@@ -47,6 +47,13 @@ enum SubmissionStatus {
   RETURNED
 }
 
+enum AttendanceStatus {
+  PRESENT
+  ABSENT
+  LATE
+  EXCUSED
+}
+
 model School {
   id        String   @id @default(uuid()) @db.Uuid
   name      String
@@ -70,6 +77,9 @@ model School {
   submissions   AssignmentSubmission[]
   submissionFiles SubmissionFile[]
   lessonProgress LessonProgress[]
+  assignmentFiles AssignmentFile[]
+  attendanceSessions AttendanceSession[]
+  attendanceRecords AttendanceRecord[]
 }
 
 model User {
@@ -170,6 +180,7 @@ model SchoolClass {
   timetableSlots       TimetableSlot[]
   assignments          Assignment[]
   units                Unit[]
+  attendanceSessions   AttendanceSession[]
 
   @@unique([gradeId, name])
   @@index([schoolId])
@@ -191,6 +202,7 @@ model Subject {
   units               Unit[]
   assignments         Assignment[]
   timetableSlots      TimetableSlot[]
+  attendanceSessions  AttendanceSession[]
 
   @@unique([schoolId, name])
   @@index([schoolId])
@@ -211,6 +223,7 @@ model Student {
   enrollments  Enrollment[]
   submissions  AssignmentSubmission[]
   progress     LessonProgress[]
+  attendanceRecords AttendanceRecord[]
 
   @@index([schoolId])
 }
@@ -288,11 +301,12 @@ model Lesson {
   id        String     @id @default(uuid()) @db.Uuid
   schoolId  String     @db.Uuid
   unitId    String     @db.Uuid
-  title     String
-  type      LessonType
-  body      String?
-  url       String?
-  sortOrder Int        @default(0)
+  title       String
+  type        LessonType
+  body        String?
+  url         String?
+  publishedAt DateTime?
+  sortOrder   Int        @default(0)
   createdAt DateTime   @default(now())
   updatedAt DateTime   @updatedAt
 
@@ -339,6 +353,7 @@ model TimetableSlot {
   school  School      @relation(fields: [schoolId], references: [id], onDelete: Cascade)
   class   SchoolClass @relation(fields: [classId], references: [id], onDelete: Cascade)
   subject Subject     @relation(fields: [subjectId], references: [id], onDelete: Cascade)
+  attendanceSessions AttendanceSession[]
 
   @@index([schoolId])
   @@index([classId, weekday])
@@ -349,17 +364,19 @@ model Assignment {
   schoolId    String    @db.Uuid
   subjectId   String    @db.Uuid
   classId     String    @db.Uuid
-  title       String
+  title        String
   instructions String
-  dueAt       DateTime
-  publishedAt DateTime?
-  createdAt   DateTime  @default(now())
-  updatedAt   DateTime  @updatedAt
+  dueAt        DateTime
+  maxScore     Int       @default(100)
+  publishedAt  DateTime?
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
 
   school      School                 @relation(fields: [schoolId], references: [id], onDelete: Cascade)
   subject     Subject                @relation(fields: [subjectId], references: [id], onDelete: Cascade)
   class       SchoolClass            @relation(fields: [classId], references: [id], onDelete: Cascade)
   submissions AssignmentSubmission[]
+  files       AssignmentFile[]
 
   @@index([schoolId])
   @@index([classId])
@@ -371,10 +388,14 @@ model AssignmentSubmission {
   schoolId     String           @db.Uuid
   assignmentId String           @db.Uuid
   studentId    String           @db.Uuid
-  status       SubmissionStatus @default(DRAFT)
-  submittedAt  DateTime?
-  createdAt    DateTime         @default(now())
-  updatedAt    DateTime         @updatedAt
+  status            SubmissionStatus @default(DRAFT)
+  submittedAt       DateTime?
+  score             Decimal?         @db.Decimal(6, 2)
+  feedback          String?
+  gradedAt          DateTime?
+  gradesPublishedAt DateTime?
+  createdAt         DateTime         @default(now())
+  updatedAt         DateTime         @updatedAt
 
   school     School           @relation(fields: [schoolId], references: [id], onDelete: Cascade)
   assignment Assignment       @relation(fields: [assignmentId], references: [id], onDelete: Cascade)
@@ -421,4 +442,61 @@ model LessonProgress {
 
   @@unique([studentId, lessonId])
   @@index([schoolId])
+}
+
+model AssignmentFile {
+  id           String   @id @default(uuid()) @db.Uuid
+  schoolId     String   @db.Uuid
+  assignmentId String   @db.Uuid
+  storageKey   String
+  fileName     String
+  mimeType     String
+  size         Int
+  checksum     String?
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  school     School     @relation(fields: [schoolId], references: [id], onDelete: Cascade)
+  assignment Assignment @relation(fields: [assignmentId], references: [id], onDelete: Cascade)
+
+  @@index([schoolId])
+  @@index([assignmentId])
+}
+
+model AttendanceSession {
+  id               String    @id @default(uuid()) @db.Uuid
+  schoolId         String    @db.Uuid
+  classId          String    @db.Uuid
+  subjectId        String    @db.Uuid
+  timetableSlotId  String?   @db.Uuid
+  takenOn          DateTime  @db.Date
+  createdAt        DateTime  @default(now())
+  updatedAt        DateTime  @updatedAt
+
+  school         School             @relation(fields: [schoolId], references: [id], onDelete: Cascade)
+  class          SchoolClass        @relation(fields: [classId], references: [id], onDelete: Cascade)
+  subject        Subject            @relation(fields: [subjectId], references: [id], onDelete: Cascade)
+  timetableSlot  TimetableSlot?     @relation(fields: [timetableSlotId], references: [id], onDelete: SetNull)
+  records        AttendanceRecord[]
+
+  @@unique([classId, subjectId, takenOn])
+  @@index([schoolId])
+}
+
+model AttendanceRecord {
+  id        String           @id @default(uuid()) @db.Uuid
+  schoolId  String           @db.Uuid
+  sessionId String           @db.Uuid
+  studentId String           @db.Uuid
+  status    AttendanceStatus
+  createdAt DateTime         @default(now())
+  updatedAt DateTime         @updatedAt
+
+  school  School             @relation(fields: [schoolId], references: [id], onDelete: Cascade)
+  session AttendanceSession  @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+  student Student            @relation(fields: [studentId], references: [id], onDelete: Cascade)
+
+  @@unique([sessionId, studentId])
+  @@index([schoolId])
+  @@index([studentId])
 }

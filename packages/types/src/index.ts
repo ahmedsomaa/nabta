@@ -221,10 +221,199 @@ export interface StudentAssignmentDetail {
   subjectName: string;
   status: StudentAssignmentStatus;
   canSubmit: boolean;
+  maxScore: number;
+  score: number | null;
+  feedback: string | null;
+  attachments: { id: string; fileName: string; mimeType: string; size: number }[];
   files: { id: string; fileName: string; mimeType: string; size: number }[];
 }
 
 export interface FilePresignResult {
   storageKey: string;
   uploadUrl: string;
+}
+
+export type AttendanceStatus = 'PRESENT' | 'ABSENT' | 'LATE' | 'EXCUSED';
+
+export interface TeacherMe {
+  id: string;
+  givenName: string;
+  familyName: string;
+}
+
+export interface TeacherClassItem {
+  classId: string;
+  className: string;
+  subjectId: string;
+  subjectName: string;
+}
+
+export interface TeacherScheduleSlot {
+  id: string;
+  weekday: number;
+  startsAt: string;
+  endsAt: string;
+  room: string | null;
+  classId: string;
+  className: string;
+  subjectId: string;
+  subjectName: string;
+}
+
+export interface TeacherToGradeItem {
+  assignmentId: string;
+  title: string;
+  pending: number;
+  classId: string;
+  className: string;
+  subjectId: string;
+  subjectName: string;
+}
+
+export interface TeacherAlert {
+  kind: 'missing_work' | 'low_progress';
+  message: string;
+  classId: string;
+  subjectId: string;
+}
+
+export interface TeacherDashboard {
+  schedule: TeacherScheduleSlot[];
+  toGrade: TeacherToGradeItem[];
+  alerts: TeacherAlert[];
+}
+
+export interface TeacherLessonSummary {
+  id: string;
+  title: string;
+  type: LessonType;
+  sortOrder: number;
+  publishedAt: string | null;
+}
+
+export interface TeacherUnit {
+  id: string;
+  title: string;
+  sortOrder: number;
+  lessons: TeacherLessonSummary[];
+}
+
+export interface TeacherAssignmentListItem {
+  id: string;
+  title: string;
+  dueAt: string;
+  publishedAt: string | null;
+  classId: string;
+  className: string;
+  subjectId: string;
+  subjectName: string;
+  pendingCount: number;
+}
+
+export interface TeacherClassDetail {
+  classId: string;
+  className: string;
+  subjectId: string;
+  subjectName: string;
+  units: TeacherUnit[];
+  assignments: TeacherAssignmentListItem[];
+}
+
+export interface TeacherRosterRow {
+  studentId: string;
+  givenName: string;
+  familyName: string;
+  progressPercent: number;
+  attendancePercent: number | null;
+  average: number | null;
+  missingWork: number;
+}
+
+export interface TeacherStudentOverview {
+  studentId: string;
+  givenName: string;
+  familyName: string;
+  lessons: { id: string; title: string; completed: boolean }[];
+  assignments: {
+    id: string;
+    title: string;
+    status: StudentAssignmentStatus;
+    score: number | null;
+  }[];
+}
+
+export interface TeacherLessonDetail {
+  id: string;
+  unitId: string;
+  title: string;
+  type: LessonType;
+  body: string | null;
+  url: string | null;
+  publishedAt: string | null;
+  sortOrder: number;
+  materials: { id: string; fileName: string; mimeType: string; size: number }[];
+}
+
+export interface TeacherAssignmentDetail {
+  id: string;
+  title: string;
+  instructions: string;
+  dueAt: string;
+  maxScore: number;
+  publishedAt: string | null;
+  classId: string;
+  className: string;
+  subjectId: string;
+  subjectName: string;
+  files: { id: string; fileName: string; mimeType: string; size: number }[];
+}
+
+export interface TeacherSubmissionListItem {
+  id: string | null;
+  studentId: string;
+  givenName: string;
+  familyName: string;
+  status: StudentAssignmentStatus;
+  submittedAt: string | null;
+  score: number | null;
+  gradesPublishedAt: string | null;
+}
+
+export interface TeacherSubmissionDetail {
+  id: string;
+  assignmentId: string;
+  assignmentTitle: string;
+  maxScore: number;
+  studentId: string;
+  givenName: string;
+  familyName: string;
+  status: SubmissionStatus;
+  submittedAt: string | null;
+  score: number | null;
+  feedback: string | null;
+  gradesPublishedAt: string | null;
+  files: { id: string; fileName: string; mimeType: string; size: number; downloadUrl: string }[];
+}
+
+export interface TeacherGradebook {
+  classId: string;
+  subjectId: string;
+  students: { id: string; givenName: string; familyName: string }[];
+  assignments: { id: string; title: string; maxScore: number; publishedAt: string | null }[];
+  cells: {
+    studentId: string;
+    assignmentId: string;
+    score: number | null;
+    status: StudentAssignmentStatus;
+  }[];
+}
+
+export interface TeacherAttendance {
+  date: string;
+  records: {
+    studentId: string;
+    givenName: string;
+    familyName: string;
+    status: AttendanceStatus | null;
+  }[];
 }

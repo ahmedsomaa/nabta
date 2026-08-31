@@ -188,6 +188,7 @@ async function main() {
     '00000000-0000-4000-8000-000000000111',
     '00000000-0000-4000-8000-000000000112',
     '00000000-0000-4000-8000-000000000113',
+    '00000000-0000-4000-8000-000000000114',
   ] as const;
   const ASSIGNMENT_IDS = [
     '00000000-0000-4000-8000-000000000121',
@@ -207,9 +208,11 @@ async function main() {
     },
   });
 
+  const publishedAt = new Date();
+
   await prisma.lesson.upsert({
     where: { id: LESSON_IDS[0] },
-    update: {},
+    update: { publishedAt },
     create: {
       id: LESSON_IDS[0],
       schoolId: school.id,
@@ -217,13 +220,14 @@ async function main() {
       title: 'What is a linear equation?',
       type: 'RICH_TEXT',
       body: 'A linear equation is an equation whose graph is a straight line. In Grade 10 we write it as y = mx + c, where m is the gradient and c is the y-intercept.\n\nWorked example: 2x + 3 = 11. Subtract 3 from both sides: 2x = 8. Divide by 2: x = 4.',
+      publishedAt,
       sortOrder: 0,
     },
   });
 
   await prisma.lesson.upsert({
     where: { id: LESSON_IDS[1] },
-    update: {},
+    update: { publishedAt },
     create: {
       id: LESSON_IDS[1],
       schoolId: school.id,
@@ -231,13 +235,14 @@ async function main() {
       title: 'Khan Academy — graphing lines',
       type: 'EXTERNAL',
       url: 'https://www.khanacademy.org/math/algebra/x2f8bb11595b61c86:linear-equations-graphs',
+      publishedAt,
       sortOrder: 1,
     },
   });
 
   await prisma.lesson.upsert({
     where: { id: LESSON_IDS[2] },
-    update: {},
+    update: { publishedAt },
     create: {
       id: LESSON_IDS[2],
       schoolId: school.id,
@@ -245,7 +250,23 @@ async function main() {
       title: 'Practice worksheet (PDF)',
       type: 'PDF',
       url: 'https://mozilla.github.io/pdf.js/web/compressed.tracemonkey-pldi-09.pdf',
+      publishedAt,
       sortOrder: 2,
+    },
+  });
+
+  await prisma.lesson.upsert({
+    where: { id: LESSON_IDS[3] },
+    update: { publishedAt: null, title: 'Draft: simultaneous equations' },
+    create: {
+      id: LESSON_IDS[3],
+      schoolId: school.id,
+      unitId: UNIT_ID,
+      title: 'Draft: simultaneous equations',
+      type: 'RICH_TEXT',
+      body: 'Teacher draft — not visible to students until published.',
+      publishedAt: null,
+      sortOrder: 3,
     },
   });
 
@@ -273,7 +294,6 @@ async function main() {
   const later = new Date();
   later.setDate(later.getDate() + 21);
   later.setHours(16, 0, 0, 0);
-  const publishedAt = new Date();
 
   await prisma.assignment.upsert({
     where: { id: ASSIGNMENT_IDS[0] },
@@ -304,6 +324,37 @@ async function main() {
         'Sketch y = 2x − 1 and y = −x + 4 on the same axes. Label the intercepts. Submit one PDF.',
       dueAt: later,
       publishedAt,
+    },
+  });
+
+  const SUBMISSION_ID = '00000000-0000-4000-8000-000000000131';
+  const SUBMISSION_FILE_ID = '00000000-0000-4000-8000-000000000132';
+  await prisma.assignmentSubmission.upsert({
+    where: { assignmentId_studentId: { assignmentId: ASSIGNMENT_IDS[0], studentId: student.id } },
+    update: { status: 'SUBMITTED', submittedAt: new Date() },
+    create: {
+      id: SUBMISSION_ID,
+      schoolId: school.id,
+      assignmentId: ASSIGNMENT_IDS[0],
+      studentId: student.id,
+      status: 'SUBMITTED',
+      submittedAt: new Date(),
+    },
+  });
+  const submission = await prisma.assignmentSubmission.findUniqueOrThrow({
+    where: { assignmentId_studentId: { assignmentId: ASSIGNMENT_IDS[0], studentId: student.id } },
+  });
+  await prisma.submissionFile.upsert({
+    where: { id: SUBMISSION_FILE_ID },
+    update: { submissionId: submission.id },
+    create: {
+      id: SUBMISSION_FILE_ID,
+      schoolId: school.id,
+      submissionId: submission.id,
+      storageKey: `${school.id}/submissions/${ASSIGNMENT_IDS[0]}/${student.id}/seed.txt`,
+      fileName: 'linear-equations.txt',
+      mimeType: 'text/plain',
+      size: 48,
     },
   });
 

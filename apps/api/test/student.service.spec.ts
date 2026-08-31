@@ -53,7 +53,9 @@ describe('StudentService isolation', () => {
           instructions: '',
           dueAt: new Date(),
           subjectId: 'sub',
+          maxScore: 100,
           subject: { name: 'Math' },
+          files: [],
           submissions: [],
         }),
       },
@@ -79,7 +81,9 @@ describe('StudentService isolation', () => {
       instructions: 'Do it',
       dueAt,
       subjectId: 'sub',
+      maxScore: 100,
       subject: { name: 'Math' },
+      files: [],
       submissions: [
         {
           id: 'sub-1',

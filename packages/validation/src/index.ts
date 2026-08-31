@@ -164,6 +164,108 @@ export const assignmentDraftSchema = z.object({
   fileName: z.string().min(1).max(180),
 });
 
+const fileMeta = {
+  mimeType: z.string().min(1).max(120),
+  size: z.number().int().min(1).max(10 * 1024 * 1024),
+  fileName: z.string().min(1).max(180),
+};
+
+export const teacherFilePresignSchema = z.discriminatedUnion('purpose', [
+  z.object({ purpose: z.literal('material'), lessonId: z.string().uuid(), ...fileMeta }),
+  z.object({ purpose: z.literal('assignment'), assignmentId: z.string().uuid(), ...fileMeta }),
+]);
+
+export const createUnitSchema = z.object({
+  subjectId: z.string().uuid(),
+  classId: z.string().uuid(),
+  title: z.string().min(1).max(160),
+});
+
+export const updateUnitSchema = z.object({
+  title: z.string().min(1).max(160),
+});
+
+export const reorderUnitsSchema = z.object({
+  subjectId: z.string().uuid(),
+  classId: z.string().uuid(),
+  ids: z.array(z.string().uuid()).min(1),
+});
+
+export const createLessonSchema = z.object({
+  unitId: z.string().uuid(),
+  title: z.string().min(1).max(160),
+  type: z.enum(['RICH_TEXT', 'VIDEO', 'PDF', 'IMAGE', 'EXTERNAL']),
+  body: z.string().max(50_000).optional().nullable(),
+  url: z.string().max(2000).optional().nullable(),
+});
+
+export const updateLessonSchema = z.object({
+  title: z.string().min(1).max(160).optional(),
+  type: z.enum(['RICH_TEXT', 'VIDEO', 'PDF', 'IMAGE', 'EXTERNAL']).optional(),
+  body: z.string().max(50_000).optional().nullable(),
+  url: z.string().max(2000).optional().nullable(),
+});
+
+export const reorderLessonsSchema = z.object({
+  unitId: z.string().uuid(),
+  ids: z.array(z.string().uuid()).min(1),
+});
+
+export const lessonMaterialSchema = z.object({
+  storageKey: z.string().min(1).max(500),
+  fileName: z.string().min(1).max(180),
+  mimeType: z.string().min(1).max(120),
+  size: z.number().int().min(1).max(10 * 1024 * 1024),
+});
+
+export const createTeacherAssignmentSchema = z.object({
+  classId: z.string().uuid(),
+  subjectId: z.string().uuid(),
+  title: z.string().min(1).max(160),
+  instructions: z.string().min(1).max(20_000),
+  dueAt: z.coerce.date(),
+  maxScore: z.number().int().min(1).max(1000).optional(),
+});
+
+export const updateTeacherAssignmentSchema = z.object({
+  title: z.string().min(1).max(160).optional(),
+  instructions: z.string().min(1).max(20_000).optional(),
+  dueAt: z.coerce.date().optional(),
+  maxScore: z.number().int().min(1).max(1000).optional(),
+});
+
+export const assignmentFileSchema = lessonMaterialSchema;
+
+export const gradeSubmissionSchema = z.object({
+  score: z.number().min(0).max(1000),
+  feedback: z.string().max(10_000).optional().nullable(),
+});
+
+export const attendanceQuerySchema = z.object({
+  classId: z.string().uuid(),
+  subjectId: z.string().uuid(),
+  date: z.string().regex(/^\d{4}-\d{2}-\d{2}$/),
+});
+
+export const putAttendanceSchema = z.object({
+  classId: z.string().uuid(),
+  subjectId: z.string().uuid(),
+  date: z.string().regex(/^\d{4}-\d{2}-\d{2}$/),
+  records: z
+    .array(
+      z.object({
+        studentId: z.string().uuid(),
+        status: z.enum(['PRESENT', 'ABSENT', 'LATE', 'EXCUSED']),
+      }),
+    )
+    .min(1),
+});
+
+export const gradebookQuerySchema = z.object({
+  classId: z.string().uuid(),
+  subjectId: z.string().uuid(),
+});
+
 export type LessonProgressInput = z.infer<typeof lessonProgressSchema>;
 export type FilePresignInput = z.infer<typeof filePresignSchema>;
 export type AssignmentDraftInput = z.infer<typeof assignmentDraftSchema>;

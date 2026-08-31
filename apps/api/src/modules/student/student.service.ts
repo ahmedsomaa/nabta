@@ -83,11 +83,21 @@ export class StudentService {
 
   displayStatus(
     dueAt: Date,
-    submission: { status: string } | null,
+    submission: { status: string; submittedAt?: Date | null; gradesPublishedAt?: Date | null } | null,
   ): 'NOT_STARTED' | 'DRAFT' | 'SUBMITTED' | 'LATE' | 'GRADED' | 'RETURNED' {
     if (!submission) return 'NOT_STARTED';
     if (submission.status === 'DRAFT') return 'DRAFT';
-    return submission.status as 'SUBMITTED' | 'LATE' | 'GRADED' | 'RETURNED';
+    if (submission.gradesPublishedAt) return 'RETURNED';
+    if (submission.status === 'LATE') return 'LATE';
+    if (submission.status === 'SUBMITTED' || submission.status === 'GRADED' || submission.status === 'RETURNED') {
+      if (submission.submittedAt && submission.submittedAt > dueAt) return 'LATE';
+      return 'SUBMITTED';
+    }
+    return 'SUBMITTED';
+  }
+
+  private publishedLessons() {
+    return { where: { publishedAt: { not: null } }, orderBy: { sortOrder: 'asc' as const } };
   }
 
   async getMe(user: AuthUser) {
@@ -180,7 +190,7 @@ export class StudentService {
     const rows = await this.prisma.teachingAssignment.findMany({
       where: { schoolId: student.schoolId, classId: { in: classIds } },
       include: {
-        subject: { include: { units: { include: { lessons: true } } } },
+        subject: { include: { units: { include: { lessons: this.publishedLessons() } } } },
         teacher: true,
         class: true,
       },
@@ -216,7 +226,7 @@ export class StudentService {
       include: {
         units: {
           orderBy: { sortOrder: 'asc' },
-          include: { lessons: { orderBy: { sortOrder: 'asc' } } },
+          include: { lessons: this.publishedLessons() },
         },
         assignments: {
           where: { classId: teaching.classId, publishedAt: { not: null } },
@@ -271,7 +281,7 @@ export class StudentService {
     const student = await this.requireStudent(user);
     const classIds = this.classIds(student);
     const lesson = await this.prisma.lesson.findFirst({
-      where: { id: lessonId, schoolId: student.schoolId },
+      where: { id: lessonId, schoolId: student.schoolId, publishedAt: { not: null } },
       include: {
         unit: {
           include: {
@@ -279,7 +289,7 @@ export class StudentService {
               include: {
                 units: {
                   orderBy: { sortOrder: 'asc' },
-                  include: { lessons: { orderBy: { sortOrder: 'asc' } } },
+                  include: { lessons: this.publishedLessons() },
                 },
               },
             },
@@ -385,6 +395,7 @@ export class StudentService {
       where: { id: assignmentId, schoolId: student.schoolId, publishedAt: { not: null } },
       include: {
         subject: true,
+        files: true,
         submissions: { where: { studentId: student.id }, include: { files: true } },
       },
     });
@@ -394,6 +405,7 @@ export class StudentService {
     const submission = row.submissions[0] ?? null;
     const status = this.displayStatus(row.dueAt, submission);
     const locked = status === 'SUBMITTED' || status === 'LATE' || status === 'GRADED' || status === 'RETURNED';
+    const published = Boolean(submission?.gradesPublishedAt);
     return {
       id: row.id,
       title: row.title,
@@ -403,6 +415,15 @@ export class StudentService {
       subjectName: row.subject.name,
       status,
       canSubmit: !locked,
+      maxScore: row.maxScore,
+      score: published && submission?.score != null ? Number(submission.score) : null,
+      feedback: published ? (submission?.feedback ?? null) : null,
+      attachments: row.files.map((file) => ({
+        id: file.id,
+        fileName: file.fileName,
+        mimeType: file.mimeType,
+        size: file.size,
+      })),
       files: (submission?.files ?? []).map((file) => ({
         id: file.id,
         fileName: file.fileName,

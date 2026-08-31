@@ -4,7 +4,7 @@ How to run the Nabta monorepo locally.
 
 ## Current phase
 
-**Phase 4 — Teacher Experience** is the active implementation target. Phase 1 track, Phase 2 Academic Core, and Phase 3 Student Experience are complete:
+**Phase 5 — Assessments** is the active implementation target. Phase 1 track, Phase 2 Academic Core, Phase 3 Student Experience, and Phase 4 Teacher Experience are complete:
 
 | Phase | Status |
 |-------|--------|
@@ -15,12 +15,13 @@ How to run the Nabta monorepo locally.
 | Phase 1e — Mobile Staff | Bootstrap complete |
 | Phase 2 — Academic Core | Complete |
 | Phase 3 — Student Experience | Complete |
+| Phase 4 — Teacher Experience | Complete |
 
-Read [`docs/roadmap/04-teacher-experience/`](docs/roadmap/04-teacher-experience/index.html) before implementing new features.
+Read [`docs/roadmap/05-assessments/`](docs/roadmap/05-assessments/index.html) before implementing new features.
 
 Example Cursor prompt:
 
-> Implement Phase 4 only. Do not implement Phase 5+ functionality.
+> Implement Phase 5 only. Do not implement Phase 6+ functionality.
 
 ## Prerequisites
 
@@ -168,6 +169,6 @@ Dockerfiles live under `nabta-docker/` (`Dockerfile.api`, `Dockerfile.web`, `Doc
 
 ## Docs & agents
 
-- Product / phase spec: [`docs/roadmap/04-teacher-experience/`](docs/roadmap/04-teacher-experience/) (Phases 1–3 complete)
+- Product / phase spec: [`docs/roadmap/05-assessments/`](docs/roadmap/05-assessments/) (Phases 1–4 complete)
 - Full documentation site: [`docs/`](docs/)
 - AI implementation guide: [`AGENTS.md`](AGENTS.md)

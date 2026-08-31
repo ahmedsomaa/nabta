@@ -142,6 +142,35 @@ export function StudentAssignmentPage() {
         </Card.Header>
       </Card>
 
+      {assignment.attachments?.length ? (
+        <Card className="p-5">
+          <Card.Header>
+            <Card.Title>{t('student.attachments')}</Card.Title>
+            <Card.Description>
+              {assignment.attachments.map((file) => file.fileName).join(', ')}
+            </Card.Description>
+          </Card.Header>
+        </Card>
+      ) : null}
+
+      {assignment.feedback || assignment.score != null ? (
+        <Card className="p-5">
+          <Card.Header>
+            <Card.Title>{t('student.feedback')}</Card.Title>
+            {assignment.score != null ? (
+              <Card.Description>
+                {t('student.score', { score: assignment.score, max: assignment.maxScore })}
+              </Card.Description>
+            ) : null}
+            {assignment.feedback ? (
+              <Card.Description className="whitespace-pre-wrap text-foreground">
+                {assignment.feedback}
+              </Card.Description>
+            ) : null}
+          </Card.Header>
+        </Card>
+      ) : null}
+
       {assignment.files[0] ? (
         <p className="text-sm text-muted">{t('student.currentFile', { name: assignment.files[0].fileName })}</p>
       ) : null}

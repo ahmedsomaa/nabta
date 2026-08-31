@@ -8,6 +8,7 @@ import { EmailModule } from './modules/email/email.module';
 import { StorageModule } from './modules/storage/storage.module';
 import { AcademicModule } from './modules/academic/academic.module';
 import { StudentModule } from './modules/student/student.module';
+import { TeacherModule } from './modules/teacher/teacher.module';
 import { MarketingModule } from './modules/marketing/marketing.module';
 import { HealthController } from './health.controller';
 import { AdminController } from './modules/admin/admin.controller';
@@ -25,6 +26,7 @@ import { PrismaModule } from './prisma/prisma.module';
     AuthModule,
     AcademicModule,
     StudentModule,
+    TeacherModule,
     MarketingModule,
   ],
   controllers: [HealthController, AdminController, PlatformController],

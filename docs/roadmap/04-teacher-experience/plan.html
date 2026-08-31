@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Phase 4 — Detailed implementation plan — Nabta</title>
+  <link rel="stylesheet" href="../../assets/docs.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500&family=Quicksand:wght@400;500;600;700&family=Zain:wght@400;700&display=swap" rel="stylesheet">
+</head>
+<body data-section="roadmap" data-title="Phase 4 — Detailed plan">
+  <a href="#main" class="skip-link">Skip to content</a>
+  <header id="docs-topnav" class="docs-topnav" aria-label="Top navigation"></header>
+  <div class="docs-mobile-bar">
+    <button type="button" id="sidebar-toggle" class="sidebar-toggle" aria-expanded="false" aria-label="Open menu">&#9776;</button>
+    <a href="../../index.html" class="docs-mobile-brand">Nabta</a>
+  </div>
+  <div id="sidebar-overlay" class="sidebar-overlay"></div>
+  <div class="docs-layout">
+    <aside id="docs-sidebar" class="docs-sidebar" aria-label="Sidebar"></aside>
+    <div class="docs-content">
+      <div class="docs-body">
+        <div class="docs-article">
+          <header id="docs-header" class="docs-page-header"></header>
+          <main id="main" class="docs-main">
+      <h1>Phase 4 — Detailed implementation plan</h1>
+      <p class="lead"><span class="badge badge-phase">Phase 4</span> <span class="badge badge-complete">Complete</span> Historical execution plan — teacher portal, teacher-scoped APIs, grading, and attendance.</p>
+
+      <div class="callout">
+        <p><strong>Companion to</strong> <a href="index.html">Phase 4 — Teacher Experience</a> (scope guards and acceptance criteria). This page is the execution plan: schema deltas, teacher APIs, seed, and <code>apps/web</code> screens. Slices 0–1 are data/API prerequisites; later slices map to the phase index plus class management.</p>
+      </div>
+
+      <div class="callout">
+        <p><strong>Web teacher portal only.</strong> Quiz builder is <a href="../05-assessments/">Phase 5</a>. Notifications are <a href="../07-notifications/">Phase 7</a>. Keep student <code>/student/grades</code> as a later-phase placeholder. Do not implement <code>apps/mobile-staff</code>, <code>GradeRecord</code>, or GPA.</p>
+      </div>
+
+      <h2>Slice order</h2>
+      <p>Slices 0–1 first. Then dashboard → classes → builder → assignments → grading → attendance. Sequential; each slice is independently verifiable.</p>
+
+      <pre class="mermaid">flowchart TB
+  subgraph data [Data and APIs]
+    S0[Schema seed plus this plan]
+    S1[Teacher APIs plus isolation]
+    S0 --> S1
+  end
+  subgraph ui [apps/web teacher UI]
+    S2[Dashboard]
+    S3[Classes and roster]
+    S4[Course builder]
+    S5[Assignment create publish]
+    S6[Grading and gradebook]
+    S7[Attendance UX and e2e]
+    S2 --> S3 --> S4 --> S5 --> S6 --> S7
+  end
+  S1 --> S2</pre>
+
+      <h2>Ground truth before this phase</h2>
+      <ul>
+        <li>Academic core and Phase 3 content models exist. Nadia Hassan teaches <strong>10A Mathematics</strong>. Login: <code>teacher@nabta.local</code> / <code>Password123!</code>.</li>
+        <li>Students submit via <code>/api/v1/me</code>. <code>GRADED</code> / <code>RETURNED</code> exist on the enum but are unused.</li>
+        <li>Teacher routes in <code>apps/web</code> render <code>PlaceholderPage</code>. Shell: Home, Classes, Assignments, Gradebook — no More item.</li>
+        <li>Academic <code>GET /classes</code> returns all school classes. Teacher queries must scope by <code>TeachingAssignment</code>.</li>
+        <li>Lessons have no <code>publishedAt</code>; students currently see every lesson.</li>
+      </ul>
+
+      <h2>Original agent prompt</h2>
+      <pre><code>Implement Phase 4 only per docs/roadmap/04-teacher-experience/plan.html.
+Teacher portal + teacher APIs + schema/seed deltas. Do not implement
+quiz builder (Phase 5), notifications, GradeRecord/GPA, or mobile-staff.</code></pre>
+
+      <h2>In scope</h2>
+      <ul>
+        <li>Dashboard: today’s timetable, to-grade queue, assignment-based alerts, in-scope quick actions</li>
+        <li>Class management: roster (progress, attendance %, assignment average, missing work) and student overview</li>
+        <li>Course builder: units, lessons, reorder, materials, publish/unpublish, autosave</li>
+        <li>Assignment create / edit / publish / due date / attachments</li>
+        <li>Grade submissions, feedback, publish grades; gradebook matrix</li>
+        <li>Attendance per class session (Present / Absent / Late / Excused)</li>
+        <li>Student assignment page shows score and feedback after grades are published</li>
+        <li>EN/AR + RTL; loading / empty / error / success per <a href="../../design/ux-states.html">UX States</a></li>
+      </ul>
+
+      <h2>Out of scope</h2>
+      <ul>
+        <li>Create Quiz, Post Announcement</li>
+        <li>Low assessment-performance alerts</li>
+        <li>BullMQ / in-app notifications</li>
+        <li><code>GradeRecord</code>, term GPA, student grades page (<a href="../05-assessments/">Phase 5</a>)</li>
+        <li>Student attendance view</li>
+        <li>TipTap / full WYSIWYG — <code>TextArea</code> for rich text; URL fields for other lesson types</li>
+        <li>Global search, admin portal, <code>apps/mobile-staff</code></li>
+      </ul>
+
+      <h2>Slice 0 — Schema, seed, student publish filter</h2>
+      <p><strong>Goal:</strong> persist grading, publish, attachments, and attendance. Tenant isolation (<code>schoolId</code> from JWT).</p>
+      <div class="table-wrap"><table>
+        <thead><tr><th>Change</th><th>Role</th></tr></thead>
+        <tbody>
+          <tr><td><code>Lesson.publishedAt</code></td><td>Students only see published lessons</td></tr>
+          <tr><td><code>Assignment.maxScore</code></td><td>Default 100</td></tr>
+          <tr><td><code>AssignmentFile</code></td><td>Teacher attachments; keys <code>{schoolId}/assignments/{assignmentId}/{uuid}.{ext}</code></td></tr>
+          <tr><td>Submission grade fields</td><td><code>score</code>, <code>feedback</code>, <code>gradedAt</code>, <code>gradesPublishedAt</code></td></tr>
+          <tr><td><code>AttendanceSession</code> / <code>AttendanceRecord</code></td><td>Per class+subject+date; statuses Present / Absent / Late / Excused</td></tr>
+        </tbody>
+      </table></div>
+      <p>Do <strong>not</strong> add Assessment, Question, GradeRecord, Notification, or AuditLog.</p>
+      <p><strong>Seed:</strong> publish existing Math lessons; add one unpublished draft lesson; seed Omar’s submission on the soon-due assignment as <code>SUBMITTED</code>.</p>
+      <p><strong>Verify:</strong> unpublished lesson hidden from student subject page; Omar has a submitted row.</p>
+
+      <h2>Slice 1 — Teacher APIs + storage</h2>
+      <p><strong>Module:</strong> <code>apps/api/src/modules/teacher/</code>. Role <code>TEACHER</code> + <code>TenantGuard</code>. Scope by <code>TeachingAssignment</code>.</p>
+      <p><strong>Key endpoints</strong> under <code>/api/v1/teacher</code>: <code>/me</code>, <code>/dashboard</code>, classes/roster, units/lessons CRUD and reorder, publish, materials, assignments CRUD and publish, submissions grade and publish-grades, gradebook, attendance, files/presign.</p>
+      <p><strong>Rules:</strong> draft assignments stay invisible to students. <code>PATCH</code> score → <code>GRADED</code>. Student APIs hide score until <code>gradesPublishedAt</code>. <code>POST .../publish-grades</code> sets <code>RETURNED</code>. No BullMQ.</p>
+      <p><strong>Verify:</strong> Nadia loads dashboard and grades Omar; a second-school token cannot.</p>
+
+      <h2>Slice 2 — Dashboard</h2>
+      <p><strong>Route:</strong> <code>/teacher/dashboard</code>. Greeting uses given name <strong>Nadia</strong>.</p>
+      <ul>
+        <li>Today’s classes from <code>TimetableSlot</code></li>
+        <li>To-grade queue (SUBMITTED + LATE counts)</li>
+        <li>Alerts: missing work, low lesson progress</li>
+        <li>Quick actions: Create Assignment, Upload Material, Take Attendance — not Quiz or Announcement</li>
+      </ul>
+      <p><strong>Verify:</strong> teacher login shows schedule and Omar’s seeded submission in to-grade.</p>
+
+      <h2>Slice 3 — Classes + roster</h2>
+      <p><strong>Routes:</strong> <code>/teacher/classes</code>, <code>/teacher/classes/:classId/:subjectId</code>, student overview nested under that hub.</p>
+      <p>Roster columns: Student, Progress, Attendance, Average, Missing Work. Average uses published-grade assignment scores only.</p>
+      <p><strong>Verify:</strong> Nadia opens 10A Mathematics and sees Omar.</p>
+
+      <h2>Slice 4 — Course builder</h2>
+      <p><strong>Route:</strong> <code>/teacher/classes/:classId/:subjectId/builder</code></p>
+      <p>Add/rename/delete units and lessons; drag-and-drop reorder; lesson editor; material upload; publish/unpublish; debounced autosave.</p>
+      <p><strong>Verify:</strong> Nadia publishes a lesson; Omar sees it. Draft stays hidden.</p>
+
+      <h2>Slice 5 — Assignments create / publish</h2>
+      <p><strong>Routes:</strong> <code>/teacher/assignments</code>, <code>/teacher/assignments/new</code>, <code>/teacher/assignments/:id</code></p>
+      <p>Title, instructions, due date, class+subject locked to teaching assignments, max score, attachments, draft, publish.</p>
+      <p><strong>Verify:</strong> published assignment appears on Omar’s list.</p>
+
+      <h2>Slice 6 — Grading + gradebook + student reveal</h2>
+      <p><strong>Routes:</strong> submissions queue, <code>/teacher/gradebook</code> and per class/subject matrix.</p>
+      <p>Student assignment detail gains optional <code>score</code>, <code>maxScore</code>, <code>feedback</code> after <code>gradesPublishedAt</code>.</p>
+      <p><strong>Verify:</strong> grade → publish → Omar sees score. Before publish he still sees Submitted/Late only.</p>
+
+      <h2>Slice 7 — Attendance + UX + e2e</h2>
+      <p><strong>Route:</strong> <code>/teacher/classes/:classId/:subjectId/attendance</code></p>
+      <p>Bulk record for a date. Toast on success. Dashboard Take Attendance deep-links here. Every screen has loading, empty, error, success. Nested URLs keep the parent nav item active.</p>
+      <p><strong>End-to-end:</strong> Nadia publishes assignment → Omar submits → Nadia grades and publishes grades → Omar sees feedback → Nadia records attendance.</p>
+
+      <h2>Index mapping</h2>
+      <div class="table-wrap"><table>
+        <thead><tr><th>Index slice</th><th>This plan</th></tr></thead>
+        <tbody>
+          <tr><td>1. Teacher dashboard</td><td>Slice 2 (after 0–1)</td></tr>
+          <tr><td>Class management (in scope, unnumbered)</td><td>Slice 3</td></tr>
+          <tr><td>2. Course builder</td><td>Slice 4</td></tr>
+          <tr><td>3. Assignments</td><td>Slice 5</td></tr>
+          <tr><td>4. Grading + gradebook</td><td>Slice 6</td></tr>
+          <tr><td>5. Attendance + workflow</td><td>Slice 7</td></tr>
+        </tbody>
+      </table></div>
+
+      <h2>Acceptance (phase index)</h2>
+      <ul class="checklist">
+        <li>Teacher dashboard shows today’s classes and to-grade queue</li>
+        <li>Teacher can build course content with units and lessons</li>
+        <li>Teacher can create and publish assignments</li>
+        <li>Students can submit (Phase 3) and teacher can grade</li>
+        <li>Teacher can add feedback and publish grades</li>
+        <li>Teacher can record attendance per session</li>
+        <li>Complete workflow: create → publish → students submit → grade → feedback</li>
+      </ul>
+
+      <div class="related-links">
+        <h2>Related</h2>
+        <p><strong>Phase spec:</strong> <a href="index.html">Phase 4 — Teacher Experience</a></p>
+        <p><strong>Requirements:</strong> <a href="../../requirements/teacher.html">Teacher Portal</a>, <a href="../../requirements/search-and-files.html">Search &amp; Files</a></p>
+        <p><strong>Architecture:</strong> <a href="../../technical/data-model.html">Data Model</a>, <a href="../../technical/api-design.html">API Design</a>, <a href="../../technical/frontend-architecture.html">Frontend Architecture</a>, <a href="../../technical/sequences.html">Sequence Diagrams</a></p>
+        <p><strong>Design:</strong> <a href="../../design/ux-states.html">UX States</a></p>
+        <p><strong>Previous:</strong> <a href="../03-student-experience/">Phase 3</a> (complete) · <strong>Next:</strong> <a href="../05-assessments/">Phase 5</a> (current)</p>
+      </div>
+      <p class="source-footnote">Source: Phase 4 roadmap; teacher portal requirements; search-and-files; UX states</p>
+          </main>
+          <footer id="docs-pager" class="docs-pager-wrap"></footer>
+        </div>
+        <aside id="docs-toc" class="docs-toc" aria-label="Table of contents"></aside>
+      </div>
+    </div>
+  </div>
+  <script src="../../assets/nav-config.js"></script>
+  <script src="../../assets/layout.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.min.js"></script>
+  <script src="../../assets/docs.js"></script>
+</body>
+</html>
