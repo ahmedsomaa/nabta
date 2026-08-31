@@ -95,18 +95,19 @@
   participant Student
   participant API as NestJS API
   participant DB as PostgreSQL
-  Student->>API: GET /api/v1/assessments/:id
+  Student->>API: GET /api/v1/me/assessments/:id
   API-->>Student: Assessment overview (time limit, attempts)
-  Student->>API: POST /api/v1/assessments/:id/start
+  Student->>API: POST /api/v1/me/assessments/:id/start
   API->>DB: Create AssessmentAttempt
   API-->>Student: {attemptId, questions}
   loop Each question
-    Student->>API: PATCH /api/v1/attempts/:id/answers {questionId, answer}
+    Student->>API: PATCH /api/v1/me/attempts/:id/answers {questionId, answer}
     API->>DB: Save answer
   end
-  Student->>API: POST /api/v1/attempts/:id/submit
+  Student->>API: POST /api/v1/me/attempts/:id/submit
   API->>API: Auto-score objective questions
-  API->>DB: Update attempt (score, status: completed)
+  API->>DB: Update attempt (score, status: SUBMITTED)
+  Student->>API: GET /api/v1/me/attempts/:id/result
   API-->>Student: {score, feedback, passed}</pre>
 
       <h2>5. Teacher Records Attendance</h2>
@@ -161,7 +162,7 @@
       <div class="related-links">
         <h2>Related</h2>
         <p><strong>Requirements:</strong> <a href="../requirements/student.html">Student Portal</a>, <a href="../requirements/teacher.html">Teacher Portal</a>, <a href="../requirements/admin.html">Admin Portal</a></p>
-        <p><span class="badge badge-phase">Phases</span> <a href="../roadmap/03-student-experience/">Phase 3</a>, <a href="../roadmap/04-teacher-experience/">Phase 4</a>, <a href="../roadmap/07-notifications/">Phase 7</a></p>
+        <p><span class="badge badge-phase">Phases</span> <a href="../roadmap/03-student-experience/">Phase 3</a>, <a href="../roadmap/04-teacher-experience/">Phase 4</a>, <a href="../roadmap/05-assessments/">Phase 5</a>, <a href="../roadmap/07-notifications/">Phase 7</a></p>
       </div>
       <p class="source-footnote">Source: requirements.md §§46–48, 11–12</p>
           </main>

@@ -170,6 +170,6 @@ Dockerfiles live under `nabta-docker/` (`Dockerfile.api`, `Dockerfile.web`, `Doc
 
 ## Docs & agents
 
-- Product / phase spec: [`docs/roadmap/05-assessments/`](docs/roadmap/05-assessments/) (Phases 1–4 complete)
+- Product / phase spec: [`docs/roadmap/06-administration/`](docs/roadmap/06-administration/) (Phases 1–5 complete)
 - Full documentation site: [`docs/`](docs/)
 - AI implementation guide: [`AGENTS.md`](AGENTS.md)
