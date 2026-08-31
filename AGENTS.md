@@ -38,7 +38,7 @@ Implement **one phase folder at a time**. Example prompt:
 - **UI:** HeroUI v3 — Nabta green `#10B981` as `--accent` (see `docs/design/`)
 - **Icons:** Lucide React (default static); lucide-animated for selective hover icons (per-icon via shadcn registry CLI)
 - **Logo:** Lucide Sprout icon (see `docs/design/logos.html`)
-- **Fonts:** IBM Plex Sans (EN), IBM Plex Sans Arabic (AR)
+- **Fonts:** Quicksand (EN), Zain (AR); JetBrains Mono for code
 - **i18n:** EN/AR from Phase 1, RTL support required
 - **Docs site:** Pure HTML/CSS in `docs/` — Fumadocs-inspired layout, emerald-500 palette, no build step
 

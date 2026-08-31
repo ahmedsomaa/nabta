@@ -4,7 +4,7 @@ export function passwordResetEmailHtml(params: {
 }): string {
   if (params.locale === 'ar') {
     return `
-      <div dir="rtl" style="font-family: IBM Plex Sans Arabic, sans-serif; line-height:1.6">
+      <div dir="rtl" style="font-family: Zain, sans-serif; line-height:1.6">
         <h1>إعادة تعيين كلمة المرور — نبتة</h1>
         <p>اضغط الرابط أدناه لإعادة تعيين كلمة المرور. ينتهي الرابط خلال ساعة.</p>
         <p><a href="${params.resetUrl}">${params.resetUrl}</a></p>
@@ -12,7 +12,7 @@ export function passwordResetEmailHtml(params: {
       </div>`;
   }
   return `
-    <div style="font-family: IBM Plex Sans, sans-serif; line-height:1.6">
+    <div style="font-family: Quicksand, sans-serif; line-height:1.6">
       <h1>Reset your Nabta password</h1>
       <p>Click the link below to choose a new password. This link expires in one hour.</p>
       <p><a href="${params.resetUrl}">${params.resetUrl}</a></p>

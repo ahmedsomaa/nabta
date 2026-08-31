@@ -20,9 +20,9 @@
   --docs-toc-width: 14rem;
   --docs-topnav-height: 3.5rem;
   --docs-radius: 0.5rem;
-  --font-sans: "IBM Plex Sans", system-ui, -apple-system, sans-serif;
-  --font-arabic: "IBM Plex Sans Arabic", "IBM Plex Sans", sans-serif;
-  --font-mono: "IBM Plex Mono", ui-monospace, Menlo, monospace;
+  --font-sans: "Quicksand", "Zain", system-ui, -apple-system, sans-serif;
+  --font-arabic: "Zain", "Quicksand", system-ui, sans-serif;
+  --font-mono: "JetBrains Mono", ui-monospace, Menlo, monospace;
 }
 
 [data-theme="dark"] {

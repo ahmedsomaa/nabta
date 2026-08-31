@@ -6,7 +6,8 @@
   --accent-foreground: oklch(1 0 0);
   --background: oklch(0.985 0.004 95);
   --foreground: oklch(0.21 0 0);
-  --font-sans: "IBM Plex Sans", "IBM Plex Sans Arabic", system-ui, sans-serif;
+  --font-sans: "Quicksand", "Zain", system-ui, sans-serif;
+  --font-mono: "JetBrains Mono", ui-monospace, monospace;
 }
 
 .dark {

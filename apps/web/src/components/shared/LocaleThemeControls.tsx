@@ -1,33 +1,52 @@
 import { useTranslation } from 'react-i18next';
-import { Button } from '@heroui/react';
+import { Button, Tooltip } from '@heroui/react';
+import { Languages, Moon, Sun } from 'lucide-react';
 import { useTheme } from '@/features/theme/ThemeProvider';
 
 export function LocaleThemeControls() {
   const { t, i18n } = useTranslation();
-  const { theme, setTheme } = useTheme();
+  const { resolved, setTheme } = useTheme();
+
+  const isArabic = i18n.language === 'ar' || i18n.language.startsWith('ar');
+  const localeLabel = isArabic ? t('locale.switchToEnglish') : t('locale.switchToArabic');
+  const themeLabel = resolved === 'dark' ? t('theme.switchToLight') : t('theme.switchToDark');
 
   const toggleLocale = () => {
-    const next = i18n.language === 'ar' ? 'en' : 'ar';
+    const next = isArabic ? 'en' : 'ar';
     void i18n.changeLanguage(next);
     localStorage.setItem('nabta.locale', next);
     document.documentElement.lang = next;
     document.documentElement.dir = next === 'ar' ? 'rtl' : 'ltr';
   };
 
-  const cycleTheme = () => {
-    const order = ['system', 'light', 'dark'] as const;
-    const idx = order.indexOf(theme);
-    setTheme(order[(idx + 1) % order.length]!);
+  const toggleTheme = () => {
+    setTheme(resolved === 'dark' ? 'light' : 'dark');
   };
 
   return (
-    <div className="flex items-center gap-2">
-      <Button size="sm" variant="secondary" onPress={toggleLocale}>
-        {i18n.language === 'ar' ? t('locale.en') : t('locale.ar')}
-      </Button>
-      <Button size="sm" variant="secondary" onPress={cycleTheme}>
-        {t(`theme.${theme}`)}
-      </Button>
+    <div className="inline-flex items-center gap-0.5">
+      <Tooltip delay={400}>
+        <Button isIconOnly size="sm" variant="ghost" aria-label={localeLabel} onPress={toggleLocale}>
+          <Languages className="size-4" aria-hidden />
+        </Button>
+        <Tooltip.Content>
+          <Tooltip.Arrow />
+          {localeLabel}
+        </Tooltip.Content>
+      </Tooltip>
+      <Tooltip delay={400}>
+        <Button isIconOnly size="sm" variant="ghost" aria-label={themeLabel} onPress={toggleTheme}>
+          {resolved === 'dark' ? (
+            <Sun className="size-4" aria-hidden />
+          ) : (
+            <Moon className="size-4" aria-hidden />
+          )}
+        </Button>
+        <Tooltip.Content>
+          <Tooltip.Arrow />
+          {themeLabel}
+        </Tooltip.Content>
+      </Tooltip>
     </div>
   );
 }

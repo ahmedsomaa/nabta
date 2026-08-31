@@ -2,7 +2,8 @@
   "app": {
     "name": "Nabta",
     "tagline": "Learn. Grow. Thrive.",
-    "comingSoon": "Coming in later phases"
+    "comingSoon": "Coming in later phases",
+    "copyright": "© {{year}} {{name}}"
   },
   "nav": {
     "home": "Home",
@@ -32,22 +33,32 @@
     "noAccount": "Don't have a school yet?",
     "hasAccount": "Already have an account?",
     "loginTitle": "Welcome back",
+    "loginSubtitle": "Sign in to your school portal to continue learning.",
     "registerTitle": "Create your school",
+    "registerSubtitle": "Set up Nabta for your school in a few minutes.",
     "forgotTitle": "Reset your password",
+    "forgotSubtitle": "Enter your email and we will send a reset link if an account exists.",
     "resetTitle": "Choose a new password",
+    "resetSubtitle": "Pick a strong password you have not used before.",
     "resetSent": "If that email exists, we sent a reset link.",
-    "resetSuccess": "Password updated. You can log in now."
+    "resetSuccess": "Password updated. You can log in now.",
+    "showPassword": "Show password",
+    "hidePassword": "Hide password"
   },
   "theme": {
     "light": "Light",
     "dark": "Dark",
     "system": "System",
-    "toggle": "Theme"
+    "toggle": "Theme",
+    "switchToLight": "Switch to light mode",
+    "switchToDark": "Switch to dark mode"
   },
   "locale": {
     "label": "Language",
     "en": "English",
-    "ar": "Arabic"
+    "ar": "Arabic",
+    "switchToEnglish": "Switch to English",
+    "switchToArabic": "Switch to Arabic"
   },
   "errors": {
     "generic": "Something went wrong. Please try again.",
