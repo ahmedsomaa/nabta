@@ -9,7 +9,8 @@ const config: Config = {
   coverageDirectory: './coverage',
   testEnvironment: 'node',
   moduleNameMapper: {
-    '^@nabta/database$': '<rootDir>/../../packages/database/src/index.ts',
+    // Isolation tests mock Prisma; never load the generated client (ESM .js specifiers).
+    '^@nabta/database$': '<rootDir>/test/stubs/database.ts',
     '^@nabta/types$': '<rootDir>/../../packages/types/src/index.ts',
     '^@nabta/validation$': '<rootDir>/../../packages/validation/src/index.ts',
     '^@nabta/config$': '<rootDir>/../../packages/config/src/index.ts',
