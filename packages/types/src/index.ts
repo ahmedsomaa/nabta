@@ -8,6 +8,8 @@ export interface AuthUser {
   email: string;
   role: UserRole;
   schoolId: string;
+  schoolName: string;
+  schoolLogoUrl: string | null;
   locale: Locale;
   theme: ThemePreference;
   status: UserStatus;

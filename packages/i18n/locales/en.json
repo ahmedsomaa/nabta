@@ -18,7 +18,14 @@
     "academics": "Academics",
     "reports": "Reports",
     "settings": "Settings",
-    "logout": "Log out"
+    "logout": "Log out",
+    "workspace": "Workspace",
+    "account": "Account",
+    "roles": {
+      "STUDENT": "Student",
+      "TEACHER": "Teacher",
+      "ADMIN": "Admin"
+    }
   },
   "auth": {
     "login": "Log in",

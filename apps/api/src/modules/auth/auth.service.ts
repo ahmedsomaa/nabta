@@ -91,9 +91,10 @@ export class AuthService {
     });
 
     const tokens = await this.issueTokens(result.id, result.email, result.role);
+    const created = await this.users.findById(result.id);
     return {
       ...tokens,
-      user: this.users.toAuthUser(result),
+      user: this.users.toAuthUser(created ?? result),
     };
   }
 
@@ -119,7 +120,7 @@ export class AuthService {
     const tokenHash = this.hashToken(input.refreshToken);
     const stored = await this.prisma.refreshToken.findFirst({
       where: { tokenHash, revokedAt: null },
-      include: { user: true },
+      include: { user: { include: { school: true } } },
     });
     if (!stored || stored.expiresAt < new Date()) {
       throw new UnauthorizedException('Invalid refresh token.');

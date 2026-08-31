@@ -20,6 +20,8 @@ describe('RolesGuard', () => {
     email: 'a@b.c',
     role: 'ADMIN',
     schoolId: 's',
+    schoolName: 'Nabta Demo School',
+    schoolLogoUrl: null,
     locale: 'en',
     theme: 'system',
     status: 'active',
