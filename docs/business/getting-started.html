@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Getting Started — Nabta</title>
+  <link rel="stylesheet" href="../assets/docs.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Sans+Arabic:wght@400;500;600&display=swap" rel="stylesheet">
+</head>
+<body data-section="business" data-title="Getting Started">
+  <a href="#main" class="skip-link">Skip to content</a>
+  <header id="docs-topnav" class="docs-topnav" aria-label="Top navigation"></header>
+  <div id="sidebar-overlay" class="sidebar-overlay"></div>
+  <div class="docs-layout">
+    <aside id="docs-sidebar" class="docs-sidebar" aria-label="Sidebar"></aside>
+    <div class="docs-content">
+      <div class="docs-body">
+        <div class="docs-article">
+          <header id="docs-header" class="docs-page-header"></header>
+          <main id="main" class="docs-main">
+<h1>Getting Started</h1>
+      <p class="lead">How to use the Nabta documentation to build the platform incrementally.</p>
+
+      <div class="callout">
+        <p><strong>Golden rule:</strong> Implement <strong>one phase folder at a time</strong> (for example <code>docs/roadmap/01-foundation/</code>). Do not implement Phase 1b or Phase 2+ while working on Phase 1. Each phase page links to the requirements, design, and technical pages it needs.</p>
+      </div>
+
+      <h2>Documentation Structure</h2>
+      <div class="table-wrap"><table>
+        <thead><tr><th>Section</th><th>Purpose</th></tr></thead>
+        <tbody>
+          <tr><td><a href="index.html">Business</a></td><td>Why Nabta exists — positioning, vision, glossary</td></tr>
+          <tr><td><a href="../requirements/index.html">Requirements</a></td><td>What Nabta must do — product behavior by portal and platform topic</td></tr>
+          <tr><td><a href="../design/index.html">Design</a></td><td>How it should look — colors, typography, logos, UX states</td></tr>
+          <tr><td><a href="../technical/index.html">Technical</a></td><td>How it is built — stack, deployment, diagrams</td></tr>
+          <tr><td><a href="../roadmap/index.html">Roadmap</a></td><td>When to build what — one phase folder at a time</td></tr>
+        </tbody>
+      </table></div>
+
+      <h2>Recommended Workflow</h2>
+      <ol>
+        <li>Read the phase folder (e.g. <a href="../roadmap/01-foundation/index.html">Phase 1 — Foundation</a>)</li>
+        <li>Review linked requirement, design, and technical pages</li>
+        <li>Give Cursor a focused prompt: <em>"Implement Phase 1 only. Do not implement Phase 1b or Phase 2+ functionality."</em></li>
+        <li>Verify acceptance criteria on the phase page</li>
+        <li>Move to the next phase</li>
+      </ol>
+
+      <h2>Phase Order</h2>
+      <pre class="mermaid">flowchart LR
+  P1[Phase 1 Foundation] --> P1b[Phase 1b Marketing]
+  P1 --> P2[Phase 2 Academic Core]
+  P1b --> P2
+  P2 --> P3[Phase 3 Student]
+  P2 --> P4[Phase 4 Teacher]
+  P3 --> P5[Phase 5 Assessments]
+  P4 --> P5
+  P2 --> P6[Phase 6 Admin]
+  P3 --> P7[Phase 7 Notifications]
+  P4 --> P7
+  P5 --> P7
+  P6 --> P7
+  P7 --> P8[Phase 8 Hardening]
+  P8 -.-> Future[Future Roadmap]</pre>
+
+      <h2>Cursor Working Rules</h2>
+      <ul>
+        <li>Inspect the existing project structure before implementing</li>
+        <li>Reuse existing abstractions — do not duplicate components</li>
+        <li>Follow existing naming conventions</li>
+        <li>Keep changes focused — do not rewrite unrelated code</li>
+        <li>When functionality is in the UI, it must work or be marked as not yet implemented</li>
+        <li>Prioritize correctness and architecture over number of screens generated</li>
+      </ul>
+
+      <h2>Monorepo Structure</h2>
+      <pre><code>nabta/
+├── apps/
+│   ├── web/           # Nabta portals
+│   ├── api/           # NestJS
+│   └── marketing/     # Public site (Phase 1b)
+├── packages/
+│   ├── database/
+│   ├── types/
+│   ├── validation/
+│   ├── config/
+│   └── i18n/
+├── nabta-docker/
+├── .github/workflows/
+└── turbo.json</code></pre>
+
+      <h2>Start Here</h2>
+      <div class="docs-hero-actions">
+        <a href="../roadmap/01-foundation/index.html" class="btn btn-primary">Phase 1 — Foundation</a>
+        <a href="../technical/system-architecture.html" class="btn btn-secondary">System Architecture</a>
+      </div>
+
+      <p class="source-footnote">See also: <a href="../requirements/notice.md">notice.md</a></p>
+          </main>
+          <footer id="docs-pager" class="docs-pager-wrap"></footer>
+        </div>
+        <aside id="docs-toc" class="docs-toc" aria-label="Table of contents"></aside>
+      </div>
+    </div>
+  </div>
+  <script src="../assets/nav-config.js"></script>
+  <script src="../assets/layout.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.min.js"></script>
+  <script src="../assets/docs.js"></script>
+</body>
+</html>

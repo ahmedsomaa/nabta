@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Academic Structure — Nabta</title>
+  <link rel="stylesheet" href="../assets/docs.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Sans+Arabic:wght@400;500;600&display=swap" rel="stylesheet">
+</head>
+<body data-section="requirements" data-title="Academic Structure">
+  <a href="#main" class="skip-link">Skip to content</a>
+  <header id="docs-topnav" class="docs-topnav" aria-label="Top navigation"></header>
+  <div class="docs-mobile-bar">
+    <button type="button" id="sidebar-toggle" class="sidebar-toggle" aria-expanded="false" aria-label="Open menu">&#9776;</button>
+    <a href="../index.html" class="docs-mobile-brand">Nabta</a>
+  </div>
+  <div id="sidebar-overlay" class="sidebar-overlay"></div>
+  <div class="docs-layout">
+    <aside id="docs-sidebar" class="docs-sidebar" aria-label="Sidebar"></aside>
+    <div class="docs-content">
+      <div class="docs-body">
+        <div class="docs-article">
+          <header id="docs-header" class="docs-page-header"></header>
+          <main id="main" class="docs-main">
+<h1>Academic Structure</h1>
+      <p class="lead">The school hierarchy must be modeled explicitly and support multi-tenancy from day one.</p>
+
+      <h2>Hierarchy</h2>
+      <pre><code>School
+ └── Academic Year
+      └── Grade
+           └── Class / Section
+                └── Subject
+                     └── Teacher
+                          └── Students</code></pre>
+
+      <h3>Example</h3>
+      <pre><code>School: Cairo International School
+Academic Year: 2026/2027
+
+Grade: Grade 10
+Section: 10A
+
+Subjects:
+  Mathematics
+  Physics
+  English
+  Biology
+  Computer Science</code></pre>
+
+      <h2>Multi-Tenancy</h2>
+      <p>The system should support multiple schools in the future. Design all school-owned entities around a <code>schoolId</code>.</p>
+      <ul>
+        <li>First release may contain only one school</li>
+        <li>Backend must enforce tenant isolation — a user from School A must never access School B data</li>
+        <li>Do not rely on frontend filtering for security</li>
+      </ul>
+
+      <h2>Configurable Elements</h2>
+      <ul>
+        <li>Academic years (e.g. 2026/2027, 2027/2028)</li>
+        <li>Grades (e.g. Grade 7–12)</li>
+        <li>Classes/sections (e.g. 7A, 7B, 10A)</li>
+        <li>Subjects — do not hardcode subject lists</li>
+        <li>Grading schemes (percentage, letter grade, GPA, IB-style, custom)</li>
+      </ul>
+
+      <h2>In Scope</h2>
+      <ul>
+        <li>CRUD for academic years, grades, classes, subjects</li>
+        <li>Student enrollments in classes</li>
+        <li>Teacher assignments to subjects/classes</li>
+        <li>All relationships persist to PostgreSQL</li>
+      </ul>
+
+      <h2>Out of Scope (Initial)</h2>
+      <ul>
+        <li>Multi-school admin UI (architecture-ready, not required in v1)</li>
+        <li>Curriculum-specific logic hardcoded into core</li>
+      </ul>
+
+      <h2>Acceptance Criteria</h2>
+      <ul class="checklist">
+        <li>Admin can create academic year → grade → class → subject hierarchy</li>
+        <li>Students can be assigned to classes</li>
+        <li>Teachers can be assigned to subjects/classes</li>
+        <li>All entities are scoped by schoolId</li>
+        <li>Subject lists are configurable, not hardcoded</li>
+      </ul>
+
+      <div class="related-links">
+        <h2>Related</h2>
+        <p><span class="badge badge-phase">Phases</span> <a href="../roadmap/02-academic-core/">Phase 2 — Academic Core</a>, <a href="../roadmap/06-administration/">Phase 6 — Administration</a></p>
+        <p><span class="badge badge-arch">Architecture</span> <a href="../technical/data-model.html">Data Model</a>, <a href="../technical/system-design.html">System Design</a></p>
+      </div>
+      <p class="source-footnote">Source: requirements.md §3, §9</p>
+          </main>
+          <footer id="docs-pager" class="docs-pager-wrap"></footer>
+        </div>
+        <aside id="docs-toc" class="docs-toc" aria-label="Table of contents"></aside>
+      </div>
+    </div>
+  </div>
+  <script src="../assets/nav-config.js"></script>
+  <script src="../assets/layout.js"></script>
+  <script src="../assets/docs.js"></script>
+</body>
+</html>

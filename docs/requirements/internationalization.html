@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Internationalization — Nabta</title>
+  <link rel="stylesheet" href="../assets/docs.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Sans+Arabic:wght@400;500;600&display=swap" rel="stylesheet">
+</head>
+<body data-section="requirements" data-title="Internationalization">
+  <a href="#main" class="skip-link">Skip to content</a>
+  <header id="docs-topnav" class="docs-topnav" aria-label="Top navigation"></header>
+  <div class="docs-mobile-bar">
+    <button type="button" id="sidebar-toggle" class="sidebar-toggle" aria-expanded="false" aria-label="Open menu">&#9776;</button>
+    <a href="../index.html" class="docs-mobile-brand">Nabta</a>
+  </div>
+  <div id="sidebar-overlay" class="sidebar-overlay"></div>
+  <div class="docs-layout">
+    <aside id="docs-sidebar" class="docs-sidebar" aria-label="Sidebar"></aside>
+    <div class="docs-content">
+      <div class="docs-body">
+        <div class="docs-article">
+          <header id="docs-header" class="docs-page-header"></header>
+          <main id="main" class="docs-main">
+<h1>Internationalization</h1>
+      <p class="lead">Bilingual support for Egyptian international schools — English and Arabic from day one.</p>
+
+      <h2>v1 Languages</h2>
+      <table>
+        <thead><tr><th>Locale</th><th>Direction</th><th>Status</th></tr></thead>
+        <tbody>
+          <tr><td><strong>English (en)</strong></td><td>LTR</td><td>Required — Phase 1 scaffolding</td></tr>
+          <tr><td><strong>Arabic (ar)</strong></td><td>RTL</td><td>Required — Phase 1 scaffolding</td></tr>
+        </tbody>
+      </table>
+      <p>Architecture must support additional locales in the future (e.g. French, German) without rewriting the i18n system.</p>
+
+      <h2>Scope</h2>
+      <ul>
+        <li>All LMS portals (student, teacher, admin)</li>
+        <li>Marketing site (<code>apps/marketing</code>)</li>
+        <li>System emails and notifications (when implemented)</li>
+        <li>Date, time, and number formatting per locale</li>
+      </ul>
+
+      <h2>Implementation</h2>
+      <ul>
+        <li><code>packages/i18n</code> — shared translation files (<code>en.json</code>, <code>ar.json</code>)</li>
+        <li><code>react-i18next</code> in <code>apps/web</code> and <code>apps/marketing</code></li>
+        <li>RTL layout via <code>dir="rtl"</code> on <code>&lt;html&gt;</code> when Arabic is active</li>
+        <li>Logical CSS properties (<code>ms-</code>, <code>me-</code>, <code>ps-</code>, <code>pe-</code>) — avoid hardcoded left/right</li>
+        <li>Locale switcher in app shell and marketing site header</li>
+        <li>Locale persisted in user profile; browser <code>Accept-Language</code> as fallback for unauthenticated users</li>
+      </ul>
+
+      <h2>Rollout Strategy</h2>
+      <p><strong>Phase 1:</strong> i18n scaffolding + EN/AR shell strings (navigation, auth, common UI, errors).</p>
+      <p><strong>Per feature phase:</strong> translate new feature strings as they are built — do not defer all translation to the end.</p>
+
+      <h2>RTL Considerations</h2>
+      <ul>
+        <li>Sidebar and navigation mirror correctly in RTL</li>
+        <li>Icons with direction (chevrons, arrows) flip appropriately</li>
+        <li>Tables and forms remain readable in RTL</li>
+        <li>Both light and dark themes work correctly in RTL</li>
+      </ul>
+
+      <h2>Acceptance Criteria</h2>
+      <ul class="checklist">
+        <li>User can switch between English and Arabic</li>
+        <li>Arabic renders with correct RTL layout</li>
+        <li>Locale preference persists across sessions</li>
+        <li>Dates and numbers format per active locale</li>
+        <li>All Phase 1 shell UI is translated in both languages</li>
+      </ul>
+
+      <div class="related-links">
+        <h2>Related</h2>
+        <p><span class="badge badge-phase">Phases</span> <a href="../roadmap/01-foundation/">Phase 1 — Foundation</a>, <a href="../roadmap/01b-marketing-site/">Phase 1b — Marketing Site</a></p>
+        <p><span class="badge badge-arch">Architecture</span> <a href="../technical/frontend-architecture.html">Frontend Architecture</a></p>
+        <p>Also see: <a href="../design/philosophy.html">UX &amp; Design</a></p>
+      </div>
+      <p class="source-footnote">Source: expanded requirements — i18n</p>
+          </main>
+          <footer id="docs-pager" class="docs-pager-wrap"></footer>
+        </div>
+        <aside id="docs-toc" class="docs-toc" aria-label="Table of contents"></aside>
+      </div>
+    </div>
+  </div>
+  <script src="../assets/nav-config.js"></script>
+  <script src="../assets/layout.js"></script>
+  <script src="../assets/docs.js"></script>
+</body>
+</html>

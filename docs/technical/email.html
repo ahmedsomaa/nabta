@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Email (Resend) — Nabta</title>
+  <link rel="stylesheet" href="../assets/docs.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Sans+Arabic:wght@400;500;600&display=swap" rel="stylesheet">
+</head>
+<body data-section="technical" data-title="Email (Resend)">
+  <a href="#main" class="skip-link">Skip to content</a>
+  <header id="docs-topnav" class="docs-topnav" aria-label="Top navigation"></header>
+  <div class="docs-mobile-bar">
+    <button type="button" id="sidebar-toggle" class="sidebar-toggle" aria-expanded="false" aria-label="Open menu">&#9776;</button>
+    <a href="../index.html" class="docs-mobile-brand">Nabta</a>
+  </div>
+  <div id="sidebar-overlay" class="sidebar-overlay"></div>
+  <div class="docs-layout">
+    <aside id="docs-sidebar" class="docs-sidebar" aria-label="Sidebar"></aside>
+    <div class="docs-content">
+      <div class="docs-body">
+        <div class="docs-article">
+          <header id="docs-header" class="docs-page-header"></header>
+          <main id="main" class="docs-main">
+<h1>Email (Resend)</h1>
+      <p class="lead">Backend transactional email via Resend — auth emails in Phase 1, notification emails in Phase 7.</p>
+
+      <h2>Architecture</h2>
+      <pre><code>EmailService (interface)
+  └── ResendEmailService (default)
+        ├── auth emails (Phase 1)
+        └── notification emails (Phase 7)</code></pre>
+
+      <h2>EmailService Interface</h2>
+      <pre><code>interface EmailService {
+  send(params: {
+    to: string;
+    subject: string;
+    html: string;
+    templateId?: string;
+  }): Promise&lt;void&gt;;
+}</code></pre>
+      <p>Business logic uses the interface, not Resend directly. This allows swapping providers without changing domain modules.</p>
+
+      <h2>Resend Integration</h2>
+      <div class="table-wrap"><table>
+        <thead><tr><th>Item</th><th>Detail</th></tr></thead>
+        <tbody>
+          <tr><td>Package</td><td><code>resend</code> in <code>apps/api</code></td></tr>
+          <tr><td>Module</td><td><code>apps/api/src/modules/email/</code></td></tr>
+          <tr><td>Templates</td><td><code>apps/api/src/modules/email/templates/</code> (HTML or React Email)</td></tr>
+          <tr><td>Env vars</td><td><code>RESEND_API_KEY</code>, <code>RESEND_FROM_EMAIL</code> (e.g. <code>noreply@nabta.app</code>)</td></tr>
+          <tr><td>Secrets</td><td>Stored in deployment secrets — not in Docker Compose or git</td></tr>
+        </tbody>
+      </table></div>
+
+      <h2>Phase 1 — Auth Emails (Implement)</h2>
+      <ul>
+        <li><strong>Password reset</strong> — link with expiring token</li>
+        <li><strong>Welcome / email verification</strong> — if email verification is enabled</li>
+      </ul>
+      <p>Templates support EN and AR based on user locale preference.</p>
+
+      <h2>Phase 7 — Notification Emails (Implement)</h2>
+      <ul>
+        <li>Assignment created / due soon / graded</li>
+        <li>New announcement</li>
+        <li>Grade published</li>
+      </ul>
+      <p>Sent asynchronously via BullMQ worker after in-app notification is created. User email preferences respected.</p>
+
+      <h2>Pipeline</h2>
+      <pre class="mermaid">flowchart LR
+  Event[DomainEvent] --> Queue[BullMQ]
+  Queue --> Worker[NotificationWorker]
+  Worker --> DB[(InAppNotification)]
+  Worker --> Email[ResendEmailService]
+  Email --> Resend[Resend API]</pre>
+
+      <h2>Password Reset Flow</h2>
+      <pre class="mermaid">sequenceDiagram
+  participant User
+  participant API as NestJS API
+  participant Resend as Resend API
+  User->>API: POST /api/v1/auth/forgot-password {email}
+  API->>API: Generate reset token
+  API->>Resend: send password-reset template
+  Resend-->>User: Email with reset link
+  User->>API: POST /api/v1/auth/reset-password {token, password}
+  API->>API: Validate token, update password</pre>
+
+      <h2>Rules</h2>
+      <ul>
+        <li>Never log email content containing tokens or PII</li>
+        <li>Rate limit forgot-password endpoint</li>
+        <li>Do not reveal whether an email exists in the system</li>
+        <li>EN/AR templates where user locale is known</li>
+        <li>Resend API key only in server environment — never in frontend</li>
+      </ul>
+
+      <h2>Acceptance Criteria</h2>
+      <ul class="checklist">
+        <li><code>EmailService</code> interface with <code>ResendEmailService</code> implementation</li>
+        <li><code>RESEND_API_KEY</code> and <code>RESEND_FROM_EMAIL</code> in <code>.env.example</code></li>
+        <li>Password reset email sends successfully in Phase 1</li>
+        <li>Notification emails send via Resend in Phase 7</li>
+        <li>Templates available in EN and AR</li>
+      </ul>
+
+      <div class="related-links">
+        <h2>Related</h2>
+        <p><span class="badge badge-phase">Phases</span> <a href="../roadmap/01-foundation/">Phase 1 — Foundation</a>, <a href="../roadmap/07-notifications/">Phase 7 — Notifications</a></p>
+        <p><span class="badge badge-arch">Architecture</span> <a href="system-design.html">System Design</a>, <a href="backend-architecture.html">Backend Architecture</a>, <a href="docker-and-deployment.html">Docker &amp; Deployment</a></p>
+        <p><strong>Requirements:</strong> <a href="../requirements/security.html">Security</a>, <a href="../requirements/notifications-and-announcements.html">Notifications</a></p>
+      </div>
+      <p class="source-footnote">Source: Nabta expanded requirements — email</p>
+          </main>
+          <footer id="docs-pager" class="docs-pager-wrap"></footer>
+        </div>
+        <aside id="docs-toc" class="docs-toc" aria-label="Table of contents"></aside>
+      </div>
+    </div>
+  </div>
+  <script src="../assets/nav-config.js"></script>
+  <script src="../assets/layout.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.min.js"></script>
+  <script src="../assets/docs.js"></script>
+</body>
+</html>

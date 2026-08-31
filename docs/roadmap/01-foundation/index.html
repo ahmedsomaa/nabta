@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Phase 1 — Foundation — Nabta</title>
+  <link rel="stylesheet" href="../../assets/docs.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Sans+Arabic:wght@400;500;600&display=swap" rel="stylesheet">
+</head>
+<body data-section="roadmap" data-title="Phase 1 — Foundation">
+  <a href="#main" class="skip-link">Skip to content</a>
+  <header id="docs-topnav" class="docs-topnav" aria-label="Top navigation"></header>
+  <div class="docs-mobile-bar">
+    <button type="button" id="sidebar-toggle" class="sidebar-toggle" aria-expanded="false" aria-label="Open menu">&#9776;</button>
+    <a href="../../index.html" class="docs-mobile-brand">Nabta</a>
+  </div>
+  <div id="sidebar-overlay" class="sidebar-overlay"></div>
+  <div class="docs-layout">
+    <aside id="docs-sidebar" class="docs-sidebar" aria-label="Sidebar"></aside>
+    <div class="docs-content">
+      <div class="docs-body">
+        <div class="docs-article">
+          <header id="docs-header" class="docs-page-header"></header>
+          <main id="main" class="docs-main">
+<h1>Phase 1 — Foundation</h1>
+      <p class="lead"><span class="badge badge-phase">Phase 1</span> Implement this phase only. Do not implement Phase 1b or Phase 2+ functionality.</p>
+
+      <h2>Goal</h2>
+      <p>Establish the monorepo, full Docker development environment, CI/CD, authentication, RBAC, HeroUI v3, i18n scaffolding, light/dark mode, application layouts, and HeroUI agent tooling (MCP, Skills, agents-md).</p>
+
+      <h2>In Scope</h2>
+      <ul>
+        <li>Monorepo structure (pnpm workspace + Turbo)</li>
+        <li><code>apps/web</code> — React 19 + Vite + Tailwind CSS v4 + HeroUI v3 (<code>@heroui/react</code> + <code>@heroui/styles</code>)</li>
+        <li><code>apps/api</code> — NestJS with modular architecture</li>
+        <li><code>packages/database</code> — Prisma schema/client</li>
+        <li><code>packages/types</code>, <code>packages/validation</code>, <code>packages/config</code>, <code>packages/i18n</code></li>
+        <li>Docker Compose: PostgreSQL, Redis, MinIO, api, web</li>
+        <li>Dockerfiles: <code>Dockerfile.api</code>, <code>Dockerfile.web</code></li>
+        <li>GitHub Actions CI: lint, test, build, Docker image build</li>
+        <li>Testing baseline: Jest (API), Vitest (web), at least one test each</li>
+        <li>Authentication (email/password, refresh tokens)</li>
+        <li>RBAC (STUDENT, TEACHER, ADMIN)</li>
+        <li>Design system with HeroUI theme overrides (Nabta <code>--accent</code> <code>#10B981</code>); light/dark; theme toggle in app shell</li>
+        <li>HeroUI agent tooling: <code>.cursor/mcp.json</code> (<code>@heroui/react-mcp</code>), Agent Skills (<code>heroui-react</code>), <code>agents-md</code> → <code>docs/technical/heroui-agents.md</code> + <code>.heroui-docs/</code></li>
+        <li>i18n scaffolding: EN/AR shell strings (nav, auth, common UI)</li>
+        <li>Role-based application layouts (sidebar, mobile nav)</li>
+        <li>API architecture shell (<code>/api/v1</code>, health check)</li>
+        <li>MinIO storage service interface (S3-compatible)</li>
+        <li>Resend email service: <code>EmailService</code> + password reset email</li>
+        <li><code>RESEND_API_KEY</code>, <code>RESEND_FROM_EMAIL</code> in <code>.env.example</code></li>
+        <li><code>.env.example</code>, README, dev scripts</li>
+      </ul>
+
+      <h2>Out of Scope</h2>
+      <ul>
+        <li>Marketing site (<a href="../01b-marketing-site/">Phase 1b</a>)</li>
+        <li>Academic entities (schools, classes, subjects)</li>
+        <li>Student/teacher/admin portal features</li>
+        <li>Assignments, assessments, notifications</li>
+        <li>File uploads beyond storage interface setup</li>
+        <li>Full translation of all features (rolls out per phase)</li>
+      </ul>
+
+      <h2>Deliverables</h2>
+      <pre><code>nabta/
+├── apps/web/
+├── apps/api/
+│   └── src/modules/email/   # Resend integration
+├── packages/database/
+├── packages/types/
+├── packages/validation/
+├── packages/config/
+├── packages/i18n/
+├── nabta-docker/
+│   ├── docker-compose.yml
+│   ├── Dockerfile.api
+│   └── Dockerfile.web
+├── .github/workflows/ci.yml
+├── package.json
+├── pnpm-workspace.yaml
+└── turbo.json</code></pre>
+
+      <h2>Acceptance Criteria</h2>
+      <ul class="checklist">
+        <li>Monorepo builds and runs with <code>pnpm start</code> / <code>pnpm start:app</code> (or <code>pnpm dev</code>)</li>
+        <li><code>pnpm docker:up</code> starts PostgreSQL, Redis, and MinIO</li>
+        <li><code>pnpm docker:up:full</code> starts api + web containers</li>
+        <li>GitHub Actions CI runs on PR (lint, test, build)</li>
+        <li>User can register/login with email/password</li>
+        <li>JWT + refresh token flow works</li>
+        <li>RBAC guards protect endpoints by role</li>
+        <li>Three role-based layouts render (student, teacher, admin)</li>
+        <li>Light/dark theme toggle works with persisted preference</li>
+        <li>EN/AR locale switcher works; Arabic renders RTL</li>
+        <li>HeroUI v3 initialized with Nabta accent tokens (<code>#10B981</code> → <code>--accent</code>)</li>
+        <li>Official HeroUI MCP configured; Agent Skills installed; <code>heroui-agents.md</code> index present; Nabta root <code>AGENTS.md</code> preserved</li>
+        <li>Prisma migrations run successfully</li>
+        <li>At least one API and one web test pass in CI</li>
+        <li>Password reset email sends via Resend</li>
+      </ul>
+
+
+      <h2>Implementation slices</h2>
+      <p>Complete these in order. Each slice is independently verifiable. Implement this phase folder only — do not start Phase 1b or Phase 2 until every slice below passes.</p>
+      <ol>
+        <li><strong>Monorepo skeleton</strong> — pnpm workspace + Turbo; <code>apps/web</code>, <code>apps/api</code>; packages <code>database</code>, <code>types</code>, <code>validation</code>, <code>config</code>, <code>i18n</code>. Verify: <code>pnpm dev</code> builds and runs.</li>
+        <li><strong>HeroUI agent tooling</strong> — <code>.cursor/mcp.json</code> with <code>@heroui/react-mcp</code>; install <code>heroui-react</code> (and related) Agent Skills; run <code>npx heroui-cli@latest agents-md --react --output docs/technical/heroui-agents.md</code>; link from Nabta <code>AGENTS.md</code> without overwriting it. Verify: MCP config present; skills under <code>.agents/skills/</code>; <code>heroui-agents.md</code> exists; root <code>AGENTS.md</code> remains Nabta-first.</li>
+        <li><strong>Prisma + PostgreSQL</strong> — schema and client in <code>packages/database</code>; migrations apply. Verify: migrations run successfully against Docker Postgres.</li>
+        <li><strong>Docker data services</strong> — Compose for PostgreSQL, Redis, and MinIO. Verify: <code>pnpm docker:up</code> starts those three services.</li>
+        <li><strong>API + web containers</strong> — <code>Dockerfile.api</code>, <code>Dockerfile.web</code>, Compose <code>full</code> profile. Verify: <code>pnpm docker:up:full</code> starts api + web.</li>
+        <li><strong>CI baseline</strong> — GitHub Actions lint, test, build, Docker image build. Verify: the workflow runs on pull request.</li>
+        <li><strong>Auth</strong> — email/password register and login; JWT + refresh tokens. Verify: a user can register/login and the refresh flow works.</li>
+        <li><strong>RBAC</strong> — STUDENT, TEACHER, ADMIN guards on endpoints. Verify: guards reject unauthorized roles.</li>
+        <li><strong>i18n scaffolding</strong> — EN/AR shell strings (nav, auth, common UI); locale switcher; Arabic RTL. Verify: the switcher works and Arabic renders RTL.</li>
+        <li><strong>Layouts + design system</strong> — three role-based layouts; HeroUI v3 (<code>@heroui/react</code> + <code>@heroui/styles</code>); Nabta <code>--accent</code> tokens; light/dark toggle with persisted preference. Verify: layouts render, theme persists, HeroUI components render.</li>
+        <li><strong>Email + storage interfaces</strong> — Resend <code>EmailService</code> password-reset email; MinIO storage service interface; <code>RESEND_*</code> in <code>.env.example</code>. Verify: password reset email sends via Resend.</li>
+        <li><strong>Test smoke</strong> — at least one API (Jest) and one web (Vitest) test. Verify: both pass in CI.</li>
+      </ol>
+
+      <div class="related-links">
+        <h2>Related</h2>
+        <p><strong>Requirements:</strong> <a href="../../business/product-vision.html">Product Vision</a>, <a href="../../requirements/roles-and-permissions.html">Roles &amp; Permissions</a>, <a href="../../design/philosophy.html">UX &amp; Design</a>, <a href="../../requirements/internationalization.html">Internationalization</a>, <a href="../../requirements/security.html">Security</a></p>
+        <p><strong>Architecture:</strong> <a href="../../technical/tech-stack.html">Tech Stack</a>, <a href="../../technical/system-architecture.html">System Architecture</a>, <a href="../../technical/email.html">Email (Resend)</a>, <a href="../../technical/docker-and-deployment.html">Docker &amp; Deployment</a>, <a href="../../technical/testing-and-cicd.html">Testing &amp; CI/CD</a></p>
+        <p><strong>Next:</strong> <a href="../01b-marketing-site/">Phase 1b — Marketing Site</a></p>
+      </div>
+      <p class="source-footnote">Source: requirements.md §51 Phase 1, §55; expanded requirements</p>
+          </main>
+          <footer id="docs-pager" class="docs-pager-wrap"></footer>
+        </div>
+        <aside id="docs-toc" class="docs-toc" aria-label="Table of contents"></aside>
+      </div>
+    </div>
+  </div>
+  <script src="../../assets/nav-config.js"></script>
+  <script src="../../assets/layout.js"></script>
+  <script src="../../assets/docs.js"></script>
+</body>
+</html>

@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Student Portal — Nabta</title>
+  <link rel="stylesheet" href="../assets/docs.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Sans+Arabic:wght@400;500;600&display=swap" rel="stylesheet">
+</head>
+<body data-section="requirements" data-title="Student Portal">
+  <a href="#main" class="skip-link">Skip to content</a>
+  <header id="docs-topnav" class="docs-topnav" aria-label="Top navigation"></header>
+  <div class="docs-mobile-bar">
+    <button type="button" id="sidebar-toggle" class="sidebar-toggle" aria-expanded="false" aria-label="Open menu">&#9776;</button>
+    <a href="../index.html" class="docs-mobile-brand">Nabta</a>
+  </div>
+  <div id="sidebar-overlay" class="sidebar-overlay"></div>
+  <div class="docs-layout">
+    <aside id="docs-sidebar" class="docs-sidebar" aria-label="Sidebar"></aside>
+    <div class="docs-content">
+      <div class="docs-body">
+        <div class="docs-article">
+          <header id="docs-header" class="docs-page-header"></header>
+          <main id="main" class="docs-main">
+<h1>Student Portal</h1>
+      <p class="lead">The most focused experience — answers: <strong>"What should I do today?"</strong></p>
+
+      <h2>Dashboard</h2>
+      <p>Header: "Good morning, Ahmed"</p>
+      <h3>Today's Schedule</h3>
+      <pre><code>08:00  Mathematics  Room 204
+09:00  Physics      Lab 2
+10:30  English      Room 105</code></pre>
+      <h3>Upcoming</h3>
+      <p>Assignments, quizzes, exams, deadlines with due dates.</p>
+      <h3>Continue Learning</h3>
+      <p>Most recently accessed lesson.</p>
+      <h3>Academic Overview</h3>
+      <p>Current GPA/average, attendance, assignment completion, upcoming assessments. Do not overwhelm with analytics.</p>
+
+      <h2>My Classes</h2>
+      <p>List enrolled subjects. Each opens a subject page with:</p>
+      <ul>
+        <li>Teacher, description, current unit</li>
+        <li>Lessons, materials, assignments, assessments</li>
+        <li>Announcements, progress</li>
+      </ul>
+
+      <h2>Learning Experience</h2>
+      <p>Focused lesson interface with content area and course/unit navigation sidebar.</p>
+      <p>Support: video, rich text, PDFs, images, external resources, downloadable files, embedded content. Track lesson progress.</p>
+
+      <h2>Assignments (Student View)</h2>
+      <p>Students can view instructions, due date, resources, upload/replace submission before deadline, submit, and view status, grade, and feedback.</p>
+      <p><strong>Statuses</strong> (owned by teacher workflow — see <a href="teacher.html">Teacher Portal</a>):</p>
+      <pre><code>Not Started → Draft → Submitted → Late → Graded → Returned</code></pre>
+
+      <h2>Assessments (Student View)</h2>
+      <p>Flow: Overview → Start → Questions → Submit → Result → Feedback</p>
+      <p>Question types: multiple choice, multiple answer, true/false, short answer.</p>
+
+      <h2>Grades</h2>
+      <p>Subject-level current grades. Clicking a subject shows assessments, assignments, scores, feedback, grade history.</p>
+      <p>Grading schemes are configurable per school (percentage, letter, GPA, IB-style, custom).</p>
+
+      <h2>Attendance (Student View)</h2>
+      <p>View: Present, Absent, Late, Excused. Show percentage and counts.</p>
+
+      <h2>Also Available</h2>
+      <ul>
+        <li>Announcements and notifications</li>
+        <li>Upcoming deadlines</li>
+        <li>Profile management</li>
+      </ul>
+
+      <h2>Navigation</h2>
+      <pre><code>Home | My Classes | Assignments | Grades | More</code></pre>
+
+      <h2>Acceptance Criteria</h2>
+      <ul class="checklist">
+        <li>Dashboard shows today's schedule, upcoming work, and continue learning</li>
+        <li>Student can browse enrolled subjects and open lesson content</li>
+        <li>Student can submit assignments and see status/grade/feedback</li>
+        <li>Student can take assessments and view results</li>
+        <li>Student can view grades and attendance</li>
+        <li>Complete workflow works: login → dashboard → subject → assignment → submit → see grade</li>
+      </ul>
+
+      <div class="related-links">
+        <h2>Related</h2>
+        <p><span class="badge badge-phase">Phases</span> <a href="../roadmap/03-student-experience/">Phase 3 — Student Experience</a>, <a href="../roadmap/05-assessments/">Phase 5 — Assessments</a></p>
+        <p><span class="badge badge-arch">Architecture</span> <a href="../technical/frontend-architecture.html">Frontend Architecture</a>, <a href="../technical/sequences.html">Sequence Diagrams</a></p>
+        <p>Also see: <a href="teacher.html">Teacher Portal</a> (assignment/grading workflow owner)</p>
+      </div>
+      <p class="source-footnote">Source: requirements.md §§13–19, 46</p>
+          </main>
+          <footer id="docs-pager" class="docs-pager-wrap"></footer>
+        </div>
+        <aside id="docs-toc" class="docs-toc" aria-label="Table of contents"></aside>
+      </div>
+    </div>
+  </div>
+  <script src="../assets/nav-config.js"></script>
+  <script src="../assets/layout.js"></script>
+  <script src="../assets/docs.js"></script>
+</body>
+</html>

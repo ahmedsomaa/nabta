@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Environment Variables — Nabta</title>
+  <link rel="stylesheet" href="../assets/docs.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Sans+Arabic:wght@400;500;600&display=swap" rel="stylesheet">
+</head>
+<body data-section="technical" data-title="Environment Variables">
+  <a href="#main" class="skip-link">Skip to content</a>
+  <header id="docs-topnav" class="docs-topnav" aria-label="Top navigation"></header>
+  <div class="docs-mobile-bar">
+    <button type="button" id="sidebar-toggle" class="sidebar-toggle" aria-expanded="false" aria-label="Open menu">&#9776;</button>
+    <a href="../index.html" class="docs-mobile-brand">Nabta</a>
+  </div>
+  <div id="sidebar-overlay" class="sidebar-overlay"></div>
+  <div class="docs-layout">
+    <aside id="docs-sidebar" class="docs-sidebar" aria-label="Sidebar"></aside>
+    <div class="docs-content">
+      <div class="docs-body">
+        <div class="docs-article">
+          <header id="docs-header" class="docs-page-header"></header>
+          <main id="main" class="docs-main">
+<h1>Environment Variables</h1>
+      <p class="lead">All environment variables by phase. Document every var in <code>.env.example</code> as it is introduced.</p>
+
+      <div class="callout callout-warning">
+        <p>Never commit secrets. Production values go in your platform's secret manager — not Docker Compose files. See <a href="docker-and-deployment.html">Docker &amp; Deployment</a>.</p>
+      </div>
+
+      <h2>Phase 1 — Foundation</h2>
+      <div class="table-wrap"><table>
+        <thead><tr><th>Variable</th><th>Example</th><th>Purpose</th></tr></thead>
+        <tbody>
+          <tr><td><code>NODE_ENV</code></td><td><code>development</code></td><td>Runtime environment</td></tr>
+          <tr><td><code>PORT</code></td><td><code>3000</code></td><td>API server port</td></tr>
+          <tr><td><code>DATABASE_URL</code></td><td><code>postgresql://user:pass@localhost:5432/nabta</code></td><td>PostgreSQL connection (Prisma)</td></tr>
+          <tr><td><code>REDIS_URL</code></td><td><code>redis://localhost:6379</code></td><td>Redis — cache, BullMQ queues</td></tr>
+          <tr><td><code>JWT_ACCESS_SECRET</code></td><td><em>random 64-char string</em></td><td>Access token signing</td></tr>
+          <tr><td><code>JWT_REFRESH_SECRET</code></td><td><em>random 64-char string</em></td><td>Refresh token signing</td></tr>
+          <tr><td><code>JWT_ACCESS_EXPIRY</code></td><td><code>15m</code></td><td>Access token TTL</td></tr>
+          <tr><td><code>JWT_REFRESH_EXPIRY</code></td><td><code>7d</code></td><td>Refresh token TTL</td></tr>
+          <tr><td><code>RESEND_API_KEY</code></td><td><code>re_...</code></td><td>Resend transactional email API key</td></tr>
+          <tr><td><code>RESEND_FROM_EMAIL</code></td><td><code>noreply@nabta.app</code></td><td>Verified sender address</td></tr>
+          <tr><td><code>MINIO_ENDPOINT</code></td><td><code>localhost</code></td><td>MinIO host (local dev)</td></tr>
+          <tr><td><code>MINIO_PORT</code></td><td><code>9000</code></td><td>MinIO port</td></tr>
+          <tr><td><code>MINIO_ACCESS_KEY</code></td><td><code>minioadmin</code></td><td>MinIO access key</td></tr>
+          <tr><td><code>MINIO_SECRET_KEY</code></td><td><code>minioadmin</code></td><td>MinIO secret key</td></tr>
+          <tr><td><code>MINIO_BUCKET</code></td><td><code>nabta-files</code></td><td>Default object storage bucket</td></tr>
+          <tr><td><code>MINIO_USE_SSL</code></td><td><code>false</code></td><td>SSL for MinIO (true in production S3/R2)</td></tr>
+          <tr><td><code>WEB_URL</code></td><td><code>http://localhost:5173</code></td><td>Portal app URL (CORS, email links)</td></tr>
+          <tr><td><code>API_URL</code></td><td><code>http://localhost:3000</code></td><td>API base URL (web app config)</td></tr>
+        </tbody>
+      </table></div>
+
+      <h2>Phase 1b — Marketing Site</h2>
+      <div class="table-wrap"><table>
+        <thead><tr><th>Variable</th><th>Example</th><th>Purpose</th></tr></thead>
+        <tbody>
+          <tr><td><code>VITE_WEB_URL</code></td><td><code>http://localhost:5173</code></td><td>Login link target (portal app)</td></tr>
+          <tr><td><code>VITE_API_URL</code></td><td><code>http://localhost:3000</code></td><td>Contact/demo form API endpoint</td></tr>
+        </tbody>
+      </table></div>
+
+      <h2>Production additions (Phase 8+)</h2>
+      <div class="table-wrap"><table>
+        <thead><tr><th>Variable</th><th>Purpose</th></tr></thead>
+        <tbody>
+          <tr><td><code>S3_ENDPOINT</code> / <code>R2_*</code></td><td>Production object storage (replaces MinIO)</td></tr>
+          <tr><td><code>SENTRY_DSN</code></td><td>Error monitoring (optional)</td></tr>
+          <tr><td><code>LOG_LEVEL</code></td><td>Structured logging level</td></tr>
+        </tbody>
+      </table></div>
+
+      <h2><code>.env.example</code> template</h2>
+      <pre><code># Phase 1 — copy to .env and fill in values
+NODE_ENV=development
+PORT=3000
+DATABASE_URL=postgresql://nabta:nabta@localhost:5432/nabta
+REDIS_URL=redis://localhost:6379
+JWT_ACCESS_SECRET=change-me
+JWT_REFRESH_SECRET=change-me-too
+JWT_ACCESS_EXPIRY=15m
+JWT_REFRESH_EXPIRY=7d
+RESEND_API_KEY=
+RESEND_FROM_EMAIL=noreply@nabta.app
+MINIO_ENDPOINT=localhost
+MINIO_PORT=9000
+MINIO_ACCESS_KEY=minioadmin
+MINIO_SECRET_KEY=minioadmin
+MINIO_BUCKET=nabta-files
+MINIO_USE_SSL=false
+WEB_URL=http://localhost:5173
+API_URL=http://localhost:3000</code></pre>
+
+      <div class="related-links">
+        <h2>Related</h2>
+        <p><a href="../roadmap/01-foundation/">Phase 1 — Foundation</a> · <a href="email.html">Email (Resend)</a> · <a href="docker-and-deployment.html">Docker &amp; Deployment</a></p>
+      </div>
+          </main>
+          <footer id="docs-pager" class="docs-pager-wrap"></footer>
+        </div>
+        <aside id="docs-toc" class="docs-toc" aria-label="Table of contents"></aside>
+      </div>
+    </div>
+  </div>
+  <script src="../assets/nav-config.js"></script>
+  <script src="../assets/layout.js"></script>
+  <script src="../assets/docs.js"></script>
+</body>
+</html>

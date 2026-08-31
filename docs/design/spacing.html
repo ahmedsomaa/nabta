@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Spacing — Nabta</title>
+  <link rel="stylesheet" href="../assets/docs.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Sans+Arabic:wght@400;500;600&display=swap" rel="stylesheet">
+</head>
+<body data-section="design" data-title="Spacing">
+  <a href="#main" class="skip-link">Skip to content</a>
+  <header id="docs-topnav" class="docs-topnav" aria-label="Top navigation"></header>
+  <div id="sidebar-overlay" class="sidebar-overlay"></div>
+  <div class="docs-layout">
+    <aside id="docs-sidebar" class="docs-sidebar" aria-label="Sidebar"></aside>
+    <div class="docs-content">
+      <div class="docs-body">
+        <div class="docs-article">
+          <header id="docs-header" class="docs-page-header"></header>
+          <main id="main" class="docs-main">
+<h1>Spacing &amp; Shape</h1>
+      <p class="lead">4px base scale, soft radius, restrained elevation — calm school UI on HeroUI defaults.</p>
+
+      <h2>Spacing scale</h2>
+      <p>Use a 4px base (HeroUI / Tailwind-aligned). Prefer consistent gaps over one-off padding.</p>
+      <div class="table-wrap"><table>
+        <thead><tr><th>Step</th><th>px</th><th>Typical use</th></tr></thead>
+        <tbody>
+          <tr><td>1</td><td>4</td><td>Icon gaps, tight chip padding</td></tr>
+          <tr><td>2</td><td>8</td><td>Inline control spacing</td></tr>
+          <tr><td>3</td><td>12</td><td>Compact stacks</td></tr>
+          <tr><td>4</td><td>16</td><td>Default component padding</td></tr>
+          <tr><td>5</td><td>20</td><td>Card inner spacing</td></tr>
+          <tr><td>6</td><td>24</td><td>Section gaps</td></tr>
+          <tr><td>8</td><td>32</td><td>Page section separation</td></tr>
+          <tr><td>10</td><td>40</td><td>Major layout blocks</td></tr>
+          <tr><td>12</td><td>48</td><td>Hero / empty-state breathing room</td></tr>
+        </tbody>
+      </table></div>
+
+      <h2>Radius</h2>
+      <p>Drive from HeroUI <code>--radius</code> (default soft, ~0.5–0.75rem). Prefer medium rounded controls — not sharp brutalism, not pill overload.</p>
+      <ul>
+        <li><code>--radius-sm</code> — chips, small inputs</li>
+        <li><code>--radius</code> / md — buttons, cards</li>
+        <li><code>--radius-lg</code> — large surfaces, modals</li>
+        <li><code>--field-radius</code> — form fields (HeroUI derived)</li>
+      </ul>
+
+      <h2>Elevation</h2>
+      <p>Prefer borders and surface tokens over heavy multi-layer shadows. Use soft elevation for overlays (dropdown, modal, toast) only. Avoid neon glows.</p>
+
+      <h2>Touch targets</h2>
+      <p>Minimum interactive target: <strong>44×44px</strong> on mobile. Icon-only buttons must meet this via padding or hit-area.</p>
+          </main>
+          <footer id="docs-pager" class="docs-pager-wrap"></footer>
+        </div>
+        <aside id="docs-toc" class="docs-toc" aria-label="Table of contents"></aside>
+      </div>
+    </div>
+  </div>
+  <script src="../assets/nav-config.js"></script>
+  <script src="../assets/layout.js"></script>
+  <script src="../assets/docs.js"></script>
+</body>
+</html>

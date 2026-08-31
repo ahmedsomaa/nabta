@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Roles & Permissions — Nabta</title>
+  <link rel="stylesheet" href="../assets/docs.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Sans+Arabic:wght@400;500;600&display=swap" rel="stylesheet">
+</head>
+<body data-section="requirements" data-title="Roles & Permissions">
+  <a href="#main" class="skip-link">Skip to content</a>
+  <header id="docs-topnav" class="docs-topnav" aria-label="Top navigation"></header>
+  <div class="docs-mobile-bar">
+    <button type="button" id="sidebar-toggle" class="sidebar-toggle" aria-expanded="false" aria-label="Open menu">&#9776;</button>
+    <a href="../index.html" class="docs-mobile-brand">Nabta</a>
+  </div>
+  <div id="sidebar-overlay" class="sidebar-overlay"></div>
+  <div class="docs-layout">
+    <aside id="docs-sidebar" class="docs-sidebar" aria-label="Sidebar"></aside>
+    <div class="docs-content">
+      <div class="docs-body">
+        <div class="docs-article">
+          <header id="docs-header" class="docs-page-header"></header>
+          <main id="main" class="docs-main">
+<h1>Roles &amp; Permissions</h1>
+      <p class="lead">Centralized RBAC — no hardcoded role checks scattered throughout the application.</p>
+
+      <h2>Initial Roles</h2>
+      <table>
+        <thead><tr><th>Role</th><th>Summary</th></tr></thead>
+        <tbody>
+          <tr><td><strong>STUDENT</strong></td><td>View dashboard, classes, lessons, submit assignments, take quizzes, view grades, attendance, announcements</td></tr>
+          <tr><td><strong>TEACHER</strong></td><td>Manage classes, create content, grade submissions, record attendance, publish announcements</td></tr>
+          <tr><td><strong>ADMIN</strong></td><td>Manage users, academic structure, assignments, analytics, system settings, permissions</td></tr>
+        </tbody>
+      </table>
+
+      <h2>Permission Model</h2>
+      <p>Permissions should eventually support granular actions:</p>
+      <pre><code>students.read
+students.write
+assignments.create
+assignments.grade
+grades.read
+grades.write
+attendance.read
+attendance.write</code></pre>
+
+      <h2>Authorization Rules</h2>
+      <ul>
+        <li>Create reusable NestJS guards/decorators</li>
+        <li>Frontend permissions control UI visibility</li>
+        <li>Backend permissions enforce actual authorization</li>
+        <li><strong>Never rely on frontend authorization alone</strong></li>
+        <li>Never trust client-provided schoolId, userId, role, or permissions</li>
+        <li>Derive authorization context from the authenticated user</li>
+      </ul>
+
+      <h2>Future Roles (Architecture-Ready)</h2>
+      <p>Do not implement initially, but design for extensibility:</p>
+      <ul>
+        <li>Parent</li>
+        <li>Principal / Vice Principal</li>
+        <li>Academic Coordinator</li>
+        <li>Department Head</li>
+        <li>Counselor</li>
+        <li>Librarian</li>
+        <li>School Administrator</li>
+      </ul>
+
+      <h2>Acceptance Criteria</h2>
+      <ul class="checklist">
+        <li>Three roles (STUDENT, TEACHER, ADMIN) are implemented</li>
+        <li>Backend guards enforce authorization on every protected endpoint</li>
+        <li>Frontend hides UI elements the user cannot access</li>
+        <li>No hardcoded role checks in business logic — use centralized RBAC</li>
+        <li>Adding a new role does not require rewriting existing modules</li>
+      </ul>
+
+      <div class="related-links">
+        <h2>Related</h2>
+        <p><span class="badge badge-phase">Phases</span> <a href="../roadmap/01-foundation/">Phase 1 — Foundation</a></p>
+        <p><span class="badge badge-arch">Architecture</span> <a href="../technical/system-design.html">System Design</a>, <a href="../technical/backend-architecture.html">Backend Architecture</a></p>
+        <p>See also: <a href="security.html">Security</a></p>
+      </div>
+      <p class="source-footnote">Source: requirements.md §§4–5, 12</p>
+          </main>
+          <footer id="docs-pager" class="docs-pager-wrap"></footer>
+        </div>
+        <aside id="docs-toc" class="docs-toc" aria-label="Table of contents"></aside>
+      </div>
+    </div>
+  </div>
+  <script src="../assets/nav-config.js"></script>
+  <script src="../assets/layout.js"></script>
+  <script src="../assets/docs.js"></script>
+</body>
+</html>

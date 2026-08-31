@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>System Architecture — Nabta</title>
+  <link rel="stylesheet" href="../assets/docs.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Sans+Arabic:wght@400;500;600&display=swap" rel="stylesheet">
+</head>
+<body data-section="technical" data-title="System Architecture">
+  <a href="#main" class="skip-link">Skip to content</a>
+  <header id="docs-topnav" class="docs-topnav" aria-label="Top navigation"></header>
+  <div class="docs-mobile-bar">
+    <button type="button" id="sidebar-toggle" class="sidebar-toggle" aria-expanded="false" aria-label="Open menu">&#9776;</button>
+    <a href="../index.html" class="docs-mobile-brand">Nabta</a>
+  </div>
+  <div id="sidebar-overlay" class="sidebar-overlay"></div>
+  <div class="docs-layout">
+    <aside id="docs-sidebar" class="docs-sidebar" aria-label="Sidebar"></aside>
+    <div class="docs-content">
+      <div class="docs-body">
+        <div class="docs-article">
+          <header id="docs-header" class="docs-page-header"></header>
+          <main id="main" class="docs-main">
+<h1>System Architecture</h1>
+      <p class="lead">Monorepo layout, container diagram, and request/worker paths.</p>
+
+      <h2>Monorepo Structure</h2>
+      <pre><code>nabta/
+├── apps/
+│   ├── web/           # Nabta portals (student/teacher/admin)
+│   ├── api/           # NestJS
+│   └── marketing/     # Public marketing site (Phase 1b)
+├── packages/
+│   ├── database/      # Prisma schema/client
+│   ├── types/         # Shared domain types
+│   ├── validation/    # Shared Zod schemas
+│   ├── config/        # Shared configuration
+│   └── i18n/          # Shared EN/AR translations
+├── nabta-docker/
+│   ├── docker-compose.yml
+│   ├── docker-compose.prod.yml
+│   ├── Dockerfile.api
+│   ├── Dockerfile.web
+│   └── Dockerfile.marketing
+├── .github/workflows/ # CI/CD from day one
+├── package.json
+├── pnpm-workspace.yaml
+└── turbo.json</code></pre>
+
+      <h2>Container Diagram</h2>
+      <pre class="mermaid">flowchart TB
+  subgraph browser [Browser]
+    WebApp[apps/web]
+    Marketing[apps/marketing]
+  end
+  subgraph server [Server]
+  subgraph nest [apps/api NestJS]
+    Controllers[Controllers]
+    Services[Domain Services]
+    Guards[Auth Guards]
+    Workers[BullMQ Workers]
+  end
+  end
+  subgraph infra [Infrastructure]
+    PG[(PostgreSQL)]
+    Redis[(Redis)]
+    MinIO[(MinIO)]
+  end
+  WebApp -->|REST /api/v1| Controllers
+  Marketing -->|Login link| WebApp
+  Controllers --> Guards
+  Guards --> Services
+  Services --> PG
+  Services --> Redis
+  Services --> MinIO
+  Workers --> Redis
+  Workers --> PG</pre>
+
+      <h2>Request Path</h2>
+      <ol>
+        <li>Browser sends request to <code>/api/v1/*</code></li>
+        <li>NestJS controller receives request</li>
+        <li>Auth guard validates JWT, extracts user + schoolId + role</li>
+        <li>RBAC guard checks permissions</li>
+        <li>Service executes domain logic with tenant-scoped queries</li>
+        <li>Prisma queries PostgreSQL (always filtered by schoolId)</li>
+        <li>Response returned as <code>{ data, meta }</code></li>
+      </ol>
+
+      <h2>Background Worker Path</h2>
+      <ol>
+        <li>Domain event occurs (e.g. assignment published)</li>
+        <li>Service enqueues job to BullMQ via Redis</li>
+        <li>Worker picks up job</li>
+        <li>Worker creates notification records in PostgreSQL</li>
+        <li>Worker sends notification emails via Resend (<code>EmailService</code>)</li>
+      </ol>
+
+      <h2>Shared Packages</h2>
+      <ul>
+        <li><code>packages/database</code> — Prisma schema, client, migrations (used by api)</li>
+        <li><code>packages/types</code> — Shared TypeScript interfaces (used by web + api + mobile future)</li>
+        <li><code>packages/validation</code> — Shared Zod schemas (used by web + api)</li>
+        <li><code>packages/config</code> — Environment config, constants (used by web + api)</li>
+        <li><code>packages/i18n</code> — Shared EN/AR translations (used by web + marketing)</li>
+      </ul>
+
+      <div class="related-links">
+        <h2>Related</h2>
+        <p><span class="badge badge-phase">Phases</span> <a href="../roadmap/01-foundation/">Phase 1 — Foundation</a></p>
+        <p><span class="badge badge-arch">Architecture</span> <a href="tech-stack.html">Tech Stack</a>, <a href="system-design.html">System Design</a></p>
+      </div>
+      <p class="source-footnote">Source: requirements.md §7, notice.md</p>
+          </main>
+          <footer id="docs-pager" class="docs-pager-wrap"></footer>
+        </div>
+        <aside id="docs-toc" class="docs-toc" aria-label="Table of contents"></aside>
+      </div>
+    </div>
+  </div>
+  <script src="../assets/nav-config.js"></script>
+  <script src="../assets/layout.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.min.js"></script>
+  <script src="../assets/docs.js"></script>
+</body>
+</html>

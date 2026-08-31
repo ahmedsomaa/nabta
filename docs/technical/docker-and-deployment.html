@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Docker & Deployment — Nabta</title>
+  <link rel="stylesheet" href="../assets/docs.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Sans+Arabic:wght@400;500;600&display=swap" rel="stylesheet">
+</head>
+<body data-section="technical" data-title="Docker & Deployment">
+  <a href="#main" class="skip-link">Skip to content</a>
+  <header id="docs-topnav" class="docs-topnav" aria-label="Top navigation"></header>
+  <div class="docs-mobile-bar">
+    <button type="button" id="sidebar-toggle" class="sidebar-toggle" aria-expanded="false" aria-label="Open menu">&#9776;</button>
+    <a href="../index.html" class="docs-mobile-brand">Nabta</a>
+  </div>
+  <div id="sidebar-overlay" class="sidebar-overlay"></div>
+  <div class="docs-layout">
+    <aside id="docs-sidebar" class="docs-sidebar" aria-label="Sidebar"></aside>
+    <div class="docs-content">
+      <div class="docs-body">
+        <div class="docs-article">
+          <header id="docs-header" class="docs-page-header"></header>
+          <main id="main" class="docs-main">
+<h1>Docker &amp; Deployment</h1>
+      <p class="lead">Run the full stack locally with Docker Compose; deploy to free tiers now, AWS/GCP for production.</p>
+
+      <h2>Local Development — Docker Compose</h2>
+      <p>Single command to start the full local stack:</p>
+      <table>
+        <thead><tr><th>Service</th><th>Image / Build</th><th>Purpose</th></tr></thead>
+        <tbody>
+          <tr><td><code>postgres</code></td><td>postgres:16</td><td>Primary database</td></tr>
+          <tr><td><code>redis</code></td><td>redis:7</td><td>Cache + BullMQ queues</td></tr>
+          <tr><td><code>minio</code></td><td>minio/minio</td><td>S3-compatible object storage</td></tr>
+          <tr><td><code>api</code></td><td>Dockerfile.api</td><td>NestJS (hot-reload in dev)</td></tr>
+          <tr><td><code>web</code></td><td>Dockerfile.web</td><td>Nabta SPA</td></tr>
+          <tr><td><code>marketing</code></td><td>Dockerfile.marketing</td><td>Marketing site (Phase 1b)</td></tr>
+        </tbody>
+      </table>
+      <pre><code># Infrastructure only (postgres, redis, minio)
+pnpm docker:up
+
+# Full stack including apps (containers)
+pnpm docker:up:full
+
+# Local apps against Docker infra (preferred for day-to-day)
+pnpm start</code></pre>
+
+      <h2>Docker Files</h2>
+      <pre><code>nabta-docker/
+├── docker-compose.yml        # Dev: all services
+├── docker-compose.prod.yml   # Production overrides
+├── Dockerfile.api
+├── Dockerfile.web
+└── Dockerfile.marketing</code></pre>
+
+      <h2>Environment Matrix</h2>
+      <table>
+        <thead><tr><th>Environment</th><th>Purpose</th><th>Deploy trigger</th></tr></thead>
+        <tbody>
+          <tr><td><strong>dev</strong></td><td>Local Docker Compose</td><td>Manual</td></tr>
+          <tr><td><strong>staging</strong></td><td>Integration testing, demo</td><td>Push to <code>main</code></td></tr>
+          <tr><td><strong>prod</strong></td><td>Live schools</td><td>Tagged release (manual gate)</td></tr>
+        </tbody>
+      </table>
+
+      <h2>Free / Low-Cost Deployment (Start Here)</h2>
+      <table>
+        <thead><tr><th>Component</th><th>Platform</th><th>Notes</th></tr></thead>
+        <tbody>
+          <tr><td>CI/CD</td><td>GitHub Actions</td><td>Lint, test, build, push Docker images to GHCR</td></tr>
+          <tr><td>Marketing site</td><td>Cloudflare Pages or Vercel</td><td>Static/SSR, free tier</td></tr>
+          <tr><td>Nabta web</td><td>Cloudflare Pages or Vercel</td><td>SPA; proxy <code>/api</code> to backend</td></tr>
+          <tr><td>API</td><td>Render, Fly.io, or Railway</td><td>Docker container deploy</td></tr>
+          <tr><td>PostgreSQL</td><td>Neon or Supabase</td><td>Free tier Postgres</td></tr>
+          <tr><td>Redis</td><td>Upstash</td><td>Serverless Redis free tier</td></tr>
+          <tr><td>Object storage</td><td>Cloudflare R2 or MinIO on Fly</td><td>S3-compatible, R2 has free egress</td></tr>
+          <tr><td>Container registry</td><td>GitHub Container Registry</td><td>Free for public repos</td></tr>
+        </tbody>
+      </table>
+
+      <h2>Production — AWS Reference Architecture</h2>
+      <pre class="mermaid">flowchart TB
+  subgraph aws [AWS]
+    CF[CloudFront CDN]
+    S3Web[S3 - web + marketing]
+    ALB[Application Load Balancer]
+    ECS[ECS Fargate - api]
+    RDS[(RDS PostgreSQL)]
+    ElastiCache[(ElastiCache Redis)]
+    S3Files[S3 - file storage]
+    SM[Secrets Manager]
+    R53[Route 53]
+  end
+  Users[Users] --> R53
+  R53 --> CF
+  CF --> S3Web
+  CF --> ALB
+  ALB --> ECS
+  ECS --> RDS
+  ECS --> ElastiCache
+  ECS --> S3Files
+  ECS --> SM</pre>
+      <ul>
+        <li><strong>Compute:</strong> ECS Fargate for API containers</li>
+        <li><strong>Frontend:</strong> S3 + CloudFront for web and marketing static assets</li>
+        <li><strong>Database:</strong> RDS PostgreSQL (Multi-AZ for prod)</li>
+        <li><strong>Cache:</strong> ElastiCache Redis</li>
+        <li><strong>Files:</strong> S3 with pre-signed URLs</li>
+        <li><strong>Secrets:</strong> AWS Secrets Manager for DB credentials, JWT secrets, PSP keys</li>
+        <li><strong>DNS/TLS:</strong> Route 53 + ACM certificates</li>
+      </ul>
+
+      <h2>Production — GCP Reference Architecture</h2>
+      <pre class="mermaid">flowchart TB
+  subgraph gcp [GCP]
+    CDN[Cloud CDN]
+    GCSWeb[Cloud Storage - web]
+    LB[Cloud Load Balancing]
+    CloudRun[Cloud Run - api]
+    CloudSQL[(Cloud SQL PostgreSQL)]
+    Memorystore[(Memorystore Redis)]
+    GCSFiles[Cloud Storage - files]
+    SecretMgr[Secret Manager]
+  end
+  Users[Users] --> CDN
+  CDN --> GCSWeb
+  CDN --> LB
+  LB --> CloudRun
+  CloudRun --> CloudSQL
+  CloudRun --> Memorystore
+  CloudRun --> GCSFiles
+  CloudRun --> SecretMgr</pre>
+      <ul>
+        <li><strong>Compute:</strong> Cloud Run for API (auto-scaling containers)</li>
+        <li><strong>Frontend:</strong> Cloud Storage + Cloud CDN</li>
+        <li><strong>Database:</strong> Cloud SQL PostgreSQL</li>
+        <li><strong>Cache:</strong> Memorystore Redis</li>
+        <li><strong>Files:</strong> GCS with signed URLs</li>
+        <li><strong>Secrets:</strong> GCP Secret Manager</li>
+      </ul>
+
+      <h2>Secrets &amp; External Services</h2>
+      <p>Store sensitive values in your platform's secret manager — not in Docker Compose files or committed <code>.env</code> files.</p>
+      <table>
+        <thead><tr><th>Secret</th><th>Where</th><th>Notes</th></tr></thead>
+        <tbody>
+          <tr><td><code>RESEND_API_KEY</code></td><td>API container env / Secrets Manager</td><td>Resend transactional email — not in Docker Compose</td></tr>
+          <tr><td><code>RESEND_FROM_EMAIL</code></td><td>API container env</td><td>Verified sender domain (e.g. <code>noreply@nabta.app</code>)</td></tr>
+          <tr><td>JWT secrets, DB credentials</td><td>Secrets Manager</td><td>Rotate in production</td></tr>
+        </tbody>
+      </table>
+
+      <h2>Health Checks</h2>
+      <ul>
+        <li>API: <code>GET /api/v1/health</code> — returns DB and Redis connectivity status</li>
+        <li>Docker: configure <code>HEALTHCHECK</code> in Dockerfiles</li>
+        <li>Load balancers: health check on <code>/api/v1/health</code> every 30s</li>
+      </ul>
+
+      <div class="related-links">
+        <h2>Related</h2>
+        <p><span class="badge badge-phase">Phases</span> <a href="../roadmap/01-foundation/">Phase 1 — Foundation</a>, <a href="../roadmap/01b-marketing-site/">Phase 1b — Marketing Site</a></p>
+        <p><span class="badge badge-arch">Architecture</span> <a href="testing-and-cicd.html">Testing &amp; CI/CD</a>, <a href="system-architecture.html">System Architecture</a>, <a href="email.html">Email (Resend)</a></p>
+      </div>
+      <p class="source-footnote">Source: expanded requirements — Docker &amp; deployment</p>
+          </main>
+          <footer id="docs-pager" class="docs-pager-wrap"></footer>
+        </div>
+        <aside id="docs-toc" class="docs-toc" aria-label="Table of contents"></aside>
+      </div>
+    </div>
+  </div>
+  <script src="../assets/nav-config.js"></script>
+  <script src="../assets/layout.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.min.js"></script>
+  <script src="../assets/docs.js"></script>
+</body>
+</html>

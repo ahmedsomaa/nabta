@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Future Roadmap — Nabta</title>
+  <link rel="stylesheet" href="../assets/docs.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Sans+Arabic:wght@400;500;600&display=swap" rel="stylesheet">
+</head>
+<body data-section="roadmap" data-title="Future Roadmap">
+  <a href="#main" class="skip-link">Skip to content</a>
+  <header id="docs-topnav" class="docs-topnav" aria-label="Top navigation"></header>
+  <div class="docs-mobile-bar">
+    <button type="button" id="sidebar-toggle" class="sidebar-toggle" aria-expanded="false" aria-label="Open menu">&#9776;</button>
+    <a href="../index.html" class="docs-mobile-brand">Nabta</a>
+  </div>
+  <div id="sidebar-overlay" class="sidebar-overlay"></div>
+  <div class="docs-layout">
+    <aside id="docs-sidebar" class="docs-sidebar" aria-label="Sidebar"></aside>
+    <div class="docs-content">
+      <div class="docs-body">
+        <div class="docs-article">
+          <header id="docs-header" class="docs-page-header"></header>
+          <main id="main" class="docs-main">
+<h1>Future Roadmap</h1>
+      <p class="lead">Mobile apps, payments, and LLM integration — documented for architecture readiness, not implemented in current phases.</p>
+
+      <div class="callout callout-warning">
+        <p>These features are <strong>not in scope</strong> for Phases 1–8. This page documents how the architecture should be prepared so they can be added without a rewrite.</p>
+      </div>
+
+      <h2>Mobile Apps</h2>
+      <h3>Likely v1 Mobile</h3>
+      <p><strong>Student app</strong> — assignments, grades, schedule, notifications, lesson content.</p>
+      <h3>Possible Later</h3>
+      <p><strong>Teacher app</strong> — grading, attendance recording on-the-go.</p>
+
+      <h3>Approach</h3>
+      <ul>
+        <li>React Native (Expo) in monorepo as <code>apps/mobile-student</code></li>
+        <li>Share <code>packages/types</code>, <code>packages/validation</code>, <code>packages/i18n</code></li>
+        <li>API already versioned (<code>/api/v1</code>) — mobile is another API client</li>
+        <li>Push notifications via Expo + backend notification service</li>
+        <li>Offline support for downloaded materials (future consideration)</li>
+      </ul>
+
+      <pre class="mermaid">flowchart LR
+  MobileStudent[apps/mobile-student] --> API[apps/api /api/v1]
+  MobileTeacher[apps/mobile-teacher future] --> API
+  Web[apps/web] --> API</pre>
+
+      <h2>Payments</h2>
+      <div class="callout">
+        <p><strong>Gate:</strong> Complete PSP research and select a provider before creating a payments implementation phase.</p>
+      </div>
+
+      <h3>Egyptian PSP Research</h3>
+      <table>
+        <thead><tr><th>PSP</th><th>Notes</th></tr></thead>
+        <tbody>
+          <tr><td><strong>Paymob</strong></td><td>Widely used in Egypt; cards, mobile wallets, installments</td></tr>
+          <tr><td><strong>Fawry</strong></td><td>Cash collection at Fawry outlets; popular in Egypt</td></tr>
+          <tr><td><strong>PayTabs (Accept)</strong></td><td>Regional payment gateway</td></tr>
+          <tr><td><strong>Kashier</strong></td><td>Egyptian payment gateway</td></tr>
+          <tr><td><strong>Geidea</strong></td><td>POS + online payments</td></tr>
+        </tbody>
+      </table>
+
+      <h3>Planned Architecture (Document Only)</h3>
+      <ul>
+        <li><code>payments</code> domain module: invoices, subscriptions, school billing</li>
+        <li>Webhook handlers per PSP for payment confirmation</li>
+        <li>Never store card data — PCI compliance via PSP tokenization</li>
+        <li>School admin configures PSP credentials per tenant</li>
+        <li>Payment status tracked in PostgreSQL; receipts generated as PDFs</li>
+      </ul>
+
+      <h3>Use Cases (Future)</h3>
+      <ul>
+        <li>School subscription billing (monthly/annual platform fee)</li>
+        <li>Parent fee payments (tuition, activities)</li>
+        <li>Invoice generation and payment tracking</li>
+      </ul>
+
+      <h2>LLM Integration</h2>
+      <p>Document use cases and integration patterns. No implementation in current phases.</p>
+
+      <h3>Use Cases</h3>
+      <table>
+        <thead><tr><th>Use Case</th><th>Integration Pattern</th></tr></thead>
+        <tbody>
+          <tr><td>Assignment feedback assist</td><td>Teacher-triggered, human-in-the-loop review before sending to student</td></tr>
+          <tr><td>Student study helper</td><td>Scoped to enrolled subject content only; no open-ended web access</td></tr>
+          <tr><td>Admin insights</td><td>Natural language queries over school analytics data</td></tr>
+          <tr><td>Content drafting</td><td>Teacher lesson and announcement draft suggestions</td></tr>
+        </tbody>
+      </table>
+
+      <h3>Architecture Principles</h3>
+      <ul>
+        <li><strong>Provider abstraction:</strong> <code>LlmService</code> interface — swap OpenAI, Anthropic, or local models without changing business logic</li>
+        <li><strong>School-level opt-in:</strong> each school enables/disables AI features independently</li>
+        <li><strong>Data boundaries:</strong> no student PII sent to LLM without explicit consent</li>
+        <li><strong>Audit logging:</strong> all AI-generated content logged in <code>AuditLog</code></li>
+        <li><strong>Rate limiting:</strong> cost controls per school (token budgets)</li>
+        <li><strong>Human-in-the-loop:</strong> teachers review AI suggestions before publishing to students</li>
+      </ul>
+
+      <pre class="mermaid">flowchart LR
+  Teacher[Teacher action] --> LlmService[LlmService abstraction]
+  LlmService --> OpenAI[OpenAI]
+  LlmService --> Anthropic[Anthropic]
+  LlmService --> Local[Local model]
+  LlmService --> AuditLog[AuditLog]
+  LlmService --> Review[Human review gate]</pre>
+
+      <h2>Other Future Features</h2>
+      <ul>
+        <li>Parent portal (view child's progress, pay fees)</li>
+        <li>SSO (Microsoft Entra ID, Google Workspace)</li>
+        <li>Additional languages beyond EN/AR</li>
+        <li>Advanced analytics and reporting</li>
+        <li>School-specific customization and white-labeling</li>
+      </ul>
+
+      <div class="related-links">
+        <h2>Related</h2>
+        <p><span class="badge badge-phase">Phases</span> <a href="08-production-hardening/">Phase 8 — Production Hardening</a></p>
+        <p><strong>Requirements:</strong> <a href="../business/product-vision.html">Product Vision</a></p>
+      </div>
+      <p class="source-footnote">Source: expanded requirements — future roadmap</p>
+          </main>
+          <footer id="docs-pager" class="docs-pager-wrap"></footer>
+        </div>
+        <aside id="docs-toc" class="docs-toc" aria-label="Table of contents"></aside>
+      </div>
+    </div>
+  </div>
+  <script src="../assets/nav-config.js"></script>
+  <script src="../assets/layout.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.min.js"></script>
+  <script src="../assets/docs.js"></script>
+</body>
+</html>

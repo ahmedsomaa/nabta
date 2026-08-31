@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Phase 6 — Administration — Nabta</title>
+  <link rel="stylesheet" href="../../assets/docs.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Sans+Arabic:wght@400;500;600&display=swap" rel="stylesheet">
+</head>
+<body data-section="roadmap" data-title="Phase 6 — Administration">
+  <a href="#main" class="skip-link">Skip to content</a>
+  <header id="docs-topnav" class="docs-topnav" aria-label="Top navigation"></header>
+  <div class="docs-mobile-bar">
+    <button type="button" id="sidebar-toggle" class="sidebar-toggle" aria-expanded="false" aria-label="Open menu">&#9776;</button>
+    <a href="../../index.html" class="docs-mobile-brand">Nabta</a>
+  </div>
+  <div id="sidebar-overlay" class="sidebar-overlay"></div>
+  <div class="docs-layout">
+    <aside id="docs-sidebar" class="docs-sidebar" aria-label="Sidebar"></aside>
+    <div class="docs-content">
+      <div class="docs-body">
+        <div class="docs-article">
+          <header id="docs-header" class="docs-page-header"></header>
+          <main id="main" class="docs-main">
+<h1>Phase 6 — Administration</h1>
+      <p class="lead"><span class="badge badge-phase">Phase 6</span> Implement this phase only. Do not implement Phase 7+ functionality.</p>
+
+      <h2>Goal</h2>
+      <p>Build the admin portal: dashboard, user management, academic management UI, teacher/student assignments, school configuration, and analytics.</p>
+
+      <h2>In Scope</h2>
+      <ul>
+        <li>Admin dashboard (school overview, academic overview with filters)</li>
+        <li>Student management (searchable table, view/edit/assign/deactivate)</li>
+        <li>Teacher management (assign subjects/classes, deactivate)</li>
+        <li>Academic structure management UI (years, grades, classes, subjects)</li>
+        <li>Teacher/student assignment workflows</li>
+        <li>School configuration and settings</li>
+        <li>Basic analytics (attendance, assignment completion, performance)</li>
+        <li>Global search</li>
+      </ul>
+
+      <h2>Out of Scope</h2>
+      <ul>
+        <li>Notifications</li>
+        <li>Audit logging UI</li>
+        <li>Multi-school admin</li>
+      </ul>
+
+      <h2>Acceptance Criteria</h2>
+      <ul class="checklist">
+        <li>Admin dashboard shows school overview with key metrics</li>
+        <li>Admin can CRUD students and teachers via UI</li>
+        <li>Admin can manage academic structure via UI</li>
+        <li>Admin can assign teachers to classes/subjects and students to classes</li>
+        <li>Global search returns results across entities</li>
+        <li>Complete workflow: login → academic mgmt → assign teacher/students/subjects</li>
+      </ul>
+
+
+      <h2>Implementation slices</h2>
+      <p>Derived from this phase’s acceptance criteria. Complete in order; each slice is independently verifiable. Do not implement Phase 7+.</p>
+      <ol>
+        <li><strong>Admin dashboard</strong> — school overview and academic overview with filters. Verify: dashboard shows school overview with key metrics.</li>
+        <li><strong>People UI</strong> — searchable student and teacher tables; view/edit/assign/deactivate. Verify: admin can CRUD students and teachers via UI.</li>
+        <li><strong>Academic structure UI</strong> — years, grades, classes, subjects. Verify: admin can manage the hierarchy via UI.</li>
+        <li><strong>Assignments</strong> — teachers to classes/subjects; students to classes. Verify: admin can assign teachers and students.</li>
+        <li><strong>Search + workflow</strong> — global search across entities; login → academic mgmt → assign. Verify: search returns results; the complete admin workflow succeeds.</li>
+      </ol>
+
+      <div class="related-links">
+        <h2>Related</h2>
+        <p><strong>Requirements:</strong> <a href="../../requirements/admin.html">Admin Portal</a>, <a href="../../requirements/academic-structure.html">Academic Structure</a>, <a href="../../requirements/search-and-files.html">Search &amp; Files</a></p>
+        <p><strong>Architecture:</strong> <a href="../../technical/data-model.html">Data Model</a>, <a href="../../technical/sequences.html">Sequence Diagrams</a></p>
+        <p><strong>Previous:</strong> <a href="../05-assessments/">Phase 5</a> · <strong>Next:</strong> <a href="../07-notifications/">Phase 7</a></p>
+      </div>
+      <p class="source-footnote">Source: requirements.md §51 Phase 6, §48</p>
+          </main>
+          <footer id="docs-pager" class="docs-pager-wrap"></footer>
+        </div>
+        <aside id="docs-toc" class="docs-toc" aria-label="Table of contents"></aside>
+      </div>
+    </div>
+  </div>
+  <script src="../../assets/nav-config.js"></script>
+  <script src="../../assets/layout.js"></script>
+  <script src="../../assets/docs.js"></script>
+</body>
+</html>

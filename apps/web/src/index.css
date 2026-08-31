@@ -1,0 +1,30 @@
+@import "tailwindcss";
+@import "@heroui/styles";
+
+:root {
+  --accent: oklch(0.72 0.15 163);
+  --accent-foreground: oklch(1 0 0);
+  --background: oklch(0.985 0.004 95);
+  --foreground: oklch(0.21 0 0);
+  --font-sans: "IBM Plex Sans", "IBM Plex Sans Arabic", system-ui, sans-serif;
+}
+
+.dark {
+  --accent: oklch(0.78 0.14 163);
+  --accent-foreground: oklch(0.21 0 0);
+  --background: oklch(0.16 0.01 160);
+  --foreground: oklch(0.97 0 0);
+}
+
+html,
+body,
+#root {
+  min-height: 100%;
+}
+
+body {
+  margin: 0;
+  font-family: var(--font-sans);
+  background: var(--background);
+  color: var(--foreground);
+}

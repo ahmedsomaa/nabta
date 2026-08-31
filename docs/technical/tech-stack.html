@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Tech Stack — Nabta</title>
+  <link rel="stylesheet" href="../assets/docs.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Sans+Arabic:wght@400;500;600&display=swap" rel="stylesheet">
+</head>
+<body data-section="technical" data-title="Tech Stack">
+  <a href="#main" class="skip-link">Skip to content</a>
+  <header id="docs-topnav" class="docs-topnav" aria-label="Top navigation"></header>
+  <div class="docs-mobile-bar">
+    <button type="button" id="sidebar-toggle" class="sidebar-toggle" aria-expanded="false" aria-label="Open menu">&#9776;</button>
+    <a href="../index.html" class="docs-mobile-brand">Nabta</a>
+  </div>
+  <div id="sidebar-overlay" class="sidebar-overlay"></div>
+  <div class="docs-layout">
+    <aside id="docs-sidebar" class="docs-sidebar" aria-label="Sidebar"></aside>
+    <div class="docs-content">
+      <div class="docs-body">
+        <div class="docs-article">
+          <header id="docs-header" class="docs-page-header"></header>
+          <main id="main" class="docs-main">
+<h1>Tech Stack</h1>
+      <p class="lead">Technology choices for the Nabta monorepo.</p>
+
+      <h2>Frontend</h2>
+      <table>
+        <thead><tr><th>Technology</th><th>Purpose</th></tr></thead>
+        <tbody>
+          <tr><td>React 19</td><td>UI framework</td></tr>
+          <tr><td>TypeScript (strict)</td><td>Type safety — no <code>any</code></td></tr>
+          <tr><td>Vite</td><td>Build tool and dev server</td></tr>
+          <tr><td>Tailwind CSS v4</td><td>Utility-first styling and design tokens</td></tr>
+          <tr><td><a href="https://heroui.com/">HeroUI v3</a></td><td>Component library (<code>@heroui/react</code> + <code>@heroui/styles</code>) — React Aria; Nabta <code>--accent</code> <code>#10B981</code></td></tr>
+          <tr><td>react-i18next</td><td>Internationalization (EN/AR)</td></tr>
+          <tr><td>Lucide React</td><td>Default static icons (nav, forms, tables, brand mark)</td></tr>
+          <tr><td><a href="https://lucide-animated.com/">lucide-animated</a></td><td>Selective animated icons (hover) — installed per-icon via shadcn registry CLI; depends on <code>motion</code></td></tr>
+          <tr><td>React Router</td><td>Client-side routing</td></tr>
+          <tr><td>TanStack Query</td><td>Server state management</td></tr>
+          <tr><td>React Hook Form + Zod</td><td>Forms and validation</td></tr>
+          <tr><td>Framer Motion</td><td>Page/layout transitions (150–300ms) — not for HeroUI component motion</td></tr>
+        </tbody>
+      </table>
+
+      <h3>Icons</h3>
+      <p>Use <strong>Lucide React</strong> (<code>lucide-react</code>) by default. Add <strong>lucide-animated</strong> only where hover motion helps affordance (empty states, CTAs, settings, notifications). Install one icon at a time via the shadcn registry CLI (not a UI kit):</p>
+      <pre><code>npx shadcn@latest add "https://lucide-animated.com/r/&lt;icon-name&gt;.json"</code></pre>
+      <p>Components land in <code>components/icons/</code>. The CLI adds <code>motion</code> if missing. Keep <strong>Framer Motion</strong> for page and layout transitions; HeroUI uses CSS for component animation; use <code>motion</code> only for lucide-animated icons.</p>
+
+      <h3>Agent tooling</h3>
+      <p>Official HeroUI MCP (<code>.cursor/mcp.json</code> → <code>@heroui/react-mcp</code>), Agent Skills under <code>.agents/skills/heroui-react</code>, and local docs index at <a href="heroui-agents.md">heroui-agents.md</a>. See Nabta <code>AGENTS.md</code>. Node.js 22+ required for the MCP server.</p>
+
+      <h2>Backend</h2>
+      <table>
+        <thead><tr><th>Technology</th><th>Purpose</th></tr></thead>
+        <tbody>
+          <tr><td>NestJS</td><td>Modular API framework</td></tr>
+          <tr><td>TypeScript (strict)</td><td>Type safety</td></tr>
+          <tr><td>PostgreSQL</td><td>Primary database (source of truth)</td></tr>
+          <tr><td>Prisma ORM</td><td>Schema, migrations, type-safe queries</td></tr>
+          <tr><td>Redis</td><td>Cache, rate limiting, queues, temp data</td></tr>
+          <tr><td>BullMQ</td><td>Background job processing</td></tr>
+          <tr><td>Resend</td><td>Transactional email (auth + notifications)</td></tr>
+        </tbody>
+      </table>
+
+      <h2>Infrastructure</h2>
+      <table>
+        <thead><tr><th>Technology</th><th>Purpose</th></tr></thead>
+        <tbody>
+          <tr><td>pnpm</td><td>Package manager (workspace)</td></tr>
+          <tr><td>Turbo</td><td>Monorepo build orchestration</td></tr>
+          <tr><td>Docker Compose</td><td>Full local stack: PostgreSQL, Redis, MinIO, apps</td></tr>
+          <tr><td>MinIO</td><td>S3-compatible object storage (local dev)</td></tr>
+          <tr><td>GitHub Actions</td><td>CI/CD from day one</td></tr>
+          <tr><td>Object storage (prod)</td><td>Cloudflare R2, AWS S3, or GCS</td></tr>
+        </tbody>
+      </table>
+
+      <h2>Shared Packages</h2>
+      <table>
+        <thead><tr><th>Package</th><th>Purpose</th></tr></thead>
+        <tbody>
+          <tr><td><code>packages/database</code></td><td>Prisma schema, client, migrations</td></tr>
+          <tr><td><code>packages/types</code></td><td>Shared TypeScript interfaces</td></tr>
+          <tr><td><code>packages/validation</code></td><td>Shared Zod schemas</td></tr>
+          <tr><td><code>packages/config</code></td><td>Environment config, constants</td></tr>
+          <tr><td><code>packages/i18n</code></td><td>Shared EN/AR translation files</td></tr>
+        </tbody>
+      </table>
+
+      <h2>Data Responsibilities</h2>
+      <div class="callout">
+        <p><strong>PostgreSQL</strong> is the source of truth for all persistent academic data.</p>
+        <p><strong>Redis</strong> is for cache, rate limiting, notification queues, background jobs, and frequently accessed dashboard data. Never use Redis as the primary database.</p>
+      </div>
+
+      <div class="related-links">
+        <h2>Related</h2>
+        <p><span class="badge badge-phase">Phases</span> <a href="../roadmap/01-foundation/">Phase 1 — Foundation</a></p>
+        <p><span class="badge badge-arch">Architecture</span> <a href="system-architecture.html">System Architecture</a>, <a href="email.html">Email (Resend)</a>, <a href="docker-and-deployment.html">Docker &amp; Deployment</a></p>
+      </div>
+      <p class="source-footnote">Source: requirements.md §6, §10</p>
+          </main>
+          <footer id="docs-pager" class="docs-pager-wrap"></footer>
+        </div>
+        <aside id="docs-toc" class="docs-toc" aria-label="Table of contents"></aside>
+      </div>
+    </div>
+  </div>
+  <script src="../assets/nav-config.js"></script>
+  <script src="../assets/layout.js"></script>
+  <script src="../assets/docs.js"></script>
+</body>
+</html>

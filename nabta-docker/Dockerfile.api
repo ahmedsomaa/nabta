@@ -1,0 +1,35 @@
+FROM node:22-alpine AS deps
+WORKDIR /app
+RUN corepack enable
+COPY package.json pnpm-workspace.yaml pnpm-lock.yaml* ./
+COPY apps/api/package.json apps/api/
+COPY packages/database/package.json packages/database/
+COPY packages/types/package.json packages/types/
+COPY packages/validation/package.json packages/validation/
+COPY packages/config/package.json packages/config/
+COPY packages/i18n/package.json packages/i18n/
+RUN pnpm install --frozen-lockfile || pnpm install
+
+FROM node:22-alpine AS build
+WORKDIR /app
+RUN corepack enable
+COPY --from=deps /app/node_modules ./node_modules
+COPY --from=deps /app/apps/api/node_modules ./apps/api/node_modules
+COPY --from=deps /app/packages ./packages
+COPY . .
+RUN pnpm --filter @nabta/types build \
+ && pnpm --filter @nabta/config build \
+ && pnpm --filter @nabta/validation build \
+ && pnpm --filter @nabta/i18n build \
+ && pnpm --filter @nabta/database generate \
+ && pnpm --filter @nabta/database build \
+ && pnpm --filter @nabta/api build
+
+FROM node:22-alpine AS runner
+WORKDIR /app
+ENV NODE_ENV=production
+RUN corepack enable
+COPY --from=build /app ./
+WORKDIR /app/apps/api
+EXPOSE 3000
+CMD ["node", "dist/main.js"]

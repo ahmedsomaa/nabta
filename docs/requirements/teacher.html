@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Teacher Portal — Nabta</title>
+  <link rel="stylesheet" href="../assets/docs.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Sans+Arabic:wght@400;500;600&display=swap" rel="stylesheet">
+</head>
+<body data-section="requirements" data-title="Teacher Portal">
+  <a href="#main" class="skip-link">Skip to content</a>
+  <header id="docs-topnav" class="docs-topnav" aria-label="Top navigation"></header>
+  <div class="docs-mobile-bar">
+    <button type="button" id="sidebar-toggle" class="sidebar-toggle" aria-expanded="false" aria-label="Open menu">&#9776;</button>
+    <a href="../index.html" class="docs-mobile-brand">Nabta</a>
+  </div>
+  <div id="sidebar-overlay" class="sidebar-overlay"></div>
+  <div class="docs-layout">
+    <aside id="docs-sidebar" class="docs-sidebar" aria-label="Sidebar"></aside>
+    <div class="docs-content">
+      <div class="docs-body">
+        <div class="docs-article">
+          <header id="docs-header" class="docs-page-header"></header>
+          <main id="main" class="docs-main">
+<h1>Teacher Portal</h1>
+      <p class="lead">Answers: <strong>"What do I need to teach and manage today?"</strong></p>
+
+      <h2>Dashboard</h2>
+      <h3>Today's Classes</h3>
+      <pre><code>08:00  Grade 10A — Physics
+10:00  Grade 11B — Physics
+12:00  Grade 9A — Science</code></pre>
+      <h3>To Grade</h3>
+      <p>Pending submissions with counts (e.g. "Physics Assignment — 24 submissions").</p>
+      <h3>Student Alerts</h3>
+      <p>Students falling behind, missing assignments, low assessment performance, attendance concerns.</p>
+      <h3>Quick Actions</h3>
+      <p>Create Assignment, Create Quiz, Upload Material, Take Attendance, Post Announcement.</p>
+
+      <h2>Class Management</h2>
+      <p>Teachers open a class and see: students, lessons, assignments, assessments, attendance, grades, announcements.</p>
+      <p>Student table columns: Student, Progress, Attendance, Average, Missing Work. Clicking a student opens their academic overview.</p>
+
+      <h2>Course / Subject Builder</h2>
+      <p>Content creation must be extremely simple. Structure:</p>
+      <pre><code>Subject
+ ├── Unit 1
+ │    ├── Lesson 1
+ │    ├── Lesson 2
+ │    └── Quiz
+ ├── Unit 2
+ │    ├── Lesson 1
+ │    └── Assignment</code></pre>
+      <p>Teachers can: add unit, add lesson, reorder content (drag-and-drop), upload materials, add video/text, create quiz/assignment, publish/unpublish. Autosave drafts where appropriate.</p>
+
+      <h2>Assignment Workflow (Owner)</h2>
+      <p>Teachers own the assignment lifecycle:</p>
+      <ol>
+        <li>Create assignment (title, description, due date, attachments)</li>
+        <li>Publish → students receive notification</li>
+        <li>Students submit</li>
+        <li>Teacher opens submissions, grades, adds feedback</li>
+        <li>Publishes grades → students notified</li>
+      </ol>
+      <p><strong>Statuses:</strong> Not Started, Draft, Submitted, Late, Graded, Returned</p>
+
+      <h2>Attendance (Teacher View)</h2>
+      <p>Record attendance per class/session: Present, Absent, Late, Excused.</p>
+
+      <h2>Navigation</h2>
+      <pre><code>Home | Classes | Assignments | Gradebook | More</code></pre>
+
+      <h2>Acceptance Criteria</h2>
+      <ul class="checklist">
+        <li>Dashboard shows today's classes, to-grade queue, and quick actions</li>
+        <li>Teacher can build course content with units, lessons, and materials</li>
+        <li>Teacher can create, publish, and grade assignments</li>
+        <li>Teacher can record attendance per class session</li>
+        <li>Teacher can view student progress and alerts</li>
+        <li>Complete workflow works: login → class → create assignment → students submit → grade → publish</li>
+      </ul>
+
+      <div class="related-links">
+        <h2>Related</h2>
+        <p><span class="badge badge-phase">Phases</span> <a href="../roadmap/04-teacher-experience/">Phase 4 — Teacher Experience</a>, <a href="../roadmap/05-assessments/">Phase 5 — Assessments</a></p>
+        <p><span class="badge badge-arch">Architecture</span> <a href="../technical/sequences.html">Sequence Diagrams</a></p>
+        <p>Also see: <a href="student.html">Student Portal</a> (assignment consumer view)</p>
+      </div>
+      <p class="source-footnote">Source: requirements.md §§20–22, 47</p>
+          </main>
+          <footer id="docs-pager" class="docs-pager-wrap"></footer>
+        </div>
+        <aside id="docs-toc" class="docs-toc" aria-label="Table of contents"></aside>
+      </div>
+    </div>
+  </div>
+  <script src="../assets/nav-config.js"></script>
+  <script src="../assets/layout.js"></script>
+  <script src="../assets/docs.js"></script>
+</body>
+</html>

@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Colors — Nabta</title>
+  <link rel="stylesheet" href="../assets/docs.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Sans+Arabic:wght@400;500;600&display=swap" rel="stylesheet">
+</head>
+<body data-section="design" data-title="Colors">
+  <a href="#main" class="skip-link">Skip to content</a>
+  <header id="docs-topnav" class="docs-topnav" aria-label="Top navigation"></header>
+  <div id="sidebar-overlay" class="sidebar-overlay"></div>
+  <div class="docs-layout">
+    <aside id="docs-sidebar" class="docs-sidebar" aria-label="Sidebar"></aside>
+    <div class="docs-content">
+      <div class="docs-body">
+        <div class="docs-article">
+          <header id="docs-header" class="docs-page-header"></header>
+          <main id="main" class="docs-main">
+<h1>Colors</h1>
+      <p class="lead">Nabta green maps to HeroUI <code>--accent</code>. Semantic roles only — no large raw palettes in product UI.</p>
+
+      <div class="callout callout-tip">
+        <p>Portals theme via HeroUI CSS variables (oklch). Override after <code>@import "@heroui/styles"</code>. Docs site keeps the same brand hex in its own CSS. See <a href="theming.html">Theming</a>.</p>
+      </div>
+
+      <h2>Brand accent</h2>
+      <div class="table-wrap"><table>
+        <thead><tr><th>Token</th><th>Hex (human)</th><th>Notes</th></tr></thead>
+        <tbody>
+          <tr><td><code>--accent</code></td><td><code>#10B981</code></td><td>Nabta green — primary actions, focus, links</td></tr>
+          <tr><td><code>--accent-foreground</code></td><td><code>#FFFFFF</code></td><td>Text/icons on accent</td></tr>
+          <tr><td><code>--accent-hover</code></td><td><code>#059669</code></td><td>Derived / explicit hover (~emerald-600)</td></tr>
+          <tr><td><code>--accent-soft</code> / soft-foreground / soft-hover</td><td>—</td><td>Let HeroUI derive soft surfaces from accent</td></tr>
+        </tbody>
+      </table></div>
+      <p>Use accent sparingly. Overuse weakens hierarchy in a calm school product.</p>
+
+      <h2>Surfaces &amp; text (light)</h2>
+      <div class="table-wrap"><table>
+        <thead><tr><th>Token</th><th>Value</th><th>Notes</th></tr></thead>
+        <tbody>
+          <tr><td><code>--background</code></td><td><code>#FAFAF8</code></td><td>Warm off-white canvas</td></tr>
+          <tr><td><code>--foreground</code></td><td><code>#171717</code></td><td>Primary text</td></tr>
+          <tr><td><code>--muted</code></td><td><code>#737373</code></td><td>Secondary text</td></tr>
+          <tr><td><code>--border</code></td><td><code>#E5E5E5</code></td><td>Dividers, field borders</td></tr>
+          <tr><td><code>--surface</code> / <code>--overlay</code></td><td>HeroUI defaults, tinted warm</td><td>Cards, panels, popovers</td></tr>
+        </tbody>
+      </table></div>
+
+      <h2>Surfaces &amp; text (dark)</h2>
+      <div class="table-wrap"><table>
+        <thead><tr><th>Token</th><th>Value</th><th>Notes</th></tr></thead>
+        <tbody>
+          <tr><td><code>--background</code></td><td><code>#0C0F0E</code></td><td>Deep charcoal with slight green cast</td></tr>
+          <tr><td><code>--foreground</code></td><td><code>#F5F5F4</code></td><td>Primary text</td></tr>
+          <tr><td><code>--muted</code></td><td><code>#A3A3A3</code></td><td>Secondary text</td></tr>
+          <tr><td><code>--border</code></td><td><code>#27272A</code></td><td>Subtle separators</td></tr>
+          <tr><td><code>--accent</code></td><td><code>#34D399</code></td><td>Slightly lighter for contrast on dark</td></tr>
+        </tbody>
+      </table></div>
+
+      <h2>Status</h2>
+      <div class="table-wrap"><table>
+        <thead><tr><th>Token</th><th>Hex</th><th>Use</th></tr></thead>
+        <tbody>
+          <tr><td><code>--success</code></td><td><code>#16A34A</code></td><td>Confirmed grades, attendance present</td></tr>
+          <tr><td><code>--warning</code></td><td><code>#CA8A04</code></td><td>Due soon, incomplete</td></tr>
+          <tr><td><code>--danger</code></td><td><code>#DC2626</code></td><td>Errors, destructive actions (HeroUI naming)</td></tr>
+        </tbody>
+      </table></div>
+
+      <h2>Rules</h2>
+      <ul>
+        <li>Theme through CSS variables — never hardcode brand greens on one-off components</li>
+        <li>Do not introduce a second “primary” brand color</li>
+        <li>Docs site may keep <code>#10b981</code> in <code>docs/assets/docs.css</code>; portals use HeroUI tokens</li>
+      </ul>
+
+      <h2>Light &amp; dark mode</h2>
+      <p><strong>Required from Phase 1.</strong> Theme toggle in app shell. Respect <code>prefers-color-scheme</code>; persist preference. Both EN and AR must work in both themes; RTL in both themes.</p>
+          </main>
+          <footer id="docs-pager" class="docs-pager-wrap"></footer>
+        </div>
+        <aside id="docs-toc" class="docs-toc" aria-label="Table of contents"></aside>
+      </div>
+    </div>
+  </div>
+  <script src="../assets/nav-config.js"></script>
+  <script src="../assets/layout.js"></script>
+  <script src="../assets/docs.js"></script>
+</body>
+</html>

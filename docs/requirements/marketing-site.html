@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Marketing Site — Nabta</title>
+  <link rel="stylesheet" href="../assets/docs.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Sans+Arabic:wght@400;500;600&display=swap" rel="stylesheet">
+</head>
+<body data-section="requirements" data-title="Marketing Site">
+  <a href="#main" class="skip-link">Skip to content</a>
+  <header id="docs-topnav" class="docs-topnav" aria-label="Top navigation"></header>
+  <div class="docs-mobile-bar">
+    <button type="button" id="sidebar-toggle" class="sidebar-toggle" aria-expanded="false" aria-label="Open menu">&#9776;</button>
+    <a href="../index.html" class="docs-mobile-brand">Nabta</a>
+  </div>
+  <div id="sidebar-overlay" class="sidebar-overlay"></div>
+  <div class="docs-layout">
+    <aside id="docs-sidebar" class="docs-sidebar" aria-label="Sidebar"></aside>
+    <div class="docs-content">
+      <div class="docs-body">
+        <div class="docs-article">
+          <header id="docs-header" class="docs-page-header"></header>
+          <main id="main" class="docs-main">
+<h1>Marketing Site</h1>
+      <p class="lead">Public-facing website to promote the platform to Egyptian international schools — separate from LMS portals.</p>
+
+      <h2>Purpose</h2>
+      <p>Attract and inform prospective schools, parents, and educators. Drive demo requests and provide a professional brand presence. Lives at <code>apps/marketing</code> in the monorepo.</p>
+
+      <h2>v1 Pages</h2>
+      <table>
+        <thead><tr><th>Page</th><th>Content</th></tr></thead>
+        <tbody>
+          <tr><td><strong>Home</strong></td><td>Hero, value proposition, key features, CTA to demo/contact</td></tr>
+          <tr><td><strong>Features</strong></td><td>Student, teacher, admin capabilities overview</td></tr>
+          <tr><td><strong>For Schools</strong></td><td>Why international schools in Egypt, curriculum flexibility</td></tr>
+          <tr><td><strong>Pricing</strong></td><td>Placeholder — "Contact us" until pricing model is defined</td></tr>
+          <tr><td><strong>Contact / Demo</strong></td><td>Form to request a demo or get in touch</td></tr>
+        </tbody>
+      </table>
+      <p>Header includes: Login link to <code>apps/web</code>, locale switcher (EN/AR), theme toggle (light/dark).</p>
+
+      <h2>Stack</h2>
+      <ul>
+        <li>React 19 + Vite + Tailwind CSS v4 + HeroUI v3 (<code>@heroui/react</code> + <code>@heroui/styles</code>)</li>
+        <li>Shared <code>packages/i18n</code> for EN/AR</li>
+        <li>Light and dark mode</li>
+        <li>Same design tokens as Nabta portals (HeroUI <code>--accent</code> <code>#10B981</code>)</li>
+      </ul>
+
+      <h2>In Scope (Phase 1b)</h2>
+      <ul>
+        <li>All v1 pages listed above</li>
+        <li>Responsive design (mobile-first)</li>
+        <li>EN/AR with RTL support</li>
+        <li>Light/dark theme toggle</li>
+        <li>Login link to LMS app</li>
+        <li>Contact/demo form (can submit to API or external service)</li>
+      </ul>
+
+      <h2>Out of Scope</h2>
+      <ul>
+        <li>LMS portal features or authentication</li>
+        <li>Blog or content management system</li>
+        <li>Payment or signup flows</li>
+        <li>Parent portal</li>
+      </ul>
+
+      <h2>Deployment</h2>
+      <p>Deploy to Cloudflare Pages or Vercel (free tier). Separate domain or subdomain (e.g. <code>www</code> vs <code>app</code>).</p>
+
+      <h2>Acceptance Criteria</h2>
+      <ul class="checklist">
+        <li>All v1 pages render correctly in EN and AR</li>
+        <li>RTL layout works for Arabic</li>
+        <li>Light and dark themes work on all pages</li>
+        <li>Login link navigates to LMS app</li>
+        <li>Contact/demo form submits successfully</li>
+        <li>Site is responsive at all breakpoints</li>
+        <li>Deployed to free hosting (Cloudflare Pages or Vercel)</li>
+      </ul>
+
+      <div class="related-links">
+        <h2>Related</h2>
+        <p><span class="badge badge-phase">Phases</span> <a href="../roadmap/01b-marketing-site/">Phase 1b — Marketing Site</a></p>
+        <p><span class="badge badge-arch">Architecture</span> <a href="../technical/docker-and-deployment.html">Docker &amp; Deployment</a>, <a href="../technical/frontend-architecture.html">Frontend Architecture</a></p>
+        <p>Also see: <a href="internationalization.html">Internationalization</a>, <a href="../design/philosophy.html">UX &amp; Design</a></p>
+      </div>
+      <p class="source-footnote">Source: expanded requirements — marketing site</p>
+          </main>
+          <footer id="docs-pager" class="docs-pager-wrap"></footer>
+        </div>
+        <aside id="docs-toc" class="docs-toc" aria-label="Table of contents"></aside>
+      </div>
+    </div>
+  </div>
+  <script src="../assets/nav-config.js"></script>
+  <script src="../assets/layout.js"></script>
+  <script src="../assets/docs.js"></script>
+</body>
+</html>

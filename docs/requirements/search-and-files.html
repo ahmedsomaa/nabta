@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Search & Files — Nabta</title>
+  <link rel="stylesheet" href="../assets/docs.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Sans+Arabic:wght@400;500;600&display=swap" rel="stylesheet">
+</head>
+<body data-section="requirements" data-title="Search & Files">
+  <a href="#main" class="skip-link">Skip to content</a>
+  <header id="docs-topnav" class="docs-topnav" aria-label="Top navigation"></header>
+  <div class="docs-mobile-bar">
+    <button type="button" id="sidebar-toggle" class="sidebar-toggle" aria-expanded="false" aria-label="Open menu">&#9776;</button>
+    <a href="../index.html" class="docs-mobile-brand">Nabta</a>
+  </div>
+  <div id="sidebar-overlay" class="sidebar-overlay"></div>
+  <div class="docs-layout">
+    <aside id="docs-sidebar" class="docs-sidebar" aria-label="Sidebar"></aside>
+    <div class="docs-content">
+      <div class="docs-body">
+        <div class="docs-article">
+          <header id="docs-header" class="docs-page-header"></header>
+          <main id="main" class="docs-main">
+<h1>Search &amp; Files</h1>
+      <p class="lead">Global search across academic entities and abstracted file storage for all media types.</p>
+
+      <h2>Global Search</h2>
+      <p>Search across relevant entities:</p>
+      <ul>
+        <li>Students, teachers, classes, subjects</li>
+        <li>Lessons, assignments, materials</li>
+      </ul>
+      <p>Use PostgreSQL full-text search initially. Keep the search abstraction extensible so Elasticsearch/OpenSearch can be introduced later if required.</p>
+
+      <h2>File Management</h2>
+      <p>Design file handling separately from academic entities.</p>
+      <h3>File Types</h3>
+      <ul>
+        <li>PDFs, videos, images, documents</li>
+        <li>Assignment submissions</li>
+      </ul>
+      <h3>Storage Rules</h3>
+      <ul>
+        <li>Do not store large files directly in PostgreSQL</li>
+        <li>Use object storage abstraction via <code>StorageService</code> interface</li>
+        <li><strong>Local dev:</strong> MinIO in Docker Compose (S3-compatible) — not flat local filesystem</li>
+        <li><strong>Production:</strong> AWS S3, Cloudflare R2, or GCS via same interface</li>
+        <li>Storage provider swappable via configuration without changing business logic</li>
+      </ul>
+
+      <h3>Structured File Keys</h3>
+      <p>All files stored with predictable, tenant-scoped paths:</p>
+      <pre><code>{schoolId}/
+  materials/{subjectId}/{lessonId}/{uuid}.{ext}
+  assignments/{assignmentId}/{uuid}.{ext}
+  submissions/{assignmentId}/{studentId}/{uuid}.{ext}
+  announcements/{announcementId}/{uuid}.{ext}
+  avatars/{userId}.{ext}</code></pre>
+
+      <h3>Security</h3>
+      <ul>
+        <li>Pre-signed URLs for upload and download — never public buckets</li>
+        <li>MIME type validation and file size limits on upload</li>
+        <li>Database stores <code>storageKey</code>, <code>mimeType</code>, <code>size</code>, <code>checksum</code> — not file bytes</li>
+      </ul>
+
+      <h2>Acceptance Criteria</h2>
+      <ul class="checklist">
+        <li>Global search returns results across students, teachers, classes, subjects, lessons, assignments</li>
+        <li>Files stored in MinIO (dev) via storage abstraction, not in database blobs</li>
+        <li>File keys follow structured naming convention</li>
+        <li>File upload validates type and size; uses pre-signed URLs</li>
+        <li>Storage provider can be swapped via configuration</li>
+      </ul>
+
+      <div class="related-links">
+        <h2>Related</h2>
+        <p><span class="badge badge-phase">Phases</span> <a href="../roadmap/03-student-experience/">Phase 3</a>, <a href="../roadmap/04-teacher-experience/">Phase 4</a></p>
+        <p><span class="badge badge-arch">Architecture</span> <a href="../technical/system-design.html">System Design</a></p>
+      </div>
+      <p class="source-footnote">Source: requirements.md §§29–30</p>
+          </main>
+          <footer id="docs-pager" class="docs-pager-wrap"></footer>
+        </div>
+        <aside id="docs-toc" class="docs-toc" aria-label="Table of contents"></aside>
+      </div>
+    </div>
+  </div>
+  <script src="../assets/nav-config.js"></script>
+  <script src="../assets/layout.js"></script>
+  <script src="../assets/docs.js"></script>
+</body>
+</html>

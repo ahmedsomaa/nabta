@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Theming — Nabta</title>
+  <link rel="stylesheet" href="../assets/docs.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Sans+Arabic:wght@400;500;600&display=swap" rel="stylesheet">
+</head>
+<body data-section="design" data-title="Theming">
+  <a href="#main" class="skip-link">Skip to content</a>
+  <header id="docs-topnav" class="docs-topnav" aria-label="Top navigation"></header>
+  <div id="sidebar-overlay" class="sidebar-overlay"></div>
+  <div class="docs-layout">
+    <aside id="docs-sidebar" class="docs-sidebar" aria-label="Sidebar"></aside>
+    <div class="docs-content">
+      <div class="docs-body">
+        <div class="docs-article">
+          <header id="docs-header" class="docs-page-header"></header>
+          <main id="main" class="docs-main">
+<h1>Theming (HeroUI)</h1>
+      <p class="lead">Portals use HeroUI v3 CSS-variable theming. Nabta overrides brand tokens; components stay stock HeroUI.</p>
+
+      <h2>Install styles</h2>
+      <p>Tailwind must come first, then HeroUI styles:</p>
+      <pre><code>/* globals.css */
+@import "tailwindcss";
+@import "@heroui/styles";</code></pre>
+      <p>Packages: <code>@heroui/react</code>, <code>@heroui/styles</code>, <code>tailwind-variants</code>, Tailwind CSS v4. React 19+. No HeroUI Provider in v3.</p>
+
+      <h2>Nabta overrides</h2>
+      <p>Override semantic tokens for light and dark (values as oklch or hex — HeroUI prefers oklch). Example skeleton:</p>
+      <pre><code>:root {
+  --accent: oklch(0.72 0.15 163); /* ≈ #10B981 */
+  --accent-foreground: oklch(1 0 0);
+  --background: oklch(0.985 0.004 95);
+  --foreground: oklch(0.21 0 0);
+  --font-sans: "IBM Plex Sans", "IBM Plex Sans Arabic", system-ui, sans-serif;
+}
+
+.dark {
+  --accent: oklch(0.78 0.14 163); /* ≈ #34D399 */
+  --accent-foreground: oklch(0.21 0 0);
+  --background: oklch(0.16 0.01 160);
+  --foreground: oklch(0.97 0 0);
+}</code></pre>
+      <p>Full token tables: <a href="colors.html">Colors</a>, <a href="typography.html">Typography</a>, <a href="spacing.html">Spacing</a>.</p>
+
+      <h2>Component conventions</h2>
+      <ul>
+        <li>Compound components (<code>Card.Header</code>, <code>Modal.Content</code>, …)</li>
+        <li><code>onPress</code> for pressable controls (accessibility)</li>
+        <li><code>className</code> for styling — not HeroUI v2 <code>classNames</code></li>
+        <li>Do not fork HeroUI internals; compose and theme</li>
+      </ul>
+
+      <h2>Agent tooling</h2>
+      <ul>
+        <li>MCP: <a href="https://heroui.com/en/docs/react/getting-started/mcp-server">@heroui/react-mcp</a> via <code>.cursor/mcp.json</code></li>
+        <li>Skill: <code>heroui-react</code> under <code>.agents/skills/</code></li>
+        <li>Local index: <a href="../technical/heroui-agents.md">heroui-agents.md</a></li>
+      </ul>
+
+      <h2>Figma</h2>
+      <p>Duplicate the HeroUI Figma Kit and sync tokens — see <a href="figma.html">Figma</a>.</p>
+          </main>
+          <footer id="docs-pager" class="docs-pager-wrap"></footer>
+        </div>
+        <aside id="docs-toc" class="docs-toc" aria-label="Table of contents"></aside>
+      </div>
+    </div>
+  </div>
+  <script src="../assets/nav-config.js"></script>
+  <script src="../assets/layout.js"></script>
+  <script src="../assets/docs.js"></script>
+</body>
+</html>

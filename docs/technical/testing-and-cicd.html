@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Testing & CI/CD — Nabta</title>
+  <link rel="stylesheet" href="../assets/docs.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Sans+Arabic:wght@400;500;600&display=swap" rel="stylesheet">
+</head>
+<body data-section="technical" data-title="Testing & CI/CD">
+  <a href="#main" class="skip-link">Skip to content</a>
+  <header id="docs-topnav" class="docs-topnav" aria-label="Top navigation"></header>
+  <div class="docs-mobile-bar">
+    <button type="button" id="sidebar-toggle" class="sidebar-toggle" aria-expanded="false" aria-label="Open menu">&#9776;</button>
+    <a href="../index.html" class="docs-mobile-brand">Nabta</a>
+  </div>
+  <div id="sidebar-overlay" class="sidebar-overlay"></div>
+  <div class="docs-layout">
+    <aside id="docs-sidebar" class="docs-sidebar" aria-label="Sidebar"></aside>
+    <div class="docs-content">
+      <div class="docs-body">
+        <div class="docs-article">
+          <header id="docs-header" class="docs-page-header"></header>
+          <main id="main" class="docs-main">
+<h1>Testing &amp; CI/CD</h1>
+      <p class="lead">Testing and continuous integration from day one — not deferred to Phase 8.</p>
+
+      <h2>Testing Stack</h2>
+      <table>
+        <thead><tr><th>Layer</th><th>Tool</th><th>When</th></tr></thead>
+        <tbody>
+          <tr><td>API unit tests</td><td>Jest + NestJS testing utilities</td><td>Phase 1</td></tr>
+          <tr><td>API integration tests</td><td>Supertest + test database</td><td>Phase 1</td></tr>
+          <tr><td>Web component tests</td><td>Vitest + Testing Library</td><td>Phase 1</td></tr>
+          <tr><td>E2E tests</td><td>Playwright</td><td>Phase 3+ (critical flows)</td></tr>
+        </tbody>
+      </table>
+      <p>Phase 8 expands test coverage and E2E polish — the baseline is established in Phase 1.</p>
+
+      <h2>Critical E2E Workflows (Phase 3+)</h2>
+      <ul>
+        <li><strong>Student:</strong> Login → Dashboard → Subject → Lesson → Assignment → Submit</li>
+        <li><strong>Teacher:</strong> Login → Class → Assignment → Grade submission</li>
+        <li><strong>Admin:</strong> Login → Users → Student → Update academic assignment</li>
+      </ul>
+
+      <h2>CI/CD Pipeline — GitHub Actions</h2>
+      <p>Established in Phase 1. All workflows in <code>.github/workflows/</code>.</p>
+      <pre class="mermaid">flowchart LR
+  push[Push or PR] --> lint[Lint + Typecheck]
+  lint --> test[Unit + Integration Tests]
+  test --> build[Build Apps]
+  build --> docker[Build Docker Images]
+  docker --> deploy[Deploy Preview or Staging]</pre>
+
+      <h3>PR Workflow</h3>
+      <ul>
+        <li>Lint (ESLint) + typecheck (tsc)</li>
+        <li>Run unit and integration tests</li>
+        <li>Build all apps</li>
+        <li>Block merge on failure</li>
+      </ul>
+
+      <h3>Main Branch Workflow</h3>
+      <ul>
+        <li>All PR checks</li>
+        <li>Build and push Docker images to GHCR</li>
+        <li>Deploy to staging (Render/Fly + Neon + Upstash)</li>
+      </ul>
+
+      <h3>Release Workflow</h3>
+      <ul>
+        <li>Triggered on tagged release</li>
+        <li>Promote staging image to production (manual approval gate initially)</li>
+      </ul>
+
+      <h2>Workflow Files</h2>
+      <pre><code>.github/workflows/
+├── ci.yml           # PR: lint, test, build
+├── deploy-staging.yml   # main: deploy to staging
+└── deploy-prod.yml      # release tag: deploy to production</code></pre>
+
+      <h2>Test Database</h2>
+      <ul>
+        <li>Integration tests use a separate test database (Docker Compose test profile or ephemeral DB)</li>
+        <li>Each test suite resets/migrates schema before running</li>
+        <li>Never run tests against development or production databases</li>
+      </ul>
+
+      <h2>Acceptance Criteria (Phase 1)</h2>
+      <ul class="checklist">
+        <li>GitHub Actions CI runs on every PR</li>
+        <li>At least one API unit test and one integration test pass</li>
+        <li>At least one web component test passes</li>
+        <li>Failed CI blocks merge</li>
+        <li>Docker images build successfully in CI</li>
+      </ul>
+
+      <div class="related-links">
+        <h2>Related</h2>
+        <p><span class="badge badge-phase">Phases</span> <a href="../roadmap/01-foundation/">Phase 1 — Foundation</a>, <a href="../roadmap/08-production-hardening/">Phase 8 — Production Hardening</a></p>
+        <p><span class="badge badge-arch">Architecture</span> <a href="docker-and-deployment.html">Docker &amp; Deployment</a></p>
+      </div>
+      <p class="source-footnote">Source: expanded requirements — testing &amp; CI/CD</p>
+          </main>
+          <footer id="docs-pager" class="docs-pager-wrap"></footer>
+        </div>
+        <aside id="docs-toc" class="docs-toc" aria-label="Table of contents"></aside>
+      </div>
+    </div>
+  </div>
+  <script src="../assets/nav-config.js"></script>
+  <script src="../assets/layout.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.min.js"></script>
+  <script src="../assets/docs.js"></script>
+</body>
+</html>

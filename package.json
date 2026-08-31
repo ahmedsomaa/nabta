@@ -1,0 +1,27 @@
+{
+  "name": "nabta",
+  "private": true,
+  "packageManager": "pnpm@10.28.2",
+  "scripts": {
+    "dev": "turbo run dev",
+    "build": "turbo run build",
+    "lint": "turbo run lint",
+    "test": "turbo run test",
+    "typecheck": "turbo run typecheck",
+    "docker:up": "docker compose -f nabta-docker/docker-compose.yml up -d",
+    "docker:down": "docker compose -f nabta-docker/docker-compose.yml down",
+    "docker:up:full": "docker compose -f nabta-docker/docker-compose.yml --profile full up -d",
+    "docker:logs": "docker compose -f nabta-docker/docker-compose.yml logs -f",
+    "docker:ps": "docker compose -f nabta-docker/docker-compose.yml ps",
+    "db:generate": "pnpm --filter @nabta/database generate",
+    "db:migrate": "pnpm --filter @nabta/database migrate:deploy",
+    "db:migrate:dev": "pnpm --filter @nabta/database migrate:dev",
+    "db:seed": "pnpm --filter @nabta/database seed",
+    "start": "pnpm docker:up && pnpm db:migrate && pnpm db:seed && pnpm dev",
+    "start:app": "pnpm dev"
+  },
+  "devDependencies": {
+    "turbo": "^2.5.4",
+    "typescript": "^5.8.3"
+  }
+}

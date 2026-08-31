@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Backend Architecture — Nabta</title>
+  <link rel="stylesheet" href="../assets/docs.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Sans+Arabic:wght@400;500;600&display=swap" rel="stylesheet">
+</head>
+<body data-section="technical" data-title="Backend Architecture">
+  <a href="#main" class="skip-link">Skip to content</a>
+  <header id="docs-topnav" class="docs-topnav" aria-label="Top navigation"></header>
+  <div class="docs-mobile-bar">
+    <button type="button" id="sidebar-toggle" class="sidebar-toggle" aria-expanded="false" aria-label="Open menu">&#9776;</button>
+    <a href="../index.html" class="docs-mobile-brand">Nabta</a>
+  </div>
+  <div id="sidebar-overlay" class="sidebar-overlay"></div>
+  <div class="docs-layout">
+    <aside id="docs-sidebar" class="docs-sidebar" aria-label="Sidebar"></aside>
+    <div class="docs-content">
+      <div class="docs-body">
+        <div class="docs-article">
+          <header id="docs-header" class="docs-page-header"></header>
+          <main id="main" class="docs-main">
+<h1>Backend Architecture</h1>
+      <p class="lead">NestJS modular architecture, guards, and domain logic separation.</p>
+
+      <h2>Directory Structure</h2>
+      <pre><code>apps/api/src/
+├── modules/
+│   ├── auth/
+│   │   ├── auth.controller.ts
+│   │   ├── auth.service.ts
+│   │   ├── auth.module.ts
+│   │   ├── dto/
+│   │   └── strategies/
+│   ├── users/
+│   ├── students/
+│   ├── teachers/
+│   ├── academic/
+│   ├── classes/
+│   ├── subjects/
+│   ├── lessons/
+│   ├── assignments/
+│   ├── assessments/
+│   ├── attendance/
+│   ├── grades/
+│   ├── announcements/
+│   ├── notifications/
+│   ├── email/            # ResendEmailService, templates
+│   └── analytics/
+├── common/
+│   ├── guards/           # JwtAuthGuard, RolesGuard, TenantGuard
+│   ├── decorators/       # @CurrentUser, @Roles, @Permissions
+│   ├── interceptors/     # ResponseTransformInterceptor
+│   ├── filters/          # GlobalExceptionFilter
+│   ├── pipes/            # ValidationPipe
+│   └── utils/
+├── config/
+└── main.ts</code></pre>
+
+      <h2>Module Pattern</h2>
+      <p>Each domain module owns:</p>
+      <ul>
+        <li><strong>Controller</strong> — HTTP routing, request/response mapping only</li>
+        <li><strong>Service</strong> — Business logic and domain rules</li>
+        <li><strong>DTOs</strong> — Input validation with class-validator</li>
+        <li><strong>Module</strong> — Dependency injection wiring</li>
+      </ul>
+      <div class="callout callout-warning">
+        <p>Do not put business logic in controllers. Do not create a monolithic <code>app.service.ts</code>.</p>
+      </div>
+
+      <h2>Guards &amp; Decorators</h2>
+      <table>
+        <thead><tr><th>Guard/Decorator</th><th>Purpose</th></tr></thead>
+        <tbody>
+          <tr><td><code>JwtAuthGuard</code></td><td>Validates JWT, attaches user to request</td></tr>
+          <tr><td><code>RolesGuard</code></td><td>Checks user role (STUDENT, TEACHER, ADMIN)</td></tr>
+          <tr><td><code>TenantGuard</code></td><td>Ensures schoolId scoping on queries</td></tr>
+          <tr><td><code>@CurrentUser()</code></td><td>Extracts authenticated user from request</td></tr>
+          <tr><td><code>@Roles('TEACHER')</code></td><td>Restricts endpoint to specific roles</td></tr>
+        </tbody>
+      </table>
+
+      <h2>Database Access</h2>
+      <ul>
+        <li>Prisma client from <code>packages/database</code></li>
+        <li>All queries scoped by <code>schoolId</code> from authenticated user</li>
+        <li>Use Prisma <code>include</code> and <code>select</code> to avoid N+1 queries</li>
+        <li>Pagination via <code>skip</code>/<code>take</code> with total count</li>
+      </ul>
+
+      <h2>Background Jobs</h2>
+      <ul>
+        <li>BullMQ processors in <code>notifications</code> module</li>
+        <li>Jobs enqueued from domain services on events</li>
+        <li>Workers create notification records and send emails via <code>ResendEmailService</code></li>
+      </ul>
+
+      <h2>Email Module</h2>
+      <p>Transactional email via Resend. Env vars: <code>RESEND_API_KEY</code>, <code>RESEND_FROM_EMAIL</code> (e.g. <code>noreply@nabta.app</code>).</p>
+      <ul>
+        <li><code>EmailService</code> interface — domain modules depend on the interface, not Resend directly</li>
+        <li><code>ResendEmailService</code> — default implementation in <code>apps/api/src/modules/email/</code></li>
+        <li>Phase 1: password reset, welcome/verification emails</li>
+        <li>Phase 7: notification emails (assignment, announcement, grade events)</li>
+      </ul>
+
+      <div class="related-links">
+        <h2>Related</h2>
+        <p><span class="badge badge-phase">Phases</span> <a href="../roadmap/01-foundation/">Phase 1 — Foundation</a></p>
+        <p><span class="badge badge-arch">Architecture</span> <a href="api-design.html">API Design</a>, <a href="system-design.html">System Design</a>, <a href="email.html">Email (Resend)</a></p>
+      </div>
+      <p class="source-footnote">Source: requirements.md §7</p>
+          </main>
+          <footer id="docs-pager" class="docs-pager-wrap"></footer>
+        </div>
+        <aside id="docs-toc" class="docs-toc" aria-label="Table of contents"></aside>
+      </div>
+    </div>
+  </div>
+  <script src="../assets/nav-config.js"></script>
+  <script src="../assets/layout.js"></script>
+  <script src="../assets/docs.js"></script>
+</body>
+</html>

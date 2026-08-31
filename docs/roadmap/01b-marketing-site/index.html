@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Phase 1b — Marketing Site — Nabta</title>
+  <link rel="stylesheet" href="../../assets/docs.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Sans+Arabic:wght@400;500;600&display=swap" rel="stylesheet">
+</head>
+<body data-section="roadmap" data-title="Phase 1b — Marketing Site">
+  <a href="#main" class="skip-link">Skip to content</a>
+  <header id="docs-topnav" class="docs-topnav" aria-label="Top navigation"></header>
+  <div class="docs-mobile-bar">
+    <button type="button" id="sidebar-toggle" class="sidebar-toggle" aria-expanded="false" aria-label="Open menu">&#9776;</button>
+    <a href="../../index.html" class="docs-mobile-brand">Nabta</a>
+  </div>
+  <div id="sidebar-overlay" class="sidebar-overlay"></div>
+  <div class="docs-layout">
+    <aside id="docs-sidebar" class="docs-sidebar" aria-label="Sidebar"></aside>
+    <div class="docs-content">
+      <div class="docs-body">
+        <div class="docs-article">
+          <header id="docs-header" class="docs-page-header"></header>
+          <main id="main" class="docs-main">
+<h1>Phase 1b — Marketing Site</h1>
+      <p class="lead"><span class="badge badge-phase">Phase 1b</span> Implement this phase only. Depends on Phase 1. Do not implement Phase 2+ functionality.</p>
+
+      <h2>Goal</h2>
+      <p>Build the public marketing website at <code>apps/marketing</code> — separate from LMS portals. Attract schools and drive demo requests.</p>
+
+      <h2>Depends On</h2>
+      <ul>
+        <li><a href="../01-foundation/">Phase 1 — Foundation</a> (design system, i18n scaffolding, Docker)</li>
+      </ul>
+
+      <h2>In Scope</h2>
+      <ul>
+        <li><code>apps/marketing</code> — React 19 + Vite + Tailwind CSS v4 + HeroUI v3</li>
+        <li>Pages: Home, Features, For Schools, Pricing (placeholder), Contact/Demo</li>
+        <li>EN/AR with RTL support via shared <code>packages/i18n</code></li>
+        <li>Light and dark theme toggle</li>
+        <li>Login link to <code>apps/web</code></li>
+        <li>Contact/demo form submission</li>
+        <li>Responsive design (mobile-first)</li>
+        <li><code>Dockerfile.marketing</code> and Docker Compose profile</li>
+        <li>Deploy to Cloudflare Pages or Vercel (free tier)</li>
+      </ul>
+
+      <h2>Out of Scope</h2>
+      <ul>
+        <li>LMS portal features or authentication</li>
+        <li>Blog or CMS</li>
+        <li>Payment or signup flows</li>
+        <li>Academic entities (Phase 2)</li>
+      </ul>
+
+      <h2>Acceptance Criteria</h2>
+      <ul class="checklist">
+        <li>All v1 pages render in EN and AR with correct RTL</li>
+        <li>Light and dark themes work on all pages</li>
+        <li>Login link navigates to LMS app</li>
+        <li>Contact/demo form submits successfully</li>
+        <li>Site is responsive at all breakpoints</li>
+        <li>Runs via Docker Compose (<code>--profile full</code>)</li>
+        <li>Deployed to free hosting (Cloudflare Pages or Vercel)</li>
+      </ul>
+
+
+      <h2>Implementation slices</h2>
+      <p>Derived from this phase’s acceptance criteria. Complete in order; each slice is independently verifiable. Do not implement Phase 2+.</p>
+      <ol>
+        <li><strong>Marketing app scaffold</strong> — <code>apps/marketing</code> with React 19 + Vite + Tailwind v4 + HeroUI v3; <code>Dockerfile.marketing</code> and Compose profile. Verify: the app runs via Docker Compose <code>--profile full</code>.</li>
+        <li><strong>v1 pages</strong> — Home, Features, For Schools, Pricing (placeholder), Contact/Demo. Verify: all pages render.</li>
+        <li><strong>EN/AR + RTL</strong> — shared <code>packages/i18n</code>. Verify: all v1 pages render in EN and AR with correct RTL.</li>
+        <li><strong>Theme</strong> — light and dark toggle on every marketing page. Verify: both themes work on all pages.</li>
+        <li><strong>Login + contact</strong> — login link to <code>apps/web</code>; contact/demo form submits. Verify: login navigates to the LMS app; form submission succeeds.</li>
+        <li><strong>Responsive + deploy</strong> — mobile-first at specified breakpoints; free-tier host (Cloudflare Pages or Vercel). Verify: responsive at all breakpoints; site deployed.</li>
+      </ol>
+
+      <div class="related-links">
+        <h2>Related</h2>
+        <p><strong>Requirements:</strong> <a href="../../requirements/marketing-site.html">Marketing Site</a>, <a href="../../requirements/internationalization.html">Internationalization</a>, <a href="../../design/philosophy.html">UX &amp; Design</a></p>
+        <p><strong>Architecture:</strong> <a href="../../technical/docker-and-deployment.html">Docker &amp; Deployment</a>, <a href="../../technical/frontend-architecture.html">Frontend Architecture</a></p>
+        <p><strong>Previous:</strong> <a href="../01-foundation/">Phase 1</a> · <strong>Next:</strong> <a href="../02-academic-core/">Phase 2 — Academic Core</a></p>
+      </div>
+      <p class="source-footnote">Source: expanded requirements — marketing site</p>
+          </main>
+          <footer id="docs-pager" class="docs-pager-wrap"></footer>
+        </div>
+        <aside id="docs-toc" class="docs-toc" aria-label="Table of contents"></aside>
+      </div>
+    </div>
+  </div>
+  <script src="../../assets/nav-config.js"></script>
+  <script src="../../assets/layout.js"></script>
+  <script src="../../assets/docs.js"></script>
+</body>
+</html>

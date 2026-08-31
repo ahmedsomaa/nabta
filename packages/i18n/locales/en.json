@@ -1,0 +1,65 @@
+{
+  "app": {
+    "name": "Nabta",
+    "tagline": "Learn. Grow. Thrive.",
+    "comingSoon": "Coming in later phases"
+  },
+  "nav": {
+    "home": "Home",
+    "myClasses": "My Classes",
+    "classes": "Classes",
+    "assignments": "Assignments",
+    "grades": "Grades",
+    "gradebook": "Gradebook",
+    "more": "More",
+    "overview": "Overview",
+    "users": "Users",
+    "academics": "Academics",
+    "reports": "Reports",
+    "settings": "Settings",
+    "logout": "Log out"
+  },
+  "auth": {
+    "login": "Log in",
+    "register": "Create school",
+    "email": "Email",
+    "password": "Password",
+    "schoolName": "School name",
+    "forgotPassword": "Forgot password?",
+    "resetPassword": "Reset password",
+    "sendResetLink": "Send reset link",
+    "newPassword": "New password",
+    "noAccount": "Don't have a school yet?",
+    "hasAccount": "Already have an account?",
+    "loginTitle": "Welcome back",
+    "registerTitle": "Create your school",
+    "forgotTitle": "Reset your password",
+    "resetTitle": "Choose a new password",
+    "resetSent": "If that email exists, we sent a reset link.",
+    "resetSuccess": "Password updated. You can log in now."
+  },
+  "theme": {
+    "light": "Light",
+    "dark": "Dark",
+    "system": "System",
+    "toggle": "Theme"
+  },
+  "locale": {
+    "label": "Language",
+    "en": "English",
+    "ar": "Arabic"
+  },
+  "errors": {
+    "generic": "Something went wrong. Please try again.",
+    "unauthorized": "Please log in to continue.",
+    "forbidden": "You do not have permission to do that.",
+    "validation": "Please check the form and try again.",
+    "invalidCredentials": "Invalid email or password."
+  },
+  "dashboard": {
+    "studentTitle": "Student dashboard",
+    "teacherTitle": "Teacher dashboard",
+    "adminTitle": "Admin dashboard",
+    "welcome": "Welcome, {{email}}"
+  }
+}

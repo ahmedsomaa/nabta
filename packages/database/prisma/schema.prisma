@@ -1,0 +1,85 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum UserRole {
+  STUDENT
+  TEACHER
+  ADMIN
+}
+
+enum UserStatus {
+  active
+  disabled
+}
+
+enum Locale {
+  en
+  ar
+}
+
+enum ThemePreference {
+  light
+  dark
+  system
+}
+
+model School {
+  id        String   @id @default(uuid()) @db.Uuid
+  name      String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  users     User[]
+}
+
+model User {
+  id           String           @id @default(uuid()) @db.Uuid
+  email        String           @unique
+  passwordHash String
+  role         UserRole
+  schoolId     String           @db.Uuid
+  locale       Locale           @default(en)
+  theme        ThemePreference  @default(system)
+  status       UserStatus       @default(active)
+  createdAt    DateTime         @default(now())
+  updatedAt    DateTime         @updatedAt
+
+  school              School               @relation(fields: [schoolId], references: [id], onDelete: Cascade)
+  refreshTokens       RefreshToken[]
+  passwordResetTokens PasswordResetToken[]
+
+  @@index([schoolId])
+}
+
+model RefreshToken {
+  id        String    @id @default(uuid()) @db.Uuid
+  tokenHash String
+  userId    String    @db.Uuid
+  expiresAt DateTime
+  revokedAt DateTime?
+  createdAt DateTime  @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([tokenHash])
+}
+
+model PasswordResetToken {
+  id        String    @id @default(uuid()) @db.Uuid
+  tokenHash String
+  userId    String    @db.Uuid
+  expiresAt DateTime
+  usedAt    DateTime?
+  createdAt DateTime  @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([tokenHash])
+}

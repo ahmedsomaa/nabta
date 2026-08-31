@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Figma — Nabta</title>
+  <link rel="stylesheet" href="../assets/docs.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Sans+Arabic:wght@400;500;600&display=swap" rel="stylesheet">
+</head>
+<body data-section="design" data-title="Figma">
+  <a href="#main" class="skip-link">Skip to content</a>
+  <header id="docs-topnav" class="docs-topnav" aria-label="Top navigation"></header>
+  <div id="sidebar-overlay" class="sidebar-overlay"></div>
+  <div class="docs-layout">
+    <aside id="docs-sidebar" class="docs-sidebar" aria-label="Sidebar"></aside>
+    <div class="docs-content">
+      <div class="docs-body">
+        <div class="docs-article">
+          <header id="docs-header" class="docs-page-header"></header>
+          <main id="main" class="docs-main">
+<h1>Figma</h1>
+      <p class="lead">Design portals with the official HeroUI Figma Kit v3, then sync Nabta tokens. Code remains source of truth for theme CSS.</p>
+
+      <h2>HeroUI Figma Kit v3</h2>
+      <p>Community file (OSS components): <a href="https://www.figma.com/community/file/1546526812159103429/heroui-figma-kit-v3">HeroUI Figma Kit V3</a>.</p>
+      <ol>
+        <li>Open the community file and <strong>Duplicate</strong> to your drafts (required — community files are not editable libraries for agents).</li>
+        <li>Customize variables for Nabta (accent <code>#10B981</code>, IBM Plex fonts).</li>
+        <li>Use component instances from the kit; do not rebuild HeroUI components from scratch.</li>
+      </ol>
+
+      <h2>Theme Sync</h2>
+      <p>Use <a href="https://www.figma.com/community/plugin/1628472563022614828/heroui-theme-sync">HeroUI Theme Sync</a> to push CSS theme variables into the duplicated file (colors, radius, spacing, type metrics). Font family and shadows may need a manual Variables panel update.</p>
+      <p>Optional: <a href="https://www.figma.com/community/plugin/1611735683277006338/heroui-v3-color-generator">HeroUI v3 Color Generator</a> for accent soft/hover sets.</p>
+
+      <h2>Cursor Figma MCP</h2>
+      <p>The Figma kit is <strong>not</strong> an MCP server. Use the existing <strong>Figma MCP</strong> against your duplicated file:</p>
+      <ul>
+        <li><strong>fileKey:</strong> <em>(paste after you duplicate — replace this placeholder)</em></li>
+        <li>Workflow: <code>get_design_context</code> / <code>search_design_system</code> on kit components when implementing screens</li>
+      </ul>
+
+      <h2>Related</h2>
+      <p><a href="theming.html">Theming</a> · <a href="colors.html">Colors</a> · <a href="https://heroui.com/en/docs/react/getting-started/mcp-server">HeroUI React MCP</a> (component docs, separate from Figma)</p>
+          </main>
+          <footer id="docs-pager" class="docs-pager-wrap"></footer>
+        </div>
+        <aside id="docs-toc" class="docs-toc" aria-label="Table of contents"></aside>
+      </div>
+    </div>
+  </div>
+  <script src="../assets/nav-config.js"></script>
+  <script src="../assets/layout.js"></script>
+  <script src="../assets/docs.js"></script>
+</body>
+</html>

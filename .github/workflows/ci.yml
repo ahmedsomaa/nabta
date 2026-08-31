@@ -1,0 +1,66 @@
+name: CI
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+jobs:
+  build-test:
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_USER: nabta
+          POSTGRES_PASSWORD: nabta
+          POSTGRES_DB: nabta
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U nabta -d nabta"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+    env:
+      DATABASE_URL: postgresql://nabta:nabta@localhost:5432/nabta
+      JWT_ACCESS_SECRET: ci-access-secret-min-32-characters-long
+      JWT_REFRESH_SECRET: ci-refresh-secret-min-32-characters-long
+      JWT_ACCESS_EXPIRY: 15m
+      JWT_REFRESH_EXPIRY: 7d
+      WEB_URL: http://localhost:5173
+      API_URL: http://localhost:3000
+      VITE_API_URL: http://localhost:3000
+      RESEND_API_KEY: ""
+      RESEND_FROM_EMAIL: noreply@nabta.app
+      MINIO_ENDPOINT: localhost
+      MINIO_PORT: "9000"
+      MINIO_ACCESS_KEY: minioadmin
+      MINIO_SECRET_KEY: minioadmin
+      MINIO_BUCKET: nabta-files
+      MINIO_USE_SSL: "false"
+      REDIS_URL: redis://localhost:6379
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 10
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+      - run: pnpm install
+      - run: pnpm --filter @nabta/types build
+      - run: pnpm --filter @nabta/config build
+      - run: pnpm --filter @nabta/validation build
+      - run: pnpm --filter @nabta/i18n build
+      - run: pnpm --filter @nabta/database generate
+      - run: pnpm --filter @nabta/database exec prisma migrate deploy
+      - run: pnpm --filter @nabta/database build
+      - run: pnpm typecheck
+      - run: pnpm test
+      - run: pnpm build
+      - name: Build Docker images
+        run: |
+          docker build -f nabta-docker/Dockerfile.api -t nabta-api:ci .
+          docker build -f nabta-docker/Dockerfile.web -t nabta-web:ci .

@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Phase 8 — Production Hardening — Nabta</title>
+  <link rel="stylesheet" href="../../assets/docs.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Sans+Arabic:wght@400;500;600&display=swap" rel="stylesheet">
+</head>
+<body data-section="roadmap" data-title="Phase 8 — Production Hardening">
+  <a href="#main" class="skip-link">Skip to content</a>
+  <header id="docs-topnav" class="docs-topnav" aria-label="Top navigation"></header>
+  <div class="docs-mobile-bar">
+    <button type="button" id="sidebar-toggle" class="sidebar-toggle" aria-expanded="false" aria-label="Open menu">&#9776;</button>
+    <a href="../../index.html" class="docs-mobile-brand">Nabta</a>
+  </div>
+  <div id="sidebar-overlay" class="sidebar-overlay"></div>
+  <div class="docs-layout">
+    <aside id="docs-sidebar" class="docs-sidebar" aria-label="Sidebar"></aside>
+    <div class="docs-content">
+      <div class="docs-body">
+        <div class="docs-article">
+          <header id="docs-header" class="docs-page-header"></header>
+          <main id="main" class="docs-main">
+<h1>Phase 8 — Production Hardening</h1>
+      <p class="lead"><span class="badge badge-phase">Phase 8</span> Final phase — polish, secure, test, and prepare for production.</p>
+
+      <h2>Goal</h2>
+      <p>Expand test coverage, harden for production: error handling, logging, audit logs, security review, performance optimization, E2E tests, accessibility, and responsive polish.</p>
+
+      <div class="callout">
+        <p><strong>Note:</strong> Testing and CI/CD baseline is established in <a href="../01-foundation/">Phase 1</a>. Phase 8 expands coverage, adds E2E workflows, and polishes quality — it does not introduce testing from scratch.</p>
+      </div>
+
+      <h2>In Scope</h2>
+      <ul>
+        <li>Global error handling and structured logging</li>
+        <li>Audit log implementation and recording</li>
+        <li>Security review (IDOR, XSS, CSRF, rate limiting)</li>
+        <li>Performance optimization (indexes, N+1 prevention, caching, code splitting)</li>
+        <li>Expand unit and integration test coverage</li>
+        <li>E2E tests for critical workflows (Playwright)</li>
+        <li>Accessibility audit and fixes (WCAG)</li>
+        <li>Responsive polish at all breakpoints</li>
+        <li>Loading/empty/error states on all screens</li>
+        <li>Full EN/AR translation of all features</li>
+        <li>Student attendance view</li>
+        <li>Production deployment to AWS/GCP (see <a href="../../technical/docker-and-deployment.html">Docker &amp; Deployment</a>)</li>
+      </ul>
+
+      <h2>Critical Test Workflows</h2>
+      <ul>
+        <li><strong>Student:</strong> Login → Dashboard → Subject → Lesson → Assignment → Submit</li>
+        <li><strong>Teacher:</strong> Login → Class → Assignment → Grade submission</li>
+        <li><strong>Admin:</strong> Login → Users → Student → Update academic assignment</li>
+      </ul>
+
+      <h2>Acceptance Criteria</h2>
+      <ul class="checklist">
+        <li>Audit log records grade changes, status changes, deletions</li>
+        <li>All protected endpoints have authorization and tenant isolation</li>
+        <li>No N+1 queries on list endpoints</li>
+        <li>Critical workflows pass E2E tests</li>
+        <li>All screens pass accessibility checks</li>
+        <li>All screens have loading, empty, error states</li>
+        <li>Application feels fast, modern, calm, reliable, professional</li>
+        <li>Demo environment is fully populated and functional</li>
+      </ul>
+
+
+      <h2>Implementation slices</h2>
+      <p>Derived from this phase’s acceptance criteria. Complete in order; each slice is independently verifiable. Testing baseline already exists from Phase 1 — this phase expands it.</p>
+      <ol>
+        <li><strong>Audit + logging</strong> — structured logs; audit records for grade changes, status changes, deletions. Verify: audit log records those events.</li>
+        <li><strong>Security review</strong> — authorization and tenant isolation on protected endpoints; IDOR, XSS, CSRF, rate limiting. Verify: protected endpoints enforce authz and tenant isolation.</li>
+        <li><strong>Performance</strong> — indexes, N+1 prevention, caching, code splitting. Verify: no N+1 queries on list endpoints.</li>
+        <li><strong>Tests</strong> — expanded unit/integration coverage; Playwright E2E for student, teacher, and admin critical workflows. Verify: critical workflows pass E2E.</li>
+        <li><strong>Quality + launch</strong> — WCAG audit, loading/empty/error on all screens, full EN/AR, student attendance view, populated demo, production deploy. Verify: screens pass a11y checks and have UX states; demo environment is functional.</li>
+      </ol>
+
+      <div class="related-links">
+        <h2>Related</h2>
+        <p><strong>Requirements:</strong> <a href="../../requirements/security.html">Security</a>, <a href="../../design/philosophy.html">UX &amp; Design</a></p>
+        <p><strong>Architecture:</strong> <a href="../../technical/system-design.html">System Design</a>, <a href="../../technical/testing-and-cicd.html">Testing &amp; CI/CD</a>, <a href="../future.html">Future Roadmap</a></p>
+        <p><strong>Previous:</strong> <a href="../07-notifications/">Phase 7</a></p>
+      </div>
+      <p class="source-footnote">Source: requirements.md §51 Phase 8, §§42–44</p>
+          </main>
+          <footer id="docs-pager" class="docs-pager-wrap"></footer>
+        </div>
+        <aside id="docs-toc" class="docs-toc" aria-label="Table of contents"></aside>
+      </div>
+    </div>
+  </div>
+  <script src="../../assets/nav-config.js"></script>
+  <script src="../../assets/layout.js"></script>
+  <script src="../../assets/docs.js"></script>
+</body>
+</html>

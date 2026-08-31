@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Data Model — Nabta</title>
+  <link rel="stylesheet" href="../assets/docs.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Sans+Arabic:wght@400;500;600&display=swap" rel="stylesheet">
+</head>
+<body data-section="technical" data-title="Data Model">
+  <a href="#main" class="skip-link">Skip to content</a>
+  <header id="docs-topnav" class="docs-topnav" aria-label="Top navigation"></header>
+  <div class="docs-mobile-bar">
+    <button type="button" id="sidebar-toggle" class="sidebar-toggle" aria-expanded="false" aria-label="Open menu">&#9776;</button>
+    <a href="../index.html" class="docs-mobile-brand">Nabta</a>
+  </div>
+  <div id="sidebar-overlay" class="sidebar-overlay"></div>
+  <div class="docs-layout">
+    <aside id="docs-sidebar" class="docs-sidebar" aria-label="Sidebar"></aside>
+    <div class="docs-content">
+      <div class="docs-body">
+        <div class="docs-article">
+          <header id="docs-header" class="docs-page-header"></header>
+          <main id="main" class="docs-main">
+<h1>Data Model</h1>
+      <p class="lead">Core entities, relationships, and database conventions.</p>
+
+      <h2>Conventions</h2>
+      <ul>
+        <li>UUIDs for public identifiers — do not expose sequential database IDs through APIs</li>
+        <li><code>createdAt</code> and <code>updatedAt</code> timestamps on all entities</li>
+        <li><code>schoolId</code> on all school-owned entities for multi-tenancy</li>
+        <li>Normalized relational models via Prisma</li>
+      </ul>
+
+      <h2>Entity Relationship Diagram</h2>
+      <pre class="mermaid">erDiagram
+  School ||--o{ AcademicYear : has
+  School ||--o{ User : has
+  School ||--o{ Grade : has
+  School ||--o{ Subject : has
+  AcademicYear ||--o{ Grade : contains
+  Grade ||--o{ Class : contains
+  Class ||--o{ Enrollment : has
+  Student ||--o{ Enrollment : enrolled
+  User ||--|| Student : profile
+  User ||--|| Teacher : profile
+  Class ||--o{ TeachingAssignment : has
+  Teacher ||--o{ TeachingAssignment : assigned
+  Subject ||--o{ TeachingAssignment : taught
+  Subject ||--o{ Lesson : contains
+  Subject ||--o{ Assignment : has
+  Assignment ||--o{ AssignmentSubmission : receives
+  Student ||--o{ AssignmentSubmission : submits
+  Subject ||--o{ Assessment : has
+  Assessment ||--o{ Question : contains
+  Assessment ||--o{ AssessmentAttempt : has
+  Student ||--o{ AssessmentAttempt : takes
+  Class ||--o{ Attendance : records
+  Student ||--o{ Attendance : has
+  Subject ||--o{ GradeRecord : has
+  Student ||--o{ GradeRecord : receives
+  User ||--o{ Notification : receives
+  User ||--o{ AuditLog : triggers</pre>
+
+      <h2>Core Entities</h2>
+      <table>
+        <thead><tr><th>Entity</th><th>Description</th></tr></thead>
+        <tbody>
+          <tr><td>School</td><td>Top-level tenant</td></tr>
+          <tr><td>AcademicYear</td><td>e.g. 2026/2027</td></tr>
+          <tr><td>User</td><td>Auth identity (email, password hash, role)</td></tr>
+          <tr><td>Role / Permission</td><td>RBAC definitions</td></tr>
+          <tr><td>Student</td><td>Student profile linked to User</td></tr>
+          <tr><td>Teacher</td><td>Teacher profile linked to User</td></tr>
+          <tr><td>Grade</td><td>Grade level (e.g. Grade 10)</td></tr>
+          <tr><td>Class</td><td>Section (e.g. 10A)</td></tr>
+          <tr><td>Subject</td><td>Configurable subject (e.g. Physics)</td></tr>
+          <tr><td>Enrollment</td><td>Student → Class assignment</td></tr>
+          <tr><td>TeachingAssignment</td><td>Teacher → Subject/Class assignment</td></tr>
+          <tr><td>Lesson</td><td>Learning content unit</td></tr>
+          <tr><td>LearningMaterial</td><td>Files attached to lessons</td></tr>
+          <tr><td>Assignment</td><td>Teacher-created work item</td></tr>
+          <tr><td>AssignmentSubmission</td><td>Student submission with status</td></tr>
+          <tr><td>Assessment</td><td>Quiz/exam</td></tr>
+          <tr><td>Question / Answer</td><td>Assessment questions and options</td></tr>
+          <tr><td>AssessmentAttempt</td><td>Student attempt with score</td></tr>
+          <tr><td>Attendance</td><td>Per-session attendance record</td></tr>
+          <tr><td>GradeRecord</td><td>Subject-level grade for student</td></tr>
+          <tr><td>Announcement</td><td>Targeted or school-wide message</td></tr>
+          <tr><td>Notification</td><td>In-app notification for user</td></tr>
+          <tr><td>CourseProgress</td><td>Lesson completion tracking</td></tr>
+          <tr><td>AuditLog</td><td>Who, what, when, before, after</td></tr>
+        </tbody>
+      </table>
+
+      <div class="related-links">
+        <h2>Related</h2>
+        <p><span class="badge badge-phase">Phases</span> <a href="../roadmap/02-academic-core/">Phase 2 — Academic Core</a></p>
+        <p><strong>Requirements:</strong> <a href="../requirements/academic-structure.html">Academic Structure</a></p>
+      </div>
+      <p class="source-footnote">Source: requirements.md §8</p>
+          </main>
+          <footer id="docs-pager" class="docs-pager-wrap"></footer>
+        </div>
+        <aside id="docs-toc" class="docs-toc" aria-label="Table of contents"></aside>
+      </div>
+    </div>
+  </div>
+  <script src="../assets/nav-config.js"></script>
+  <script src="../assets/layout.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.min.js"></script>
+  <script src="../assets/docs.js"></script>
+</body>
+</html>

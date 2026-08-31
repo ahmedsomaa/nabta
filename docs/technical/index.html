@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Architecture — Nabta</title>
+  <link rel="stylesheet" href="../assets/docs.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Sans+Arabic:wght@400;500;600&display=swap" rel="stylesheet">
+</head>
+<body data-section="technical" data-title="Architecture">
+  <a href="#main" class="skip-link">Skip to content</a>
+  <header id="docs-topnav" class="docs-topnav" aria-label="Top navigation"></header>
+  <div id="sidebar-overlay" class="sidebar-overlay"></div>
+  <div class="docs-layout">
+    <aside id="docs-sidebar" class="docs-sidebar" aria-label="Sidebar"></aside>
+    <div class="docs-content">
+      <div class="docs-body">
+        <div class="docs-article">
+          <header id="docs-header" class="docs-page-header"></header>
+          <main id="main" class="docs-main">
+<h1>Architecture</h1>
+      <p class="lead">Technical stack, system design, data model, API conventions, and sequence diagrams — how the system is built.</p>
+
+      <h2>Overview</h2>
+      <pre class="mermaid">flowchart LR
+  subgraph clients [Clients]
+    Web[apps/web]
+  end
+  subgraph api [apps/api NestJS]
+    Modules[Domain modules]
+    Jobs[BullMQ workers]
+  end
+  subgraph data [Data]
+    PG[(PostgreSQL)]
+    Redis[(Redis)]
+    Files[Object storage]
+  end
+  Web --> Modules
+  Modules --> PG
+  Modules --> Redis
+  Modules --> Files
+  Jobs --> Redis
+  Jobs --> PG</pre>
+
+      <div class="card-grid">
+        <a href="tech-stack.html" class="card"><h3>Tech Stack</h3><p>React 19, Tailwind, HeroUI v3, NestJS, PostgreSQL, Prisma, Redis</p></a>
+        <a href="system-architecture.html" class="card"><h3>System Architecture</h3><p>Monorepo layout, request paths, containers</p></a>
+        <a href="system-design.html" class="card"><h3>System Design</h3><p>Multi-tenancy, RBAC, storage, notifications</p></a>
+        <a href="data-model.html" class="card"><h3>Data Model</h3><p>Core entities, relationships, ERD</p></a>
+        <a href="api-design.html" class="card"><h3>API Design</h3><p>REST conventions, pagination, validation</p></a>
+        <a href="frontend-architecture.html" class="card"><h3>Frontend Architecture</h3><p>Feature folders, TanStack Query, routes</p></a>
+        <a href="backend-architecture.html" class="card"><h3>Backend Architecture</h3><p>NestJS modules, guards, domain logic</p></a>
+        <a href="email.html" class="card"><h3>Email (Resend)</h3><p>Transactional email — auth and notifications</p></a>
+        <a href="environment.html" class="card"><h3>Environment Variables</h3><p>All env vars by phase — DB, Redis, Resend, MinIO</p></a>
+        <a href="docker-and-deployment.html" class="card"><h3>Docker &amp; Deployment</h3><p>Local stack, free tiers, AWS/GCP production</p></a>
+        <a href="testing-and-cicd.html" class="card"><h3>Testing &amp; CI/CD</h3><p>Jest, Vitest, Playwright, GitHub Actions</p></a>
+        <a href="sequences.html" class="card"><h3>Sequence Diagrams</h3><p>Auth, assignments, assessments, notifications</p></a>
+      </div>
+
+      <p class="source-footnote">Future plans (mobile, payments, LLM) live in <a href="../roadmap/future.html">Roadmap → Future</a>. Source: requirements.md §§6–8, 31–32</p>
+          </main>
+          <footer id="docs-pager" class="docs-pager-wrap"></footer>
+        </div>
+        <aside id="docs-toc" class="docs-toc" aria-label="Table of contents"></aside>
+      </div>
+    </div>
+  </div>
+  <script src="../assets/nav-config.js"></script>
+  <script src="../assets/layout.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.min.js"></script>
+  <script src="../assets/docs.js"></script>
+</body>
+</html>

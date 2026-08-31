@@ -1,0 +1,34 @@
+# HeroUI agents-md downloaded docs
+.heroui-docs/
+
+# Dependencies / package managers
+node_modules/
+.pnpm-store/
+dist/
+.turbo/
+coverage/
+*.tsbuildinfo
+
+# Compiled test output
+apps/api/test/**/*.js
+apps/api/test/**/*.js.map
+apps/api/test/**/*.d.ts
+apps/api/test/**/*.d.ts.map
+
+# Env
+.env
+.env.local
+*.local
+packages/database/.env
+
+# OS / editor
+.DS_Store
+
+# Prisma
+packages/database/prisma/*.db
+packages/database/prisma/*.db-journal
+
+# Logs
+*.log
+npm-debug.log*
+pnpm-debug.log*

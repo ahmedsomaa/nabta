@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Philosophy — Nabta</title>
+  <link rel="stylesheet" href="../assets/docs.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Sans+Arabic:wght@400;500;600&display=swap" rel="stylesheet">
+</head>
+<body data-section="design" data-title="Philosophy">
+  <a href="#main" class="skip-link">Skip to content</a>
+  <header id="docs-topnav" class="docs-topnav" aria-label="Top navigation"></header>
+  <div id="sidebar-overlay" class="sidebar-overlay"></div>
+  <div class="docs-layout">
+    <aside id="docs-sidebar" class="docs-sidebar" aria-label="Sidebar"></aside>
+    <div class="docs-content">
+      <div class="docs-body">
+        <div class="docs-article">
+          <header id="docs-header" class="docs-page-header"></header>
+          <main id="main" class="docs-main">
+<h1>Design Philosophy</h1>
+      <p class="lead">Modern · Calm · Premium · Academic · Professional</p>
+
+      <h2>Two surfaces</h2>
+      <p><strong>Portals</strong> (<code>apps/web</code>, <code>apps/marketing</code>) use React 19 + Tailwind CSS v4 + <a href="https://heroui.com/">HeroUI v3</a> (<code>@heroui/react</code> + <code>@heroui/styles</code>). Consume the library — don't reinvent primitives. Theme with Nabta tokens (<code>--accent</code> = <code>#10B981</code>).</p>
+      <p><strong>Docs</strong> (<code>docs/</code>) use this pure HTML/CSS shell with the same emerald brand green — no React UI library, no Tailwind, no build step.</p>
+      <h3>Portal components</h3>
+      <p>Prefer HeroUI: Button, Input, Select, Combobox, Modal, Drawer, Dropdown, Tabs, Tooltip, Popover, Calendar, Date picker, Table, Card, Badge, Progress, Toast, Alert, Skeleton, Breadcrumbs, and related compound patterns. See HeroUI MCP / <a href="../technical/heroui-agents.md">heroui-agents.md</a> for the live catalog.</p>
+
+      <h2>Navigation</h2>
+      <p><strong>Desktop:</strong> Persistent sidebar. <strong>Mobile:</strong> Bottom navigation for primary actions + drawer for secondary. Navigation changes by role.</p>
+
+      <h2>Motion</h2>
+      <p>HeroUI CSS for component animation. Framer Motion selectively for page transitions, sidebar, and shell motion (150–300ms). Support <code>prefers-reduced-motion</code>.</p>
+      <p>Icons: default to Lucide React (static). Use <a href="https://lucide-animated.com/">lucide-animated</a> sparingly for hover micro-interactions in product UI. The brand mark stays the static Lucide Sprout — see <a href="logos.html">Logos</a>.</p>
+
+      <h2>Responsive</h2>
+      <p>Breakpoints: 1440+, 1280, 1024, 768, 480, 375. Mobile is not compressed desktop — redesign for touch. Minimum touch target: 44px.</p>
+
+      <h2>Accessibility</h2>
+      <p>WCAG-oriented: keyboard navigation, focus states, semantic HTML, ARIA where required, proper labels, accessible dialogs/tables, color contrast, reduced motion, screen reader compatibility.</p>
+
+      <h2>Avoid</h2>
+      <ul>
+        <li>Generic dashboard templates, excessive gradients, neon colors</li>
+        <li>Huge shadows, excessive rounded cards</li>
+        <li>Gamification overload, visually noisy interfaces</li>
+      </ul>
+          </main>
+          <footer id="docs-pager" class="docs-pager-wrap"></footer>
+        </div>
+        <aside id="docs-toc" class="docs-toc" aria-label="Table of contents"></aside>
+      </div>
+    </div>
+  </div>
+  <script src="../assets/nav-config.js"></script>
+  <script src="../assets/layout.js"></script>
+  <script src="../assets/docs.js"></script>
+</body>
+</html>

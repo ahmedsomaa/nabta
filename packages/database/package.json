@@ -1,0 +1,37 @@
+{
+  "name": "@nabta/database",
+  "version": "0.0.1",
+  "private": true,
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "default": "./dist/index.js"
+    }
+  },
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "dev": "tsc -p tsconfig.json --watch",
+    "generate": "prisma generate",
+    "migrate:dev": "prisma migrate dev",
+    "migrate:deploy": "prisma migrate deploy",
+    "seed": "tsx prisma/seed.ts",
+    "typecheck": "tsc -p tsconfig.json --noEmit",
+    "lint": "echo \"no lint yet\"",
+    "test": "echo \"no tests\""
+  },
+  "dependencies": {
+    "@prisma/client": "^6.10.1",
+    "dotenv": "^16.5.0"
+  },
+  "devDependencies": {
+    "argon2": "^0.43.0",
+    "prisma": "^6.10.1",
+    "tsx": "^4.20.3",
+    "typescript": "^5.8.3"
+  },
+  "prisma": {
+    "seed": "tsx prisma/seed.ts"
+  }
+}

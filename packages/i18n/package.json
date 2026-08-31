@@ -1,0 +1,25 @@
+{
+  "name": "@nabta/i18n",
+  "version": "0.0.1",
+  "private": true,
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "default": "./dist/index.js"
+    },
+    "./en.json": "./locales/en.json",
+    "./ar.json": "./locales/ar.json"
+  },
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "dev": "tsc -p tsconfig.json --watch",
+    "typecheck": "tsc -p tsconfig.json --noEmit",
+    "lint": "echo \"no lint yet\"",
+    "test": "echo \"no tests\""
+  },
+  "devDependencies": {
+    "typescript": "^5.8.3"
+  }
+}

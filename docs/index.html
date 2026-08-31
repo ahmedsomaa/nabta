@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Nabta Documentation</title>
+  <link rel="stylesheet" href="assets/docs.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Sans+Arabic:wght@400;500;600&display=swap" rel="stylesheet">
+</head>
+<body data-section="home">
+  <a href="#main" class="skip-link">Skip to content</a>
+  <header id="docs-topnav" class="docs-topnav" aria-label="Top navigation"></header>
+  <div id="sidebar-overlay" class="sidebar-overlay"></div>
+  <div class="docs-layout">
+    <aside id="docs-sidebar" class="docs-sidebar" aria-label="Sidebar"></aside>
+    <div class="docs-content">
+      <div class="docs-body">
+        <div class="docs-article">
+          <header id="docs-header" class="docs-page-header"></header>
+          <main id="main" class="docs-main docs-main-hub">
+      <section class="docs-hero">
+        <div class="docs-hero-brand">
+          <svg class="docs-sprout-icon" xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <path d="M14 9.536V7a4 4 0 0 1 4-4h1.5a.5.5 0 0 1 .5.5V5a4 4 0 0 1-4 4 4 4 0 0 0-4 4c0 2 1 3 1 5a5 5 0 0 1-1 3"/>
+            <path d="M4 9a5 5 0 0 1 8 4 5 5 0 0 1-8-4"/>
+            <path d="M5 21h14"/>
+          </svg>
+          <div>
+            <h1>Nabta <span class="docs-brand-arabic">نَبْتَة</span></h1>
+            <span class="docs-hero-tagline">Learn. Grow. Thrive.</span>
+          </div>
+        </div>
+        <p class="lead">The school platform for Egyptian international schools — built for the Middle East, starting where Moodle falls short. This documentation is the working specification.</p>
+        <div class="docs-hero-actions">
+          <a href="roadmap/01-foundation/index.html" class="btn btn-primary">Start with Phase 1</a>
+          <a href="business/getting-started.html" class="btn btn-secondary">Getting Started</a>
+        </div>
+      </section>
+
+      <div class="hub-quick-links">
+        <a href="business/index.html" class="hub-quick-link">
+          <h3>Business</h3>
+          <p>Why Nabta exists</p>
+        </a>
+        <a href="requirements/index.html" class="hub-quick-link">
+          <h3>Requirements</h3>
+          <p>What it must do</p>
+        </a>
+        <a href="design/index.html" class="hub-quick-link">
+          <h3>Design</h3>
+          <p>How it should look</p>
+        </a>
+        <a href="technical/index.html" class="hub-quick-link">
+          <h3>Technical</h3>
+          <p>How to build it</p>
+        </a>
+        <a href="roadmap/index.html" class="hub-quick-link">
+          <h3>Roadmap</h3>
+          <p>When to build what</p>
+        </a>
+      </div>
+
+      <section class="hub-section">
+        <h2>Business</h2>
+        <p>Positioning, vision, and domain language.</p>
+        <div class="card-grid">
+          <a href="business/what-is-nabta.html" class="card"><h3>What is Nabta?</h3><p>Moodle-for-MENA — school OS vs generic LMS</p></a>
+          <a href="business/product-vision.html" class="card"><h3>Product Vision</h3><p>Three portals, Egyptian international-school context</p></a>
+          <a href="business/glossary.html" class="card"><h3>Glossary</h3><p>Grade level, class, subject, enrollment</p></a>
+        </div>
+      </section>
+
+      <section class="hub-section">
+        <h2>Requirements</h2>
+        <p>Product behavior by portal and platform topic.</p>
+        <div class="card-grid">
+          <a href="requirements/student.html" class="card"><h3>Student Portal</h3><p>Dashboard, classes, lessons, assignments, grades</p></a>
+          <a href="requirements/teacher.html" class="card"><h3>Teacher Portal</h3><p>Class management, content builder, grading</p></a>
+          <a href="requirements/admin.html" class="card"><h3>Admin Portal</h3><p>Users, academic structure, school analytics</p></a>
+          <a href="requirements/internationalization.html" class="card"><h3>Internationalization</h3><p>EN/AR bilingual support, RTL</p></a>
+        </div>
+      </section>
+
+      <section class="hub-section">
+        <h2>Roadmap</h2>
+        <p>Build incrementally — one phase folder at a time.</p>
+        <div class="card-grid">
+          <a href="roadmap/01-foundation/index.html" class="card"><h3>Phase 1 — Foundation</h3><p>Monorepo, Docker, CI/CD, auth, Resend, i18n</p></a>
+          <a href="roadmap/01b-marketing-site/index.html" class="card"><h3>Phase 1b — Marketing Site</h3><p>Public website — home, features, contact/demo</p></a>
+          <a href="roadmap/02-academic-core/index.html" class="card"><h3>Phase 2 — Academic Core</h3><p>Schools, years, grades, classes, enrollments</p></a>
+          <a href="roadmap/future.html" class="card"><h3>Future Plans</h3><p>Mobile apps, payments, LLM integration</p></a>
+        </div>
+      </section>
+
+      <p class="source-footnote">Historical: <a href="requirements/requirements.md">requirements.md</a> · <a href="requirements/notice.md">notice.md</a></p>
+          </main>
+          <footer id="docs-pager" class="docs-pager-wrap"></footer>
+        </div>
+        <aside id="docs-toc" class="docs-toc" aria-label="Table of contents"></aside>
+      </div>
+    </div>
+  </div>
+  <script src="assets/nav-config.js"></script>
+  <script src="assets/layout.js"></script>
+  <script src="assets/docs.js"></script>
+</body>
+</html>

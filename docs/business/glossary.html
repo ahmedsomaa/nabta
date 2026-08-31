@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Glossary — Nabta</title>
+  <link rel="stylesheet" href="../assets/docs.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Sans+Arabic:wght@400;500;600&display=swap" rel="stylesheet">
+</head>
+<body data-section="business" data-title="Glossary">
+  <a href="#main" class="skip-link">Skip to content</a>
+  <header id="docs-topnav" class="docs-topnav" aria-label="Top navigation"></header>
+  <div id="sidebar-overlay" class="sidebar-overlay"></div>
+  <div class="docs-layout">
+    <aside id="docs-sidebar" class="docs-sidebar" aria-label="Sidebar"></aside>
+    <div class="docs-content">
+      <div class="docs-body">
+        <div class="docs-article">
+          <header id="docs-header" class="docs-page-header"></header>
+          <main id="main" class="docs-main">
+<h1>Glossary</h1>
+      <p class="lead">Domain terms used across Nabta docs. Read this before implementing to avoid ambiguous naming.</p>
+
+      <div class="callout">
+        <p><strong>Tip for AI:</strong> When a term has two meanings (e.g. <em>grade</em>), always use the full entity name in code and APIs — <code>GradeLevel</code> vs <code>GradeRecord</code>.</p>
+      </div>
+
+      <h2>Organization</h2>
+      <div class="table-wrap"><table>
+        <thead><tr><th>Term</th><th>Definition</th></tr></thead>
+        <tbody>
+          <tr><td><strong>School</strong></td><td>A tenant. All data is scoped by <code>schoolId</code>. One Nabta deployment serves many schools.</td></tr>
+          <tr><td><strong>Academic Year</strong></td><td>A school year (e.g. 2025–2026). Contains terms/semesters. Most entities are scoped to an active academic year.</td></tr>
+          <tr><td><strong>Grade Level</strong></td><td>A year group — e.g. Year 7, Grade 10, KG2. <em>Not</em> a score. Entity: <code>Grade</code> or <code>GradeLevel</code>.</td></tr>
+          <tr><td><strong>Class</strong></td><td>A homeroom or teaching group within a grade level — e.g. "Year 7A". Students belong to classes via enrollments.</td></tr>
+          <tr><td><strong>Subject</strong></td><td>An academic discipline — e.g. Mathematics, Physics. Taught to a class or group of students.</td></tr>
+          <tr><td><strong>Enrollment</strong></td><td>Links a student to a class (and optionally subjects) for an academic year.</td></tr>
+        </tbody>
+      </table></div>
+
+      <h2>Academic Work</h2>
+      <div class="table-wrap"><table>
+        <thead><tr><th>Term</th><th>Definition</th></tr></thead>
+        <tbody>
+          <tr><td><strong>Lesson</strong></td><td>A unit of content within a subject — may include materials, videos, readings.</td></tr>
+          <tr><td><strong>Material</strong></td><td>A file or resource attached to a lesson (PDF, video, link).</td></tr>
+          <tr><td><strong>Assignment</strong></td><td>Work students must complete and submit by a due date.</td></tr>
+          <tr><td><strong>Submission</strong></td><td>A student's response to an assignment.</td></tr>
+          <tr><td><strong>Assessment</strong></td><td>A quiz or test — may be auto-graded or manually graded.</td></tr>
+          <tr><td><strong>Grade Record</strong></td><td>A score or mark for an assignment, assessment, or term. <em>Not</em> a grade level. Entity: <code>GradeRecord</code> or <code>Mark</code>.</td></tr>
+          <tr><td><strong>Attendance</strong></td><td>Record of student presence per class/session.</td></tr>
+          <tr><td><strong>Announcement</strong></td><td>A message from teacher or admin to students — class, subject, grade, or school-wide.</td></tr>
+        </tbody>
+      </table></div>
+
+      <h2>Users &amp; Roles</h2>
+      <div class="table-wrap"><table>
+        <thead><tr><th>Term</th><th>Definition</th></tr></thead>
+        <tbody>
+          <tr><td><strong>User</strong></td><td>Auth identity (email, password). Has one role per school: STUDENT, TEACHER, or ADMIN.</td></tr>
+          <tr><td><strong>Student</strong></td><td>User with role STUDENT. Sees student portal.</td></tr>
+          <tr><td><strong>Teacher</strong></td><td>User with role TEACHER. Manages classes, content, grading.</td></tr>
+          <tr><td><strong>Admin</strong></td><td>User with role ADMIN. Manages school structure, users, settings.</td></tr>
+          <tr><td><strong>Portal</strong></td><td>Role-specific app experience in <code>apps/web</code> — student, teacher, or admin.</td></tr>
+        </tbody>
+      </table></div>
+
+      <h2>Platform</h2>
+      <div class="table-wrap"><table>
+        <thead><tr><th>Term</th><th>Definition</th></tr></thead>
+        <tbody>
+          <tr><td><strong>Nabta</strong> (نَبْتَة)</td><td>The product name. Tagline: <em>Learn. Grow. Thrive.</em></td></tr>
+          <tr><td><strong>Phase</strong></td><td>An incremental implementation slice. Always implement one phase at a time.</td></tr>
+          <tr><td><strong>Marketing Site</strong></td><td>Public website at <code>apps/marketing</code> — not a portal. Phase 1b.</td></tr>
+        </tbody>
+      </table></div>
+
+      <div class="related-links">
+        <h2>Related</h2>
+        <p><a href="getting-started.html">Getting Started</a> · <a href="../requirements/academic-structure.html">Academic Structure</a> · <a href="../requirements/roles-and-permissions.html">Roles &amp; Permissions</a></p>
+      </div>
+          </main>
+          <footer id="docs-pager" class="docs-pager-wrap"></footer>
+        </div>
+        <aside id="docs-toc" class="docs-toc" aria-label="Table of contents"></aside>
+      </div>
+    </div>
+  </div>
+  <script src="../assets/nav-config.js"></script>
+  <script src="../assets/layout.js"></script>
+  <script src="../assets/docs.js"></script>
+</body>
+</html>

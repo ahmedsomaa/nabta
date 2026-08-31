@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Phase 3 — Student Experience — Nabta</title>
+  <link rel="stylesheet" href="../../assets/docs.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Sans+Arabic:wght@400;500;600&display=swap" rel="stylesheet">
+</head>
+<body data-section="roadmap" data-title="Phase 3 — Student Experience">
+  <a href="#main" class="skip-link">Skip to content</a>
+  <header id="docs-topnav" class="docs-topnav" aria-label="Top navigation"></header>
+  <div class="docs-mobile-bar">
+    <button type="button" id="sidebar-toggle" class="sidebar-toggle" aria-expanded="false" aria-label="Open menu">&#9776;</button>
+    <a href="../../index.html" class="docs-mobile-brand">Nabta</a>
+  </div>
+  <div id="sidebar-overlay" class="sidebar-overlay"></div>
+  <div class="docs-layout">
+    <aside id="docs-sidebar" class="docs-sidebar" aria-label="Sidebar"></aside>
+    <div class="docs-content">
+      <div class="docs-body">
+        <div class="docs-article">
+          <header id="docs-header" class="docs-page-header"></header>
+          <main id="main" class="docs-main">
+<h1>Phase 3 — Student Experience</h1>
+      <p class="lead"><span class="badge badge-phase">Phase 3</span> Implement this phase only. Do not implement Phase 4+ functionality.</p>
+
+      <h2>Goal</h2>
+      <p>Build the student portal: dashboard, my classes, subject pages, lessons, materials, assignments, and progress tracking.</p>
+
+      <h2>In Scope</h2>
+      <ul>
+        <li>Student dashboard (schedule, upcoming, continue learning, overview)</li>
+        <li>My Classes — list enrolled subjects</li>
+        <li>Subject page (teacher, units, lessons, materials, assignments, progress)</li>
+        <li>Lesson viewer (video, rich text, PDF, images, external resources)</li>
+        <li>Lesson progress tracking</li>
+        <li>Assignment view, upload, submit, status display</li>
+        <li>File upload for submissions (storage abstraction)</li>
+      </ul>
+
+      <h2>Out of Scope</h2>
+      <ul>
+        <li>Teacher portal (assignment creation, grading)</li>
+        <li>Assessments/quizzes</li>
+        <li>Grades view (partial — status only, not full gradebook)</li>
+        <li>Attendance view</li>
+        <li>Notifications</li>
+      </ul>
+
+      <h2>Acceptance Criteria</h2>
+      <ul class="checklist">
+        <li>Student dashboard shows today's schedule and upcoming work</li>
+        <li>Student can browse enrolled subjects and open lessons</li>
+        <li>Lesson progress is tracked</li>
+        <li>Student can view assignment instructions and submit files</li>
+        <li>Assignment status updates to "Submitted" after submission</li>
+        <li>All screens have loading, empty, and error states</li>
+        <li>Mobile-responsive student navigation works</li>
+      </ul>
+
+
+      <h2>Implementation slices</h2>
+      <p>Derived from this phase’s acceptance criteria. Complete in order; each slice is independently verifiable. Do not implement Phase 4+.</p>
+      <ol>
+        <li><strong>Student dashboard</strong> — today’s schedule, upcoming work, continue learning. Verify: dashboard shows schedule and upcoming work.</li>
+        <li><strong>Classes + subject page</strong> — enrolled subjects list; subject page with teacher, units, lessons, materials, assignments, progress. Verify: student can browse enrolled subjects.</li>
+        <li><strong>Lesson viewer + progress</strong> — video, rich text, PDF, images, external resources; progress tracking. Verify: student can open lessons and progress is tracked.</li>
+        <li><strong>Assignments</strong> — view instructions, upload files, submit, status display. Verify: submit updates status to “Submitted”.</li>
+        <li><strong>UX + mobile</strong> — loading, empty, and error states; mobile-responsive student navigation. Verify: no blank screens; mobile nav works.</li>
+      </ol>
+
+      <div class="related-links">
+        <h2>Related</h2>
+        <p><strong>Requirements:</strong> <a href="../../requirements/student.html">Student Portal</a>, <a href="../../requirements/search-and-files.html">Search &amp; Files</a></p>
+        <p><strong>Architecture:</strong> <a href="../../technical/frontend-architecture.html">Frontend Architecture</a>, <a href="../../technical/sequences.html">Sequence Diagrams</a></p>
+        <p><strong>Previous:</strong> <a href="../02-academic-core/">Phase 2</a> · <strong>Next:</strong> <a href="../04-teacher-experience/">Phase 4</a></p>
+      </div>
+      <p class="source-footnote">Source: requirements.md §51 Phase 3, §46</p>
+          </main>
+          <footer id="docs-pager" class="docs-pager-wrap"></footer>
+        </div>
+        <aside id="docs-toc" class="docs-toc" aria-label="Table of contents"></aside>
+      </div>
+    </div>
+  </div>
+  <script src="../../assets/nav-config.js"></script>
+  <script src="../../assets/layout.js"></script>
+  <script src="../../assets/docs.js"></script>
+</body>
+</html>

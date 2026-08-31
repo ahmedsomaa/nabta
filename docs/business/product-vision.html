@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Product Vision — Nabta</title>
+  <link rel="stylesheet" href="../assets/docs.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Sans+Arabic:wght@400;500;600&display=swap" rel="stylesheet">
+</head>
+<body data-section="business" data-title="Product Vision">
+  <a href="#main" class="skip-link">Skip to content</a>
+  <header id="docs-topnav" class="docs-topnav" aria-label="Top navigation"></header>
+  <div id="sidebar-overlay" class="sidebar-overlay"></div>
+  <div class="docs-layout">
+    <aside id="docs-sidebar" class="docs-sidebar" aria-label="Sidebar"></aside>
+    <div class="docs-content">
+      <div class="docs-body">
+        <div class="docs-article">
+          <header id="docs-header" class="docs-page-header"></header>
+          <main id="main" class="docs-main">
+<h1>Product Vision</h1>
+      <p class="lead"><strong>Nabta</strong> (نَبْتَة) — <em>Learn. Grow. Thrive.</em> A modern school platform for Egyptian international schools. Not a generic online-course marketplace.</p>
+
+      <h2>Purpose</h2>
+      <p>Nabta is a production-quality learning platform that supports the day-to-day academic workflows of an international school: students, teachers, classes, subjects, academic years, grades, assignments, assessments, attendance, announcements, learning materials, and academic progress.</p>
+
+      <h2>What This System Is</h2>
+      <p>The platform sits between:</p>
+      <ul>
+        <li>LMS (learning management)</li>
+        <li>Student Information System</li>
+        <li>Academic management platform</li>
+        <li>Digital classroom</li>
+        <li>Assessment platform</li>
+      </ul>
+      <p>The primary goal is to make learning and academic management significantly easier.</p>
+
+      <h2>Three Primary Experiences</h2>
+      <table>
+        <thead><tr><th>Portal</th><th>Core Question</th></tr></thead>
+        <tbody>
+          <tr><td><strong>Student</strong></td><td>"What do I need to learn or do today?"</td></tr>
+          <tr><td><strong>Teacher</strong></td><td>"What do I need to teach, grade, or manage today?"</td></tr>
+          <tr><td><strong>Admin</strong></td><td>"What is happening across the school?"</td></tr>
+        </tbody>
+      </table>
+      <p>Architecture must allow additional roles (parents, coordinators, principals, counselors, school staff) to be added later without rewriting the system.</p>
+
+      <h2>Additional Experiences</h2>
+      <table>
+        <thead><tr><th>Experience</th><th>When</th><th>Notes</th></tr></thead>
+        <tbody>
+          <tr><td><strong>Marketing site</strong></td><td>Phase 1b</td><td>Public website at <code>apps/marketing</code> — see <a href="../requirements/marketing-site.html">Marketing Site</a></td></tr>
+          <tr><td><strong>Mobile apps</strong></td><td>Future</td><td>Student app likely first; teacher app possible later — see <a href="../roadmap/future.html">Future Roadmap</a></td></tr>
+        </tbody>
+      </table>
+
+      <h2>Target Environment</h2>
+      <p>Designed for <strong>Egyptian international schools</strong> supporting common structures:</p>
+      <ul>
+        <li>British curriculum</li>
+        <li>American curriculum</li>
+        <li>IB-style structures</li>
+      </ul>
+      <p>Do not hardcode curriculum-specific assumptions into the core architecture. Curriculum-specific functionality should be configurable.</p>
+
+      <h2>Non-Goals</h2>
+      <ul>
+        <li>Not a generic MOOC or online-course marketplace</li>
+        <li>Not an old-school ERP with dense, noisy interfaces</li>
+        <li>Not a gamified learning app</li>
+      </ul>
+
+      <h2>Quality Priorities</h2>
+      <ul>
+        <li>Clarity, speed, simplicity</li>
+        <li>Accessibility and responsive design</li>
+        <li>Strong information hierarchy</li>
+        <li>Smooth interactions</li>
+        <li>Reliable data</li>
+        <li>Scalable architecture</li>
+        <li>Bilingual EN/AR support with RTL</li>
+      </ul>
+      <p>The interface should feel like a modern SaaS product — <strong>fast, modern, calm, reliable, professional</strong>. See <a href="../requirements/internationalization.html">Internationalization</a> for language requirements.</p>
+
+      <h2>Acceptance Criteria</h2>
+      <ul class="checklist">
+        <li>Three distinct portal experiences exist (student, teacher, admin)</li>
+        <li>UI feels modern and calm, not like a generic admin template</li>
+        <li>Core architecture does not assume a single curriculum type</li>
+        <li>System is designed for extensibility to future roles</li>
+      </ul>
+
+      <div class="related-links">
+        <h2>Related</h2>
+        <p><span class="badge badge-phase">Phases</span> <a href="../roadmap/01-foundation/">Phase 1 — Foundation</a></p>
+        <p><span class="badge badge-arch">Architecture</span> <a href="../technical/system-architecture.html">System Architecture</a></p>
+      </div>
+      <p class="source-footnote">Source: requirements.md §§1–2</p>
+          </main>
+          <footer id="docs-pager" class="docs-pager-wrap"></footer>
+        </div>
+        <aside id="docs-toc" class="docs-toc" aria-label="Table of contents"></aside>
+      </div>
+    </div>
+  </div>
+  <script src="../assets/nav-config.js"></script>
+  <script src="../assets/layout.js"></script>
+  <script src="../assets/docs.js"></script>
+</body>
+</html>

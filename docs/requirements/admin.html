@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Admin Portal — Nabta</title>
+  <link rel="stylesheet" href="../assets/docs.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Sans+Arabic:wght@400;500;600&display=swap" rel="stylesheet">
+</head>
+<body data-section="requirements" data-title="Admin Portal">
+  <a href="#main" class="skip-link">Skip to content</a>
+  <header id="docs-topnav" class="docs-topnav" aria-label="Top navigation"></header>
+  <div class="docs-mobile-bar">
+    <button type="button" id="sidebar-toggle" class="sidebar-toggle" aria-expanded="false" aria-label="Open menu">&#9776;</button>
+    <a href="../index.html" class="docs-mobile-brand">Nabta</a>
+  </div>
+  <div id="sidebar-overlay" class="sidebar-overlay"></div>
+  <div class="docs-layout">
+    <aside id="docs-sidebar" class="docs-sidebar" aria-label="Sidebar"></aside>
+    <div class="docs-content">
+      <div class="docs-body">
+        <div class="docs-article">
+          <header id="docs-header" class="docs-page-header"></header>
+          <main id="main" class="docs-main">
+<h1>Admin Portal</h1>
+      <p class="lead">Data-oriented experience — answers: <strong>"What is happening across the school?"</strong></p>
+
+      <h2>Dashboard</h2>
+      <h3>School Overview</h3>
+      <p>Students, teachers, classes, subjects, active courses, attendance, assignment completion, academic performance.</p>
+      <h3>Academic Overview</h3>
+      <p>Filterable by: academic year, grade, class, subject, teacher.</p>
+
+      <h2>Student Management</h2>
+      <p>Searchable table: Student, Class, Grade, Attendance, Average, Status.</p>
+      <p>Actions: View, Edit, Assign class, Assign subjects, Deactivate.</p>
+      <p>Student profile shows complete academic record.</p>
+
+      <h2>Teacher Management</h2>
+      <p>Show: Teacher, Department, Subjects, Classes, Status.</p>
+      <p>Actions: Assign subject, Assign class, Update profile, Deactivate.</p>
+
+      <h2>Academic Structure Management</h2>
+      <h3>Academic Years</h3>
+      <pre><code>2026/2027
+2027/2028</code></pre>
+      <h3>Grades</h3>
+      <pre><code>Grade 7, Grade 8, … Grade 12</code></pre>
+      <h3>Classes</h3>
+      <pre><code>7A, 7B, 8A, …</code></pre>
+      <h3>Subjects</h3>
+      <p>Configurable — do not hardcode subject lists.</p>
+
+      <h2>Additional Admin Capabilities</h2>
+      <ul>
+        <li>Manage users, courses/content, curriculum structures</li>
+        <li>Manage announcements (school-wide)</li>
+        <li>View school analytics</li>
+        <li>Manage system settings and permissions</li>
+      </ul>
+
+      <h2>Navigation</h2>
+      <pre><code>Overview | Users | Academics | Reports | Settings</code></pre>
+
+      <h2>Acceptance Criteria</h2>
+      <ul class="checklist">
+        <li>Admin dashboard shows school overview with key metrics</li>
+        <li>Admin can CRUD students and teachers</li>
+        <li>Admin can manage academic years, grades, classes, subjects</li>
+        <li>Admin can assign teachers to classes/subjects and students to classes</li>
+        <li>All relationships persist to PostgreSQL</li>
+        <li>Complete workflow works: login → academic mgmt → assign teacher/students/subjects</li>
+      </ul>
+
+      <div class="related-links">
+        <h2>Related</h2>
+        <p><span class="badge badge-phase">Phases</span> <a href="../roadmap/02-academic-core/">Phase 2 — Academic Core</a>, <a href="../roadmap/06-administration/">Phase 6 — Administration</a></p>
+        <p><span class="badge badge-arch">Architecture</span> <a href="../technical/data-model.html">Data Model</a>, <a href="../technical/sequences.html">Sequence Diagrams</a></p>
+        <p>Also see: <a href="academic-structure.html">Academic Structure</a></p>
+      </div>
+      <p class="source-footnote">Source: requirements.md §§23–26, 48</p>
+          </main>
+          <footer id="docs-pager" class="docs-pager-wrap"></footer>
+        </div>
+        <aside id="docs-toc" class="docs-toc" aria-label="Table of contents"></aside>
+      </div>
+    </div>
+  </div>
+  <script src="../assets/nav-config.js"></script>
+  <script src="../assets/layout.js"></script>
+  <script src="../assets/docs.js"></script>
+</body>
+</html>

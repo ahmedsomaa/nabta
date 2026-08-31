@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Sequence Diagrams — Nabta</title>
+  <link rel="stylesheet" href="../assets/docs.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Sans+Arabic:wght@400;500;600&display=swap" rel="stylesheet">
+</head>
+<body data-section="technical" data-title="Sequence Diagrams">
+  <a href="#main" class="skip-link">Skip to content</a>
+  <header id="docs-topnav" class="docs-topnav" aria-label="Top navigation"></header>
+  <div class="docs-mobile-bar">
+    <button type="button" id="sidebar-toggle" class="sidebar-toggle" aria-expanded="false" aria-label="Open menu">&#9776;</button>
+    <a href="../index.html" class="docs-mobile-brand">Nabta</a>
+  </div>
+  <div id="sidebar-overlay" class="sidebar-overlay"></div>
+  <div class="docs-layout">
+    <aside id="docs-sidebar" class="docs-sidebar" aria-label="Sidebar"></aside>
+    <div class="docs-content">
+      <div class="docs-body">
+        <div class="docs-article">
+          <header id="docs-header" class="docs-page-header"></header>
+          <main id="main" class="docs-main">
+<h1>Sequence Diagrams</h1>
+      <p class="lead">Major application flows as sequence diagrams.</p>
+
+      <h2>1. Login &amp; Refresh Token Session</h2>
+      <pre class="mermaid">sequenceDiagram
+  participant Browser
+  participant API as NestJS API
+  participant DB as PostgreSQL
+  Browser->>API: POST /api/v1/auth/login {email, password}
+  API->>DB: Find user by email
+  DB-->>API: User record
+  API->>API: Verify password hash
+  API->>API: Generate JWT + refresh token
+  API-->>Browser: {accessToken, refreshToken, user}
+  Note over Browser: Store tokens, redirect to dashboard
+  Browser->>API: GET /api/v1/students/me (Bearer JWT)
+  API->>API: JwtAuthGuard validates token
+  API->>DB: Query with schoolId from JWT
+  DB-->>API: Student data
+  API-->>Browser: {data: student}</pre>
+
+      <h2>2. Admin Academic Setup</h2>
+      <pre class="mermaid">sequenceDiagram
+  participant Admin
+  participant API as NestJS API
+  participant DB as PostgreSQL
+  Admin->>API: POST /api/v1/academic-years {name: 2026/2027}
+  API->>DB: Create AcademicYear (schoolId from JWT)
+  API-->>Admin: {data: academicYear}
+  Admin->>API: POST /api/v1/grades {name: Grade 10, yearId}
+  API->>DB: Create Grade
+  Admin->>API: POST /api/v1/classes {name: 10A, gradeId}
+  API->>DB: Create Class
+  Admin->>API: POST /api/v1/subjects {name: Physics}
+  API->>DB: Create Subject
+  Admin->>API: POST /api/v1/teaching-assignments {teacherId, subjectId, classId}
+  API->>DB: Create TeachingAssignment
+  Admin->>API: POST /api/v1/enrollments {studentId, classId}
+  API->>DB: Create Enrollment
+  API-->>Admin: All relationships persisted</pre>
+
+      <h2>3. Assignment Workflow</h2>
+      <pre class="mermaid">sequenceDiagram
+  participant Teacher
+  participant Student
+  participant API as NestJS API
+  participant Queue as BullMQ
+  participant DB as PostgreSQL
+  Teacher->>API: POST /api/v1/assignments {title, dueDate, subjectId}
+  API->>DB: Create Assignment
+  API->>Queue: Enqueue assignment_created event
+  API-->>Teacher: {data: assignment}
+  Queue->>DB: Create Notifications for enrolled students
+  Student->>API: GET /api/v1/notifications
+  API-->>Student: New assignment notification
+  Student->>API: POST /api/v1/assignments/:id/submit {file}
+  API->>DB: Create AssignmentSubmission (status: Submitted)
+  API-->>Student: {data: submission}
+  Teacher->>API: GET /api/v1/assignments/:id/submissions
+  API-->>Teacher: List of submissions
+  Teacher->>API: PATCH /api/v1/submissions/:id {grade, feedback}
+  API->>DB: Update submission (status: Graded)
+  API->>Queue: Enqueue assignment_graded event
+  Queue->>DB: Create Notification for student
+  Student->>API: GET /api/v1/assignments/:id
+  API-->>Student: {grade, feedback, status: Graded}</pre>
+
+      <h2>4. Student Takes Assessment</h2>
+      <pre class="mermaid">sequenceDiagram
+  participant Student
+  participant API as NestJS API
+  participant DB as PostgreSQL
+  Student->>API: GET /api/v1/assessments/:id
+  API-->>Student: Assessment overview (time limit, attempts)
+  Student->>API: POST /api/v1/assessments/:id/start
+  API->>DB: Create AssessmentAttempt
+  API-->>Student: {attemptId, questions}
+  loop Each question
+    Student->>API: PATCH /api/v1/attempts/:id/answers {questionId, answer}
+    API->>DB: Save answer
+  end
+  Student->>API: POST /api/v1/attempts/:id/submit
+  API->>API: Auto-score objective questions
+  API->>DB: Update attempt (score, status: completed)
+  API-->>Student: {score, feedback, passed}</pre>
+
+      <h2>5. Teacher Records Attendance</h2>
+      <pre class="mermaid">sequenceDiagram
+  participant Teacher
+  participant API as NestJS API
+  participant DB as PostgreSQL
+  Teacher->>API: GET /api/v1/classes/:id/students
+  API-->>Teacher: Student list for class
+  Teacher->>API: POST /api/v1/attendance {classId, date, records: [{studentId, status}]}
+  API->>API: RolesGuard checks TEACHER role
+  API->>API: TenantGuard scopes to schoolId
+  API->>DB: Bulk create/update Attendance records
+  API-->>Teacher: {data: attendanceSession}
+  Note over Teacher: Student can later view attendance via GET /api/v1/attendance/me</pre>
+
+      <h2>6. Tenant Isolation on Authorized Request</h2>
+      <pre class="mermaid">sequenceDiagram
+  participant Client
+  participant Guard as JwtAuthGuard
+  participant Tenant as TenantGuard
+  participant Service as Domain Service
+  participant DB as PostgreSQL
+  Client->>Guard: Request with JWT (schoolId: A)
+  Guard->>Guard: Validate JWT, extract user context
+  Note over Guard: schoolId = A (from JWT, NOT from request body)
+  Guard->>Tenant: Pass authenticated user
+  Tenant->>Tenant: Verify resource belongs to schoolId A
+  Tenant->>Service: Authorized request
+  Service->>DB: Query WHERE schoolId = A
+  DB-->>Service: Only School A data
+  Service-->>Client: Response
+  Note over Client: User from School B cannot access School A data even with manipulated IDs</pre>
+
+      <h2>7. Notification Job Path</h2>
+      <pre class="mermaid">sequenceDiagram
+  participant API as NestJS API
+  participant Redis as Redis/BullMQ
+  participant Worker as Notification Worker
+  participant DB as PostgreSQL
+  participant Resend as Resend API
+  API->>API: Domain event (e.g. assignment graded)
+  API->>Redis: Enqueue job {type, userId, payload}
+  API-->>API: Continue (non-blocking)
+  Redis->>Worker: Pick up job
+  Worker->>DB: Create Notification record
+  Worker->>Worker: Check email preferences
+  Worker->>Resend: EmailService.send (Resend)
+  Note over Resend: Assignment, announcement, grade emails
+  Note over DB: Student sees notification on next GET /api/v1/notifications</pre>
+
+      <div class="related-links">
+        <h2>Related</h2>
+        <p><strong>Requirements:</strong> <a href="../requirements/student.html">Student Portal</a>, <a href="../requirements/teacher.html">Teacher Portal</a>, <a href="../requirements/admin.html">Admin Portal</a></p>
+        <p><span class="badge badge-phase">Phases</span> <a href="../roadmap/03-student-experience/">Phase 3</a>, <a href="../roadmap/04-teacher-experience/">Phase 4</a>, <a href="../roadmap/07-notifications/">Phase 7</a></p>
+      </div>
+      <p class="source-footnote">Source: requirements.md §§46–48, 11–12</p>
+          </main>
+          <footer id="docs-pager" class="docs-pager-wrap"></footer>
+        </div>
+        <aside id="docs-toc" class="docs-toc" aria-label="Table of contents"></aside>
+      </div>
+    </div>
+  </div>
+  <script src="../assets/nav-config.js"></script>
+  <script src="../assets/layout.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.min.js"></script>
+  <script src="../assets/docs.js"></script>
+</body>
+</html>

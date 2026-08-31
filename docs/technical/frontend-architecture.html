@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Frontend Architecture — Nabta</title>
+  <link rel="stylesheet" href="../assets/docs.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Sans+Arabic:wght@400;500;600&display=swap" rel="stylesheet">
+</head>
+<body data-section="technical" data-title="Frontend Architecture">
+  <a href="#main" class="skip-link">Skip to content</a>
+  <header id="docs-topnav" class="docs-topnav" aria-label="Top navigation"></header>
+  <div class="docs-mobile-bar">
+    <button type="button" id="sidebar-toggle" class="sidebar-toggle" aria-expanded="false" aria-label="Open menu">&#9776;</button>
+    <a href="../index.html" class="docs-mobile-brand">Nabta</a>
+  </div>
+  <div id="sidebar-overlay" class="sidebar-overlay"></div>
+  <div class="docs-layout">
+    <aside id="docs-sidebar" class="docs-sidebar" aria-label="Sidebar"></aside>
+    <div class="docs-content">
+      <div class="docs-body">
+        <div class="docs-article">
+          <header id="docs-header" class="docs-page-header"></header>
+          <main id="main" class="docs-main">
+<h1>Frontend Architecture</h1>
+      <p class="lead">Feature-based organization, state management, role layouts, and routing.</p>
+
+      <h2>Directory Structure</h2>
+      <pre><code>apps/web/src/
+├── app/                  # App shell, providers
+├── components/
+│   ├── ui/               # Thin wrappers / app-specific compositions over HeroUI
+│   ├── icons/            # lucide-animated (per-icon, shadcn registry CLI)
+│   └── shared/           # Reusable composed components
+├── features/
+│   ├── auth/
+│   ├── dashboard/
+│   ├── students/
+│   ├── teachers/
+│   ├── classes/
+│   ├── subjects/
+│   ├── assignments/
+│   ├── assessments/
+│   ├── grades/
+│   ├── attendance/
+│   └── notifications/
+├── layouts/              # Role-based layouts
+├── hooks/                # Custom React hooks
+├── lib/                  # Utilities, API client
+├── services/             # API service functions
+├── types/                # Re-export from packages/types
+└── routes/               # Route definitions</code></pre>
+
+      <h2>Providers (App Shell)</h2>
+      <ul>
+        <li><strong>ThemeProvider</strong> — light/dark mode with persisted preference</li>
+        <li><strong>I18nProvider</strong> — react-i18next with EN/AR, RTL via <code>dir</code> attribute</li>
+        <li><strong>QueryClientProvider</strong> — TanStack Query</li>
+        <li><strong>AuthProvider</strong> — current user + tokens</li>
+      </ul>
+
+      <h2>Component Library</h2>
+      <p><a href="https://heroui.com/">HeroUI v3</a> (<code>@heroui/react</code> + <code>@heroui/styles</code>) on React Aria + Tailwind CSS v4. Import Tailwind first, then <code>@heroui/styles</code>. Prefer compound components (e.g. <code>Card.Header</code>); use <code>onPress</code> over <code>onClick</code>; use <code>className</code> (not v2 <code>classNames</code>). No HeroUI Provider required in v3. Theme Nabta via CSS variable overrides — see <a href="../design/theming.html">Theming</a>.</p>
+
+      <h2>Icons</h2>
+      <ul>
+        <li><strong>Default:</strong> <code>lucide-react</code> for static icons (nav, forms, tables)</li>
+        <li><strong>Selective:</strong> <a href="https://lucide-animated.com/">lucide-animated</a> only where motion helps affordance — import from <code>@/components/icons/...</code></li>
+        <li>Install per icon via shadcn registry CLI (<code>npx shadcn@latest add "https://lucide-animated.com/r/&lt;name&gt;.json"</code>); do not animate every icon</li>
+        <li>Brand mark (Sprout) stays a static Lucide path — see <a href="../design/logos.html">Logos</a></li>
+      </ul>
+
+      <h2>Internationalization</h2>
+      <ul>
+        <li>Translations from <code>packages/i18n</code> (<code>en.json</code>, <code>ar.json</code>)</li>
+        <li>Locale switcher in app shell header</li>
+        <li>RTL: set <code>dir="rtl"</code> on <code>&lt;html&gt;</code> when Arabic active</li>
+        <li>Use logical CSS properties (<code>ms-</code>, <code>me-</code>, <code>ps-</code>, <code>pe-</code>)</li>
+      </ul>
+
+      <h2>Theme (Light / Dark)</h2>
+      <ul>
+        <li>HeroUI CSS variables; Nabta <code>--accent</code> = <code>#10B981</code> — see <a href="../design/colors.html">Colors</a> and <a href="../design/theming.html">Theming</a></li>
+        <li>Theme toggle in app shell; persist in localStorage/profile</li>
+        <li>Respect <code>prefers-color-scheme</code> as default</li>
+      </ul>
+
+      <h2>State Management</h2>
+      <ul>
+        <li><strong>Server state:</strong> TanStack Query — all API data fetched, cached, and invalidated via queries/mutations</li>
+        <li><strong>UI state:</strong> Local component state (useState, useReducer)</li>
+        <li><strong>Auth state:</strong> Context or Zustand for current user + tokens</li>
+        <li>Do not duplicate server data in global state unnecessarily</li>
+      </ul>
+
+      <h2>Role-Based Layouts</h2>
+      <table>
+        <thead><tr><th>Role</th><th>Desktop</th><th>Mobile</th></tr></thead>
+        <tbody>
+          <tr><td>Student</td><td>Sidebar: Home, My Classes, Assignments, Grades, More</td><td>Bottom nav + drawer</td></tr>
+          <tr><td>Teacher</td><td>Sidebar: Home, Classes, Assignments, Gradebook, More</td><td>Bottom nav + drawer</td></tr>
+          <tr><td>Admin</td><td>Sidebar: Overview, Users, Academics, Reports, Settings</td><td>Bottom nav + drawer</td></tr>
+        </tbody>
+      </table>
+
+      <h2>Route Sketch</h2>
+      <pre><code>/login
+/student/dashboard
+/student/classes
+/student/classes/:subjectId
+/student/classes/:subjectId/lessons/:lessonId
+/student/assignments
+/student/assignments/:id
+/student/grades
+/student/attendance
+
+/teacher/dashboard
+/teacher/classes/:classId
+/teacher/classes/:classId/assignments
+/teacher/classes/:classId/gradebook
+/teacher/classes/:classId/attendance
+
+/admin/dashboard
+/admin/students
+/admin/teachers
+/admin/academics
+/admin/settings</code></pre>
+
+      <h2>Rules</h2>
+      <ul>
+        <li>No business logic in React components — use hooks and services</li>
+        <li>Use HeroUI components; don't reinvent primitives</li>
+        <li>Prefer Lucide React; use lucide-animated sparingly for interactive affordances</li>
+        <li>Lazy-load routes for code splitting</li>
+        <li>Every feature has loading (skeleton), empty, error, and success states</li>
+        <li>Use shared Zod schemas from <code>packages/validation</code> for forms</li>
+      </ul>
+
+      <div class="related-links">
+        <h2>Related</h2>
+        <p><span class="badge badge-phase">Phases</span> <a href="../roadmap/01-foundation/">Phase 1 — Foundation</a>, <a href="../roadmap/03-student-experience/">Phase 3</a></p>
+        <p><strong>Requirements:</strong> <a href="../design/philosophy.html">UX &amp; Design</a>, <a href="../requirements/internationalization.html">Internationalization</a></p>
+      </div>
+      <p class="source-footnote">Source: requirements.md §32, §37</p>
+          </main>
+          <footer id="docs-pager" class="docs-pager-wrap"></footer>
+        </div>
+        <aside id="docs-toc" class="docs-toc" aria-label="Table of contents"></aside>
+      </div>
+    </div>
+  </div>
+  <script src="../assets/nav-config.js"></script>
+  <script src="../assets/layout.js"></script>
+  <script src="../assets/docs.js"></script>
+</body>
+</html>

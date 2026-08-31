@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Notifications & Announcements — Nabta</title>
+  <link rel="stylesheet" href="../assets/docs.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Sans+Arabic:wght@400;500;600&display=swap" rel="stylesheet">
+</head>
+<body data-section="requirements" data-title="Notifications & Announcements">
+  <a href="#main" class="skip-link">Skip to content</a>
+  <header id="docs-topnav" class="docs-topnav" aria-label="Top navigation"></header>
+  <div class="docs-mobile-bar">
+    <button type="button" id="sidebar-toggle" class="sidebar-toggle" aria-expanded="false" aria-label="Open menu">&#9776;</button>
+    <a href="../index.html" class="docs-mobile-brand">Nabta</a>
+  </div>
+  <div id="sidebar-overlay" class="sidebar-overlay"></div>
+  <div class="docs-layout">
+    <aside id="docs-sidebar" class="docs-sidebar" aria-label="Sidebar"></aside>
+    <div class="docs-content">
+      <div class="docs-body">
+        <div class="docs-article">
+          <header id="docs-header" class="docs-page-header"></header>
+          <main id="main" class="docs-main">
+<h1>Notifications &amp; Announcements</h1>
+      <p class="lead">Extensible notification system with in-app delivery, Resend email (Phase 7), and future push channels.</p>
+
+      <h2>Notification Channels</h2>
+      <ul>
+        <li><strong>In-app</strong> — Phase 7</li>
+        <li><strong>Email</strong> — via Resend in Phase 7 (auth emails in Phase 1 — see <a href="../technical/email.html">Email</a>)</li>
+        <li><strong>Push notifications</strong> — future</li>
+      </ul>
+
+      <h2>Notification Events</h2>
+      <ul>
+        <li>Assignment created</li>
+        <li>Assignment due soon</li>
+        <li>Assignment graded</li>
+        <li>New announcement</li>
+        <li>Quiz published</li>
+        <li>New material uploaded</li>
+        <li>Attendance event</li>
+        <li>Grade published</li>
+      </ul>
+      <p>Use Redis/BullMQ for asynchronous notification processing.</p>
+
+      <h2>Announcements</h2>
+      <h3>Targeting</h3>
+      <ul>
+        <li><strong>Teachers</strong> can publish to: class, subject, grade</li>
+        <li><strong>Admins</strong> can publish school-wide announcements</li>
+      </ul>
+      <h3>Fields</h3>
+      <ul>
+        <li>Title, rich text, attachments</li>
+        <li>Publish date, expiry date</li>
+        <li>Target audience</li>
+      </ul>
+
+      <h2>Acceptance Criteria</h2>
+      <ul class="checklist">
+        <li>In-app notification center exists for all roles</li>
+        <li>Assignment publish triggers student notification</li>
+        <li>Grade publish triggers student notification</li>
+        <li>Teachers can post announcements to class/subject/grade</li>
+        <li>Admins can post school-wide announcements</li>
+        <li>Notification processing uses async queue (BullMQ)</li>
+        <li>Notification emails send via Resend</li>
+      </ul>
+
+      <div class="related-links">
+        <h2>Related</h2>
+        <p><span class="badge badge-phase">Phases</span> <a href="../roadmap/07-notifications/">Phase 7 — Notifications</a></p>
+        <p><span class="badge badge-arch">Architecture</span> <a href="../technical/system-design.html">System Design</a>, <a href="../technical/email.html">Email (Resend)</a>, <a href="../technical/sequences.html">Sequence Diagrams</a></p>
+      </div>
+      <p class="source-footnote">Source: requirements.md §§27–28</p>
+          </main>
+          <footer id="docs-pager" class="docs-pager-wrap"></footer>
+        </div>
+        <aside id="docs-toc" class="docs-toc" aria-label="Table of contents"></aside>
+      </div>
+    </div>
+  </div>
+  <script src="../assets/nav-config.js"></script>
+  <script src="../assets/layout.js"></script>
+  <script src="../assets/docs.js"></script>
+</body>
+</html>
