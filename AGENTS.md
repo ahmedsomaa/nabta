@@ -18,15 +18,24 @@ A school platform for Egyptian international schools — Moodle for the Middle E
 
 ## Golden rule
 
-Implement **one phase folder at a time**. Example prompt:
+Implement **one phase folder at a time**. Example prompts:
 
 > Implement Phase 1 only. Do not implement Phase 1b or Phase 2+ functionality.
+
+> Implement Phase 1b only. Do not implement Phase 1c+ or Phase 2+ functionality.
+
+> Implement Phase 1c only. Do not implement Phase 1d+ or Phase 2+ functionality.
+
+> Implement Phase 1d only. Do not implement Phase 1e+ or Phase 2+ functionality.
+
+> Implement Phase 1e only. Do not implement Phase 2+ functionality.
 
 ## Stack summary
 
 | Layer | Technology |
 |-------|-----------|
-| Frontend | React 19, Vite, Tailwind CSS v4, [HeroUI v3](https://heroui.com/) (`@heroui/react` + `@heroui/styles`), Lucide React + [lucide-animated](https://lucide-animated.com/) |
+| Web frontend | React 19, Vite, Tailwind CSS v4, [HeroUI v3](https://heroui.com/) (`@heroui/react` + `@heroui/styles`), Lucide React + [lucide-animated](https://lucide-animated.com/) — `apps/web`, `apps/marketing`, `apps/system-admin` |
+| Mobile | Expo (~54), Expo Router, [HeroUI Native](https://heroui.com/) + Uniwind — `apps/mobile-student`, `apps/mobile-staff` |
 | Backend | NestJS, Prisma, PostgreSQL |
 | Cache/queues | Redis, BullMQ |
 | Email | Resend |
@@ -49,7 +58,7 @@ When building portal UI, use HeroUI tooling (do not invent parallel component AP
 | Tool | Setup | Use |
 |------|--------|-----|
 | [MCP Server](https://heroui.com/en/docs/react/getting-started/mcp-server) | [`.cursor/mcp.json`](.cursor/mcp.json) → `@heroui/react-mcp` | Live component docs, props, theme variables, source |
-| [Agent Skills](https://heroui.com/en/docs/react/getting-started/agent-skills) | `.agents/skills/heroui-react` (also `heroui-native`, `heroui-migration`) | `/heroui-react` or auto-discovered skill |
+| [Agent Skills](https://heroui.com/en/docs/react/getting-started/agent-skills) | `.agents/skills/heroui-react` (also `heroui-native`, `heroui-migration`) | `/heroui-react` or `/heroui-native` — web vs mobile |
 | [agents-md](https://heroui.com/en/docs/react/getting-started/agents-md) | [docs/technical/heroui-agents.md](docs/technical/heroui-agents.md) + `.heroui-docs/` | Local docs index; refresh with `npx heroui-cli@latest agents-md --react --output docs/technical/heroui-agents.md` |
 
 This file (`AGENTS.md`) is **Nabta-first**. Never overwrite it with the HeroUI CLI output.

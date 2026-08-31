@@ -1,0 +1,16 @@
+@import "tailwindcss";
+@import "uniwind";
+@import "heroui-native/styles";
+
+@source "./node_modules/heroui-native/lib";
+
+/* Nabta green ≈ #10B981 — HeroUI Native uses HSL */
+:root {
+  --accent: 160 84% 39%;
+  --accent-foreground: 0 0% 100%;
+}
+
+.dark {
+  --accent: 158 64% 52%;
+  --accent-foreground: 240 6% 4%;
+}

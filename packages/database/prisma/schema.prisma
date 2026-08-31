@@ -1,16 +1,18 @@
 generator client {
-  provider = "prisma-client-js"
+  provider     = "prisma-client"
+  output       = "../src/generated/prisma"
+  moduleFormat = "cjs"
 }
 
 datasource db {
   provider = "postgresql"
-  url      = env("DATABASE_URL")
 }
 
 enum UserRole {
   STUDENT
   TEACHER
   ADMIN
+  SYSTEM_ADMIN
 }
 
 enum UserStatus {
@@ -42,14 +44,14 @@ model User {
   email        String           @unique
   passwordHash String
   role         UserRole
-  schoolId     String           @db.Uuid
+  schoolId     String?          @db.Uuid
   locale       Locale           @default(en)
   theme        ThemePreference  @default(system)
   status       UserStatus       @default(active)
   createdAt    DateTime         @default(now())
   updatedAt    DateTime         @updatedAt
 
-  school              School               @relation(fields: [schoolId], references: [id], onDelete: Cascade)
+  school              School?              @relation(fields: [schoolId], references: [id], onDelete: Cascade)
   refreshTokens       RefreshToken[]
   passwordResetTokens PasswordResetToken[]
 

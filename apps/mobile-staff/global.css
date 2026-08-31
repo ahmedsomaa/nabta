@@ -1,0 +1,15 @@
+@import "tailwindcss";
+@import "uniwind";
+@import "heroui-native/styles";
+
+@source "./node_modules/heroui-native/lib";
+
+:root {
+  --accent: 160 84% 39%;
+  --accent-foreground: 0 0% 100%;
+}
+
+.dark {
+  --accent: 158 64% 52%;
+  --accent-foreground: 240 6% 4%;
+}

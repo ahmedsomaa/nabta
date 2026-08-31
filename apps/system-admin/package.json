@@ -1,0 +1,37 @@
+{
+  "name": "@nabta/system-admin",
+  "version": "0.0.1",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "vite --port 5175",
+    "build": "tsc -b && vite build",
+    "preview": "vite preview --port 5175",
+    "lint": "echo \"no lint yet\"",
+    "typecheck": "tsc -b --pretty false",
+    "test": "echo \"no tests\""
+  },
+  "dependencies": {
+    "@heroui/react": "^3.0.0",
+    "@heroui/styles": "^3.0.0",
+    "@nabta/i18n": "workspace:*",
+    "@nabta/types": "workspace:*",
+    "@tanstack/react-query": "^5.80.7",
+    "i18next": "^25.2.1",
+    "lucide-react": "^0.514.0",
+    "react": "^19.1.0",
+    "react-dom": "^19.1.0",
+    "react-i18next": "^15.5.2",
+    "react-router-dom": "^7.6.2",
+    "tailwind-variants": "^1.0.0"
+  },
+  "devDependencies": {
+    "@tailwindcss/vite": "^4.1.10",
+    "@types/react": "^19.1.8",
+    "@types/react-dom": "^19.1.6",
+    "@vitejs/plugin-react": "^4.5.2",
+    "tailwindcss": "^4.1.10",
+    "typescript": "^5.8.3",
+    "vite": "^6.3.5"
+  }
+}

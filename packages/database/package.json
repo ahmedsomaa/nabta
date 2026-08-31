@@ -16,22 +16,22 @@
     "generate": "prisma generate",
     "migrate:dev": "prisma migrate dev",
     "migrate:deploy": "prisma migrate deploy",
-    "seed": "tsx prisma/seed.ts",
+    "seed": "prisma db seed",
     "typecheck": "tsc -p tsconfig.json --noEmit",
     "lint": "echo \"no lint yet\"",
     "test": "echo \"no tests\""
   },
   "dependencies": {
-    "@prisma/client": "^6.10.1",
-    "dotenv": "^16.5.0"
+    "@prisma/adapter-pg": "^7.10.0",
+    "@prisma/client": "^7.10.0",
+    "dotenv": "^16.5.0",
+    "pg": "^8.16.0"
   },
   "devDependencies": {
+    "@types/pg": "^8.15.4",
     "argon2": "^0.43.0",
-    "prisma": "^6.10.1",
+    "prisma": "^7.10.0",
     "tsx": "^4.20.3",
     "typescript": "^5.8.3"
-  },
-  "prisma": {
-    "seed": "tsx prisma/seed.ts"
   }
 }

@@ -53,6 +53,19 @@
       <h3>Agent tooling</h3>
       <p>Official HeroUI MCP (<code>.cursor/mcp.json</code> → <code>@heroui/react-mcp</code>), Agent Skills under <code>.agents/skills/heroui-react</code>, and local docs index at <a href="heroui-agents.md">heroui-agents.md</a>. See Nabta <code>AGENTS.md</code>. Node.js 22+ required for the MCP server.</p>
 
+      <h2>Mobile</h2>
+      <table>
+        <thead><tr><th>Technology</th><th>Purpose</th></tr></thead>
+        <tbody>
+          <tr><td>Expo (~54)</td><td>React Native toolchain, dev server, OTA updates path</td></tr>
+          <tr><td>Expo Router</td><td>File-based navigation for mobile apps</td></tr>
+          <tr><td><a href="https://heroui.com/">HeroUI Native</a></td><td>Mobile component library (<code>heroui-native</code>) — React Native + Uniwind</td></tr>
+          <tr><td>Uniwind</td><td>Tailwind CSS v4 for React Native — shared utility patterns with web</td></tr>
+          <tr><td>react-i18next</td><td>EN/AR via shared <code>packages/i18n</code></td></tr>
+        </tbody>
+      </table>
+      <p>Mobile apps (<code>apps/mobile-student</code>, <code>apps/mobile-staff</code>) are API clients — same <code>/api/v1</code> as web. Use the <code>heroui-native</code> Agent Skill for component docs. Push notifications and offline sync are future enhancements — see <a href="../roadmap/future.html">Future Roadmap</a>.</p>
+
       <h2>Backend</h2>
       <table>
         <thead><tr><th>Technology</th><th>Purpose</th></tr></thead>
@@ -60,7 +73,7 @@
           <tr><td>NestJS</td><td>Modular API framework</td></tr>
           <tr><td>TypeScript (strict)</td><td>Type safety</td></tr>
           <tr><td>PostgreSQL</td><td>Primary database (source of truth)</td></tr>
-          <tr><td>Prisma ORM</td><td>Schema, migrations, type-safe queries</td></tr>
+          <tr><td>Prisma ORM 7</td><td>Schema, migrations, type-safe queries (<code>prisma.config.ts</code> + driver adapter)</td></tr>
           <tr><td>Redis</td><td>Cache, rate limiting, queues, temp data</td></tr>
           <tr><td>BullMQ</td><td>Background job processing</td></tr>
           <tr><td>Resend</td><td>Transactional email (auth + notifications)</td></tr>

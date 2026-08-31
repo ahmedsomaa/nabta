@@ -1,4 +1,4 @@
-export type UserRole = 'STUDENT' | 'TEACHER' | 'ADMIN';
+export type UserRole = 'STUDENT' | 'TEACHER' | 'ADMIN' | 'SYSTEM_ADMIN';
 export type UserStatus = 'active' | 'disabled';
 export type Locale = 'en' | 'ar';
 export type ThemePreference = 'light' | 'dark' | 'system';
@@ -7,7 +7,7 @@ export interface AuthUser {
   id: string;
   email: string;
   role: UserRole;
-  schoolId: string;
+  schoolId: string | null;
   schoolName: string;
   schoolLogoUrl: string | null;
   locale: Locale;

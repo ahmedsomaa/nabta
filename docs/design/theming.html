@@ -73,6 +73,17 @@ html.dark {
 
       <h2>Figma</h2>
       <p>Duplicate the HeroUI Figma Kit and sync tokens — see <a href="figma.html">Figma</a>.</p>
+
+      <h2 id="native">Web (oklch) vs Native (HSL)</h2>
+      <p>All clients share the same Nabta green brand intent (<code>#10B981</code> light, <code>#34D399</code> dark accent). Implementation differs by platform:</p>
+      <div class="table-wrap"><table>
+        <thead><tr><th>Surface</th><th>Theme mechanism</th><th>Accent token</th></tr></thead>
+        <tbody>
+          <tr><td>Web portals, marketing, system-admin</td><td>HeroUI v3 CSS variables in oklch</td><td><code>--accent: oklch(0.72 0.15 163)</code> (light)</td></tr>
+          <tr><td>Mobile student, mobile staff</td><td>HeroUI Native + Uniwind HSL semantic tokens</td><td>Accent HSL aligned to Nabta green (~163° hue)</td></tr>
+        </tbody>
+      </table></div>
+      <p>Stone/zinc neutral ramps on web (light stone-50/900 stage, dark zinc-800 rail) — see overrides above. Native apps mirror the same calm, low-contrast aesthetic with platform-appropriate surface tokens. Do not copy oklch literals into React Native — use HeroUI Native theme APIs and Uniwind classes instead.</p>
           </main>
           <footer id="docs-pager" class="docs-pager-wrap"></footer>
         </div>

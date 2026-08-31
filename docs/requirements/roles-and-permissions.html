@@ -32,9 +32,21 @@
         <tbody>
           <tr><td><strong>STUDENT</strong></td><td>View dashboard, classes, lessons, submit assignments, take quizzes, view grades, attendance, announcements</td></tr>
           <tr><td><strong>TEACHER</strong></td><td>Manage classes, create content, grade submissions, record attendance, publish announcements</td></tr>
-          <tr><td><strong>ADMIN</strong></td><td>Manage users, academic structure, assignments, analytics, system settings, permissions</td></tr>
+          <tr><td><strong>ADMIN</strong></td><td>Manage one school tenant — users, academic structure, assignments, analytics, school settings. Uses <code>apps/web</code> admin portal.</td></tr>
+          <tr><td><strong>SYSTEM_ADMIN</strong></td><td>Nabta platform operator — onboard schools, monitor health, manage platform ops. Uses <code>apps/system-admin</code>. Does <em>not</em> access school academic features (classes, grades, assignments).</td></tr>
         </tbody>
       </table>
+
+      <h2>ADMIN vs SYSTEM_ADMIN</h2>
+      <div class="table-wrap"><table>
+        <thead><tr><th>Dimension</th><th>ADMIN (school)</th><th>SYSTEM_ADMIN (platform)</th></tr></thead>
+        <tbody>
+          <tr><td>Scope</td><td>Single school (<code>schoolId</code>)</td><td>All schools / platform</td></tr>
+          <tr><td>Client</td><td><code>apps/web</code> — admin routes</td><td><code>apps/system-admin</code></td></tr>
+          <tr><td>Manages</td><td>Students, teachers, classes, subjects, school settings</td><td>School tenants, platform health, operator workflows</td></tr>
+          <tr><td>Does not manage</td><td>Other schools, platform infra</td><td>School academic content or day-to-day teaching</td></tr>
+        </tbody>
+      </table></div>
 
       <h2>Permission Model</h2>
       <p>Permissions should eventually support granular actions:</p>
@@ -71,7 +83,8 @@ attendance.write</code></pre>
 
       <h2>Acceptance Criteria</h2>
       <ul class="checklist">
-        <li>Three roles (STUDENT, TEACHER, ADMIN) are implemented</li>
+        <li>Three school roles (STUDENT, TEACHER, ADMIN) are implemented in Phase 1</li>
+        <li>SYSTEM_ADMIN role and guards implemented in Phase 1c</li>
         <li>Backend guards enforce authorization on every protected endpoint</li>
         <li>Frontend hides UI elements the user cannot access</li>
         <li>No hardcoded role checks in business logic — use centralized RBAC</li>
@@ -80,7 +93,7 @@ attendance.write</code></pre>
 
       <div class="related-links">
         <h2>Related</h2>
-        <p><span class="badge badge-phase">Phases</span> <a href="../roadmap/01-foundation/">Phase 1 — Foundation</a></p>
+        <p><span class="badge badge-phase">Phases</span> <a href="../roadmap/01-foundation/">Phase 1 — Foundation</a>, <a href="../roadmap/01c-system-admin/">Phase 1c — System Admin</a></p>
         <p><span class="badge badge-arch">Architecture</span> <a href="../technical/system-design.html">System Design</a>, <a href="../technical/backend-architecture.html">Backend Architecture</a></p>
         <p>See also: <a href="security.html">Security</a></p>
       </div>

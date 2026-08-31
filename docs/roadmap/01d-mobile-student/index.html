@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Phase 1d — Mobile Student — Nabta</title>
+  <link rel="stylesheet" href="../../assets/docs.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500&family=Quicksand:wght@400;500;600;700&family=Zain:wght@400;700&display=swap" rel="stylesheet">
+</head>
+<body data-section="roadmap" data-title="Phase 1d — Mobile Student">
+  <a href="#main" class="skip-link">Skip to content</a>
+  <header id="docs-topnav" class="docs-topnav" aria-label="Top navigation"></header>
+  <div class="docs-mobile-bar">
+    <button type="button" id="sidebar-toggle" class="sidebar-toggle" aria-expanded="false" aria-label="Open menu">&#9776;</button>
+    <a href="../../index.html" class="docs-mobile-brand">Nabta</a>
+  </div>
+  <div id="sidebar-overlay" class="sidebar-overlay"></div>
+  <div class="docs-layout">
+    <aside id="docs-sidebar" class="docs-sidebar" aria-label="Sidebar"></aside>
+    <div class="docs-content">
+      <div class="docs-body">
+        <div class="docs-article">
+          <header id="docs-header" class="docs-page-header"></header>
+          <main id="main" class="docs-main">
+<h1>Phase 1d — Mobile Student</h1>
+      <p class="lead"><span class="badge badge-phase">Phase 1d</span> Implement this phase only. Depends on Phase 1. Do not implement Phase 1e+ or Phase 2+ functionality.</p>
+
+      <h2>Goal</h2>
+      <p>Scaffold the native student app at <code>apps/mobile-student</code> — Expo + HeroUI Native + Uniwind, auth shell, EN/AR, and Nabta theme.</p>
+
+      <h2>Depends On</h2>
+      <ul>
+        <li><a href="../01-foundation/">Phase 1 — Foundation</a> (auth API, i18n packages, design tokens intent)</li>
+      </ul>
+
+      <h2>In Scope</h2>
+      <ul>
+        <li><code>apps/mobile-student</code> — Expo (~54) + Expo Router + HeroUI Native + Uniwind</li>
+        <li>Student login (STUDENT role only)</li>
+        <li>Tab navigation shell with placeholder screens</li>
+        <li>EN/AR via shared <code>packages/i18n</code>; RTL layout</li>
+        <li>Light/dark theme (Nabta green accent)</li>
+        <li><code>EXPO_PUBLIC_API_URL</code> configuration</li>
+        <li><code>pnpm dev:mobile-student</code> script</li>
+      </ul>
+
+      <h2>Out of Scope</h2>
+      <ul>
+        <li>Assignments, grades, lessons (Phase 3+)</li>
+        <li>Push notifications and offline sync (future)</li>
+        <li>Teacher or admin mobile features (<a href="../01e-mobile-staff/">Phase 1e</a>)</li>
+        <li>Academic entities (Phase 2)</li>
+      </ul>
+
+      <h2>Acceptance Criteria</h2>
+      <ul class="checklist">
+        <li>Student can log in via mobile app</li>
+        <li>Non-student roles rejected at login</li>
+        <li>Tab shell renders with placeholders</li>
+        <li>EN/AR and RTL work; light/dark themes work</li>
+        <li>API reachable via <code>EXPO_PUBLIC_API_URL</code></li>
+        <li>Expo dev server starts with <code>pnpm dev:mobile-student</code></li>
+      </ul>
+
+      <h2>Implementation slices</h2>
+      <p>Complete in order. Do not implement Phase 1e+ or Phase 2+.</p>
+      <ol>
+        <li><strong>Expo scaffold</strong> — <code>apps/mobile-student</code> with Expo Router, HeroUI Native, Uniwind. Verify: <code>pnpm dev:mobile-student</code> starts.</li>
+        <li><strong>Auth</strong> — student login against API; secure token storage. Verify: STUDENT role succeeds; others fail.</li>
+        <li><strong>Navigation shell</strong> — tab layout with placeholder home/classes/assignments. Verify: tabs render.</li>
+        <li><strong>i18n + RTL</strong> — shared <code>packages/i18n</code>; locale switcher. Verify: EN/AR and RTL work.</li>
+        <li><strong>Theme</strong> — Nabta accent via HeroUI Native tokens; light/dark. Verify: both themes apply.</li>
+      </ol>
+
+      <div class="related-links">
+        <h2>Related</h2>
+        <p><strong>Requirements:</strong> <a href="../../requirements/mobile-student.html">Mobile Student</a>, <a href="../../requirements/student.html">Student Portal</a>, <a href="../../requirements/internationalization.html">Internationalization</a></p>
+        <p><strong>Architecture:</strong> <a href="../../technical/tech-stack.html">Tech Stack</a>, <a href="../../technical/frontend-architecture.html">Frontend Architecture</a>, <a href="../../design/theming.html#native">Theming — Native</a></p>
+        <p><strong>Previous:</strong> <a href="../01c-system-admin/">Phase 1c</a> · <strong>Next:</strong> <a href="../01e-mobile-staff/">Phase 1e — Mobile Staff</a></p>
+      </div>
+      <p class="source-footnote">Source: bootstrap plan — mobile student</p>
+          </main>
+          <footer id="docs-pager" class="docs-pager-wrap"></footer>
+        </div>
+        <aside id="docs-toc" class="docs-toc" aria-label="Table of contents"></aside>
+      </div>
+    </div>
+  </div>
+  <script src="../../assets/nav-config.js"></script>
+  <script src="../../assets/layout.js"></script>
+  <script src="../../assets/docs.js"></script>
+</body>
+</html>

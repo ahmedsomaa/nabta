@@ -36,7 +36,8 @@
           <tr><td><code>minio</code></td><td>minio/minio</td><td>S3-compatible object storage</td></tr>
           <tr><td><code>api</code></td><td>Dockerfile.api</td><td>NestJS (hot-reload in dev)</td></tr>
           <tr><td><code>web</code></td><td>Dockerfile.web</td><td>Nabta SPA</td></tr>
-          <tr><td><code>marketing</code></td><td>Dockerfile.marketing</td><td>Marketing site (Phase 1b)</td></tr>
+          <tr><td><code>marketing</code></td><td>Dockerfile.marketing</td><td>Marketing site (Phase 1b) — port <code>5174</code></td></tr>
+          <tr><td><code>system-admin</code></td><td>Dockerfile.system-admin</td><td>Platform operator console (Phase 1c) — port <code>5175</code></td></tr>
         </tbody>
       </table>
       <pre><code># Infrastructure only (postgres, redis, minio)
@@ -54,7 +55,8 @@ pnpm start</code></pre>
 ├── docker-compose.prod.yml   # Production overrides
 ├── Dockerfile.api
 ├── Dockerfile.web
-└── Dockerfile.marketing</code></pre>
+├── Dockerfile.marketing
+└── Dockerfile.system-admin</code></pre>
 
       <h2>Environment Matrix</h2>
       <table>
@@ -71,8 +73,9 @@ pnpm start</code></pre>
         <thead><tr><th>Component</th><th>Platform</th><th>Notes</th></tr></thead>
         <tbody>
           <tr><td>CI/CD</td><td>GitHub Actions</td><td>Lint, test, build, push Docker images to GHCR</td></tr>
-          <tr><td>Marketing site</td><td>Cloudflare Pages or Vercel</td><td>Static/SSR, free tier</td></tr>
-          <tr><td>Nabta web</td><td>Cloudflare Pages or Vercel</td><td>SPA; proxy <code>/api</code> to backend</td></tr>
+          <tr><td>Marketing site</td><td>Cloudflare Pages or Vercel</td><td>Static/SSR, free tier — <code>apps/marketing</code></td></tr>
+          <tr><td>System admin</td><td>Cloudflare Pages or Vercel</td><td>SPA; restricted access — <code>apps/system-admin</code></td></tr>
+          <tr><td>Nabta web (portals)</td><td>Cloudflare Pages or Vercel</td><td>SPA; proxy <code>/api</code> to backend</td></tr>
           <tr><td>API</td><td>Render, Fly.io, or Railway</td><td>Docker container deploy</td></tr>
           <tr><td>PostgreSQL</td><td>Neon or Supabase</td><td>Free tier Postgres</td></tr>
           <tr><td>Redis</td><td>Upstash</td><td>Serverless Redis free tier</td></tr>
@@ -105,7 +108,7 @@ pnpm start</code></pre>
   ECS --> SM</pre>
       <ul>
         <li><strong>Compute:</strong> ECS Fargate for API containers</li>
-        <li><strong>Frontend:</strong> S3 + CloudFront for web and marketing static assets</li>
+        <li><strong>Frontend:</strong> S3 + CloudFront for web, marketing, and system-admin static assets</li>
         <li><strong>Database:</strong> RDS PostgreSQL (Multi-AZ for prod)</li>
         <li><strong>Cache:</strong> ElastiCache Redis</li>
         <li><strong>Files:</strong> S3 with pre-signed URLs</li>
@@ -162,7 +165,7 @@ pnpm start</code></pre>
 
       <div class="related-links">
         <h2>Related</h2>
-        <p><span class="badge badge-phase">Phases</span> <a href="../roadmap/01-foundation/">Phase 1 — Foundation</a>, <a href="../roadmap/01b-marketing-site/">Phase 1b — Marketing Site</a></p>
+        <p><span class="badge badge-phase">Phases</span> <a href="../roadmap/01-foundation/">Phase 1 — Foundation</a>, <a href="../roadmap/01b-marketing-site/">Phase 1b — Marketing Site</a>, <a href="../roadmap/01c-system-admin/">Phase 1c — System Admin</a></p>
         <p><span class="badge badge-arch">Architecture</span> <a href="testing-and-cicd.html">Testing &amp; CI/CD</a>, <a href="system-architecture.html">System Architecture</a>, <a href="email.html">Email (Resend)</a></p>
       </div>
       <p class="source-footnote">Source: expanded requirements — Docker &amp; deployment</p>

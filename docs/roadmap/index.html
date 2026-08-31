@@ -30,6 +30,9 @@
       <div class="card-grid">
         <a href="01-foundation/index.html" class="card"><h3>Phase 1 — Foundation</h3><p>Monorepo, Docker, CI/CD, auth, RBAC, i18n, dark mode</p></a>
         <a href="01b-marketing-site/index.html" class="card"><h3>Phase 1b — Marketing Site</h3><p>Public website — home, features, contact/demo</p></a>
+        <a href="01c-system-admin/index.html" class="card"><h3>Phase 1c — System Admin</h3><p>Platform operator console — schools, health, ops</p></a>
+        <a href="01d-mobile-student/index.html" class="card"><h3>Phase 1d — Mobile Student</h3><p>Expo student app — auth shell, EN/AR, Nabta theme</p></a>
+        <a href="01e-mobile-staff/index.html" class="card"><h3>Phase 1e — Mobile Staff</h3><p>Expo staff app — teacher + admin roles, shared shell</p></a>
         <a href="02-academic-core/index.html" class="card"><h3>Phase 2 — Academic Core</h3><p>Schools, years, grades, classes, enrollments</p></a>
         <a href="03-student-experience/index.html" class="card"><h3>Phase 3 — Student Experience</h3><p>Dashboard, lessons, assignments, progress</p></a>
         <a href="04-teacher-experience/index.html" class="card"><h3>Phase 4 — Teacher Experience</h3><p>Class mgmt, lesson builder, gradebook</p></a>
@@ -42,8 +45,13 @@
       <h2>Dependency Order</h2>
       <pre class="mermaid">flowchart LR
   P1[Phase 1 Foundation] --> P1b[Phase 1b Marketing]
-  P1 --> P2[Phase 2 Academic Core]
-  P1b --> P2
+  P1 --> P1c[Phase 1c System Admin]
+  P1 --> P1d[Phase 1d Mobile Student]
+  P1 --> P1e[Phase 1e Mobile Staff]
+  P1b --> P2[Phase 2 Academic Core]
+  P1c --> P2
+  P1d --> P2
+  P1e --> P2
   P2 --> P3[Phase 3 Student]
   P2 --> P4[Phase 4 Teacher]
   P3 --> P5[Phase 5 Assessments]
@@ -54,7 +62,7 @@
   P5 --> P7
   P6 --> P7
   P7 --> P8[Phase 8 Hardening]
-  P8 -.-> Future[Future: Mobile Payments LLM]</pre>
+  P8 -.-> Future[Future: Push Offline Payments LLM]</pre>
 
       <h2>Cursor Working Rules</h2>
       <ol>

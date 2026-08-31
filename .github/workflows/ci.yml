@@ -31,6 +31,10 @@ jobs:
       WEB_URL: http://localhost:5173
       API_URL: http://localhost:3000
       VITE_API_URL: http://localhost:3000
+      VITE_WEB_URL: http://localhost:5173
+      VITE_MARKETING_URL: http://localhost:5174
+      VITE_SYSTEM_ADMIN_URL: http://localhost:5175
+      EXPO_PUBLIC_API_URL: http://localhost:3000
       RESEND_API_KEY: ""
       RESEND_FROM_EMAIL: noreply@nabta.app
       MINIO_ENDPOINT: localhost
@@ -58,9 +62,15 @@ jobs:
       - run: pnpm --filter @nabta/database exec prisma migrate deploy
       - run: pnpm --filter @nabta/database build
       - run: pnpm typecheck
+      - name: Typecheck mobile apps
+        run: |
+          pnpm --filter @nabta/mobile-student typecheck
+          pnpm --filter @nabta/mobile-staff typecheck
       - run: pnpm test
       - run: pnpm build
       - name: Build Docker images
         run: |
           docker build -f nabta-docker/Dockerfile.api -t nabta-api:ci .
           docker build -f nabta-docker/Dockerfile.web -t nabta-web:ci .
+          docker build -f nabta-docker/Dockerfile.marketing -t nabta-marketing:ci .
+          docker build -f nabta-docker/Dockerfile.system-admin -t nabta-system-admin:ci .

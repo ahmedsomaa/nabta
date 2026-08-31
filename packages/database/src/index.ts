@@ -1,9 +1,3 @@
-import { PrismaClient } from '@prisma/client';
-
-export * from '@prisma/client';
-
-export const prisma = new PrismaClient();
-
-export function createPrismaClient() {
-  return new PrismaClient();
-}
+export { PrismaClient } from './generated/prisma/client';
+export * from './generated/prisma/client';
+export { createPrismaClient } from './create-prisma-client';

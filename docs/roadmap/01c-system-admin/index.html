@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Phase 1c — System Admin — Nabta</title>
+  <link rel="stylesheet" href="../../assets/docs.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500&family=Quicksand:wght@400;500;600;700&family=Zain:wght@400;700&display=swap" rel="stylesheet">
+</head>
+<body data-section="roadmap" data-title="Phase 1c — System Admin">
+  <a href="#main" class="skip-link">Skip to content</a>
+  <header id="docs-topnav" class="docs-topnav" aria-label="Top navigation"></header>
+  <div class="docs-mobile-bar">
+    <button type="button" id="sidebar-toggle" class="sidebar-toggle" aria-expanded="false" aria-label="Open menu">&#9776;</button>
+    <a href="../../index.html" class="docs-mobile-brand">Nabta</a>
+  </div>
+  <div id="sidebar-overlay" class="sidebar-overlay"></div>
+  <div class="docs-layout">
+    <aside id="docs-sidebar" class="docs-sidebar" aria-label="Sidebar"></aside>
+    <div class="docs-content">
+      <div class="docs-body">
+        <div class="docs-article">
+          <header id="docs-header" class="docs-page-header"></header>
+          <main id="main" class="docs-main">
+<h1>Phase 1c — System Admin</h1>
+      <p class="lead"><span class="badge badge-phase">Phase 1c</span> Implement this phase only. Depends on Phase 1. Do not implement Phase 1d+ or Phase 2+ functionality.</p>
+
+      <h2>Goal</h2>
+      <p>Build the platform operator console at <code>apps/system-admin</code> for SYSTEM_ADMIN users — school tenant management and platform health. Not school academic features.</p>
+
+      <h2>Depends On</h2>
+      <ul>
+        <li><a href="../01-foundation/">Phase 1 — Foundation</a> (auth, design system, i18n, Docker)</li>
+      </ul>
+
+      <h2>In Scope</h2>
+      <ul>
+        <li><code>apps/system-admin</code> — React 19 + Vite + Tailwind CSS v4 + HeroUI v3 (port <code>5175</code>)</li>
+        <li>SYSTEM_ADMIN role + API guards</li>
+        <li>Operator auth shell and layout</li>
+        <li>School tenant list and basic CRUD</li>
+        <li>Platform health dashboard (API health check)</li>
+        <li>EN/AR with RTL via shared <code>packages/i18n</code></li>
+        <li>Light and dark theme toggle</li>
+        <li><code>Dockerfile.system-admin</code> and Docker Compose profile</li>
+      </ul>
+
+      <h2>Out of Scope</h2>
+      <ul>
+        <li>School academic features (classes, grades, assignments)</li>
+        <li>Student/teacher portal functionality</li>
+        <li>Billing or payment setup</li>
+        <li>Phase 2 academic entities</li>
+      </ul>
+
+      <h2>Acceptance Criteria</h2>
+      <ul class="checklist">
+        <li>SYSTEM_ADMIN can log in to the console</li>
+        <li>Non–SYSTEM_ADMIN users are blocked</li>
+        <li>School list with create/edit works</li>
+        <li>Health page reflects API status</li>
+        <li>EN/AR and RTL work; light/dark themes work</li>
+        <li>Runs via Docker Compose (<code>--profile full</code>) on port <code>5175</code></li>
+      </ul>
+
+      <h2>Implementation slices</h2>
+      <p>Complete in order. Do not implement Phase 1d+ or Phase 2+.</p>
+      <ol>
+        <li><strong>System-admin scaffold</strong> — <code>apps/system-admin</code> with Vite + HeroUI v3; <code>Dockerfile.system-admin</code> and Compose profile. Verify: runs on port <code>5175</code> via <code>pnpm dev:system-admin</code> and Docker <code>--profile full</code>.</li>
+        <li><strong>SYSTEM_ADMIN auth</strong> — login flow; role guard on routes and API. Verify: only SYSTEM_ADMIN can access.</li>
+        <li><strong>School tenants</strong> — list, create, edit school records. Verify: CRUD persists via API.</li>
+        <li><strong>Health dashboard</strong> — read <code>/api/v1/health</code>. Verify: DB/Redis status displayed.</li>
+        <li><strong>EN/AR + theme</strong> — shared i18n; light/dark toggle. Verify: RTL and both themes work.</li>
+      </ol>
+
+      <div class="related-links">
+        <h2>Related</h2>
+        <p><strong>Requirements:</strong> <a href="../../requirements/system-admin.html">System Admin</a>, <a href="../../requirements/roles-and-permissions.html">Roles &amp; Permissions</a>, <a href="../../requirements/internationalization.html">Internationalization</a></p>
+        <p><strong>Architecture:</strong> <a href="../../technical/docker-and-deployment.html">Docker &amp; Deployment</a>, <a href="../../technical/frontend-architecture.html">Frontend Architecture</a>, <a href="../../technical/environment.html">Environment Variables</a></p>
+        <p><strong>Previous:</strong> <a href="../01-foundation/">Phase 1</a> · <strong>Next:</strong> <a href="../01d-mobile-student/">Phase 1d — Mobile Student</a>, <a href="../02-academic-core/">Phase 2 — Academic Core</a></p>
+      </div>
+      <p class="source-footnote">Source: bootstrap plan — system admin</p>
+          </main>
+          <footer id="docs-pager" class="docs-pager-wrap"></footer>
+        </div>
+        <aside id="docs-toc" class="docs-toc" aria-label="Table of contents"></aside>
+      </div>
+    </div>
+  </div>
+  <script src="../../assets/nav-config.js"></script>
+  <script src="../../assets/layout.js"></script>
+  <script src="../../assets/docs.js"></script>
+</body>
+</html>

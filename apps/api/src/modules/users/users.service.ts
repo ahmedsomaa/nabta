@@ -26,7 +26,7 @@ export class UsersService {
     id: string;
     email: string;
     role: AuthUser['role'];
-    schoolId: string;
+    schoolId: string | null;
     locale: AuthUser['locale'];
     theme: AuthUser['theme'];
     status: AuthUser['status'];

@@ -15,13 +15,26 @@
     "docker:ps": "docker compose -f nabta-docker/docker-compose.yml ps",
     "db:generate": "pnpm --filter @nabta/database generate",
     "db:migrate": "pnpm --filter @nabta/database migrate:deploy",
-    "db:migrate:dev": "pnpm --filter @nabta/database migrate:dev",
+    "db:migrate:dev": "pnpm --filter @nabta/database migrate:dev && pnpm db:generate",
     "db:seed": "pnpm --filter @nabta/database seed",
     "start": "pnpm docker:up && pnpm db:migrate && pnpm db:seed && pnpm dev",
-    "start:app": "pnpm dev"
+    "start:web": "pnpm --filter @nabta/api --filter @nabta/web --filter @nabta/marketing --filter @nabta/system-admin dev",
+    "start:app": "pnpm dev",
+    "dev:marketing": "pnpm --filter @nabta/marketing dev",
+    "dev:system-admin": "pnpm --filter @nabta/system-admin dev",
+    "dev:mobile-student": "pnpm --filter @nabta/mobile-student dev",
+    "dev:mobile-staff": "pnpm --filter @nabta/mobile-staff dev"
   },
   "devDependencies": {
     "turbo": "^2.5.4",
     "typescript": "^5.8.3"
+  },
+  "pnpm": {
+    "onlyBuiltDependencies": [
+      "@prisma/client",
+      "argon2",
+      "esbuild",
+      "prisma"
+    ]
   }
 }

@@ -24,7 +24,8 @@
     "roles": {
       "STUDENT": "Student",
       "TEACHER": "Teacher",
-      "ADMIN": "Admin"
+      "ADMIN": "Admin",
+      "SYSTEM_ADMIN": "System admin"
     }
   },
   "auth": {
@@ -79,5 +80,99 @@
     "teacherTitle": "Teacher dashboard",
     "adminTitle": "Admin dashboard",
     "welcome": "Welcome, {{email}}"
+  },
+  "marketing": {
+    "nav": {
+      "home": "Home",
+      "features": "Features",
+      "forSchools": "For schools",
+      "pricing": "Pricing",
+      "contact": "Contact"
+    },
+    "home": {
+      "heroTitle": "The school platform for Egyptian international schools",
+      "heroBody": "Nabta combines LMS, academic structure, and day-to-day classroom workflows — bilingual from day one.",
+      "ctaDemo": "Request a demo",
+      "ctaFeatures": "See features",
+      "cards": {
+        "students": {
+          "title": "Students",
+          "body": "Clear daily view of classes, assignments, and progress."
+        },
+        "teachers": {
+          "title": "Teachers",
+          "body": "Plan lessons, collect work, and grade without the clutter."
+        },
+        "admins": {
+          "title": "School admins",
+          "body": "Structure years, classes, and users around how schools operate."
+        }
+      }
+    },
+    "features": {
+      "title": "Features",
+      "subtitle": "Built for school operations — not generic course catalogs.",
+      "items": {
+        "structure": {
+          "title": "Academic structure",
+          "body": "School → year → grade → class → subject as first-class concepts."
+        },
+        "portals": {
+          "title": "Role portals",
+          "body": "Student, teacher, and school admin experiences in one product."
+        },
+        "i18n": {
+          "title": "EN / AR + RTL",
+          "body": "Bilingual product UI with proper right-to-left layout."
+        },
+        "assessment": {
+          "title": "Assignments & assessments",
+          "body": "Submit, grade, and track — expanding phase by phase."
+        }
+      }
+    },
+    "forSchools": {
+      "title": "For schools",
+      "body": "Designed for Egyptian international schools running British, American, or IB-style structures — with room to grow across MENA.",
+      "points": {
+        "egypt": "Launch focus: Egyptian international schools",
+        "curriculum": "Curriculum as configuration, not plugins",
+        "bilingual": "English and Arabic treated as equals"
+      }
+    },
+    "pricing": {
+      "title": "Pricing",
+      "cardTitle": "Talk to us",
+      "cardBody": "Pricing is still being defined. Request a demo and we will follow up with a school-fit proposal.",
+      "cta": "Contact sales"
+    },
+    "contact": {
+      "title": "Contact / demo",
+      "subtitle": "Tell us about your school and we will get back to you.",
+      "name": "Name",
+      "email": "Email",
+      "message": "Message",
+      "submit": "Send request",
+      "success": "Thanks — we received your request."
+    }
+  },
+  "platform": {
+    "nav": {
+      "overview": "Overview",
+      "schools": "Schools",
+      "system": "System"
+    },
+    "overviewTitle": "Platform overview",
+    "overviewBody": "Monitor Nabta across all schools. Tenant tools arrive in later phases.",
+    "schoolsTitle": "Schools",
+    "schoolsBody": "School listing and provisioning will live here.",
+    "systemTitle": "System",
+    "systemBody": "Health, flags, and ops controls — coming soon.",
+    "loginTitle": "System admin",
+    "loginSubtitle": "Sign in to the Nabta platform console."
+  },
+  "mobile": {
+    "comingSoon": "Coming soon",
+    "signIn": "Sign in"
   }
 }

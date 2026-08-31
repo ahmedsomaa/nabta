@@ -61,8 +61,10 @@
           <tr><td><strong>User</strong></td><td>Auth identity (email, password). Has one role per school: STUDENT, TEACHER, or ADMIN.</td></tr>
           <tr><td><strong>Student</strong></td><td>User with role STUDENT. Sees student portal.</td></tr>
           <tr><td><strong>Teacher</strong></td><td>User with role TEACHER. Manages classes, content, grading.</td></tr>
-          <tr><td><strong>Admin</strong></td><td>User with role ADMIN. Manages school structure, users, settings.</td></tr>
-          <tr><td><strong>Portal</strong></td><td>Role-specific app experience in <code>apps/web</code> — student, teacher, or admin.</td></tr>
+          <tr><td><strong>Admin</strong></td><td>User with role ADMIN. Manages one school tenant — structure, users, settings. Uses the school admin portal in <code>apps/web</code>.</td></tr>
+          <tr><td><strong>System Admin</strong></td><td>User with role SYSTEM_ADMIN. Nabta platform operator — manages schools, health, and ops across tenants. Uses <code>apps/system-admin</code>; does <em>not</em> manage school academic features.</td></tr>
+          <tr><td><strong>Portal</strong></td><td>Role-specific web experience in <code>apps/web</code> — student, teacher, or school admin. Distinct from mobile apps and the system-admin console.</td></tr>
+          <tr><td><strong>App</strong></td><td>Native mobile client — <code>apps/mobile-student</code> (students) or <code>apps/mobile-staff</code> (teachers + school admins). Expo + HeroUI Native.</td></tr>
         </tbody>
       </table></div>
 
@@ -71,8 +73,12 @@
         <thead><tr><th>Term</th><th>Definition</th></tr></thead>
         <tbody>
           <tr><td><strong>Nabta</strong> (نَبْتَة)</td><td>The product name. Tagline: <em>Learn. Grow. Thrive.</em></td></tr>
+          <tr><td><strong>Platform</strong></td><td>The Nabta multi-tenant backend and operator layer — all schools share one API; SYSTEM_ADMIN manages the platform, not individual school academics.</td></tr>
           <tr><td><strong>Phase</strong></td><td>An incremental implementation slice. Always implement one phase at a time.</td></tr>
-          <tr><td><strong>Marketing Site</strong></td><td>Public website at <code>apps/marketing</code> — not a portal. Phase 1b.</td></tr>
+          <tr><td><strong>Marketing Site</strong></td><td>Public website at <code>apps/marketing</code> — prospective schools; not a portal. Phase 1b.</td></tr>
+          <tr><td><strong>Mobile Student</strong></td><td>Native student app at <code>apps/mobile-student</code>. Phase 1d.</td></tr>
+          <tr><td><strong>Mobile Staff</strong></td><td>Native app for teachers and school admins at <code>apps/mobile-staff</code>. Phase 1e.</td></tr>
+          <tr><td><strong>Portal vs App</strong></td><td><strong>Portal</strong> = web SPA in the browser (<code>apps/web</code> role routes). <strong>App</strong> = installed Expo client on iOS/Android. Both call the same <code>/api/v1</code> API.</td></tr>
         </tbody>
       </table></div>
 

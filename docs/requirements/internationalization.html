@@ -36,10 +36,13 @@
       </table>
       <p>Architecture must support additional locales in the future (e.g. French, German) without rewriting the i18n system.</p>
 
-      <h2>Scope</h2>
+      <h2>Scope — All Six Clients</h2>
       <ul>
-        <li>All LMS portals (student, teacher, admin)</li>
+        <li>School portals — student, teacher, admin (<code>apps/web</code>)</li>
         <li>Marketing site (<code>apps/marketing</code>)</li>
+        <li>System admin console (<code>apps/system-admin</code>)</li>
+        <li>Mobile student app (<code>apps/mobile-student</code>)</li>
+        <li>Mobile staff app (<code>apps/mobile-staff</code>)</li>
         <li>System emails and notifications (when implemented)</li>
         <li>Date, time, and number formatting per locale</li>
       </ul>
@@ -47,10 +50,11 @@
       <h2>Implementation</h2>
       <ul>
         <li><code>packages/i18n</code> — shared translation files (<code>en.json</code>, <code>ar.json</code>)</li>
-        <li><code>react-i18next</code> in <code>apps/web</code> and <code>apps/marketing</code></li>
+        <li><code>react-i18next</code> in web Vite apps (<code>apps/web</code>, <code>apps/marketing</code>, <code>apps/system-admin</code>)</li>
+        <li><code>react-i18next</code> + Expo in mobile apps (<code>apps/mobile-student</code>, <code>apps/mobile-staff</code>)</li>
         <li>RTL layout via <code>dir="rtl"</code> on <code>&lt;html&gt;</code> when Arabic is active</li>
         <li>Logical CSS properties (<code>ms-</code>, <code>me-</code>, <code>ps-</code>, <code>pe-</code>) — avoid hardcoded left/right</li>
-        <li>Locale switcher in app shell and marketing site header</li>
+        <li>Locale switcher in app shell, marketing header, system-admin header, and mobile settings</li>
         <li>Locale persisted in user profile; browser <code>Accept-Language</code> as fallback for unauthenticated users</li>
       </ul>
 
@@ -77,7 +81,7 @@
 
       <div class="related-links">
         <h2>Related</h2>
-        <p><span class="badge badge-phase">Phases</span> <a href="../roadmap/01-foundation/">Phase 1 — Foundation</a>, <a href="../roadmap/01b-marketing-site/">Phase 1b — Marketing Site</a></p>
+        <p><span class="badge badge-phase">Phases</span> <a href="../roadmap/01-foundation/">Phase 1 — Foundation</a>, <a href="../roadmap/01b-marketing-site/">Phase 1b — Marketing Site</a>, <a href="../roadmap/01c-system-admin/">Phase 1c — System Admin</a>, <a href="../roadmap/01d-mobile-student/">Phase 1d — Mobile Student</a>, <a href="../roadmap/01e-mobile-staff/">Phase 1e — Mobile Staff</a></p>
         <p><span class="badge badge-arch">Architecture</span> <a href="../technical/frontend-architecture.html">Frontend Architecture</a></p>
         <p>Also see: <a href="../design/philosophy.html">UX &amp; Design</a></p>
       </div>

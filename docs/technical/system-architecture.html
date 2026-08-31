@@ -29,9 +29,12 @@
       <h2>Monorepo Structure</h2>
       <pre><code>nabta/
 ├── apps/
-│   ├── web/           # Nabta portals (student/teacher/admin)
-│   ├── api/           # NestJS
-│   └── marketing/     # Public marketing site (Phase 1b)
+│   ├── web/              # School portals (student/teacher/admin)
+│   ├── api/              # NestJS
+│   ├── marketing/        # Public marketing site (Phase 1b)
+│   ├── system-admin/     # Platform operator console (Phase 1c)
+│   ├── mobile-student/   # Student mobile app (Phase 1d)
+│   └── mobile-staff/     # Staff mobile app (Phase 1e)
 ├── packages/
 │   ├── database/      # Prisma schema/client
 │   ├── types/         # Shared domain types
@@ -43,7 +46,8 @@
 │   ├── docker-compose.prod.yml
 │   ├── Dockerfile.api
 │   ├── Dockerfile.web
-│   └── Dockerfile.marketing
+│   ├── Dockerfile.marketing
+│   └── Dockerfile.system-admin
 ├── .github/workflows/ # CI/CD from day one
 ├── package.json
 ├── pnpm-workspace.yaml
@@ -51,9 +55,12 @@
 
       <h2>Container Diagram</h2>
       <pre class="mermaid">flowchart TB
-  subgraph browser [Browser]
-    WebApp[apps/web]
+  subgraph clients [Client Surfaces]
+    WebApp[apps/web portals]
     Marketing[apps/marketing]
+    SystemAdmin[apps/system-admin]
+    MobileStudent[apps/mobile-student]
+    MobileStaff[apps/mobile-staff]
   end
   subgraph server [Server]
   subgraph nest [apps/api NestJS]
@@ -70,6 +77,9 @@
   end
   WebApp -->|REST /api/v1| Controllers
   Marketing -->|Login link| WebApp
+  SystemAdmin -->|REST /api/v1| Controllers
+  MobileStudent -->|REST /api/v1| Controllers
+  MobileStaff -->|REST /api/v1| Controllers
   Controllers --> Guards
   Guards --> Services
   Services --> PG
@@ -101,10 +111,10 @@
       <h2>Shared Packages</h2>
       <ul>
         <li><code>packages/database</code> — Prisma schema, client, migrations (used by api)</li>
-        <li><code>packages/types</code> — Shared TypeScript interfaces (used by web + api + mobile future)</li>
-        <li><code>packages/validation</code> — Shared Zod schemas (used by web + api)</li>
+        <li><code>packages/types</code> — Shared TypeScript interfaces (used by web + api + mobile apps)</li>
+        <li><code>packages/validation</code> — Shared Zod schemas (used by web + api + mobile)</li>
         <li><code>packages/config</code> — Environment config, constants (used by web + api)</li>
-        <li><code>packages/i18n</code> — Shared EN/AR translations (used by web + marketing)</li>
+        <li><code>packages/i18n</code> — Shared EN/AR translations (used by web, marketing, system-admin, mobile)</li>
       </ul>
 
       <div class="related-links">

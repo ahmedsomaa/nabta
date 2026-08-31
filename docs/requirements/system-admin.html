@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>System Admin — Nabta</title>
+  <link rel="stylesheet" href="../assets/docs.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500&family=Quicksand:wght@400;500;600;700&family=Zain:wght@400;700&display=swap" rel="stylesheet">
+</head>
+<body data-section="requirements" data-title="System Admin">
+  <a href="#main" class="skip-link">Skip to content</a>
+  <header id="docs-topnav" class="docs-topnav" aria-label="Top navigation"></header>
+  <div class="docs-mobile-bar">
+    <button type="button" id="sidebar-toggle" class="sidebar-toggle" aria-expanded="false" aria-label="Open menu">&#9776;</button>
+    <a href="../index.html" class="docs-mobile-brand">Nabta</a>
+  </div>
+  <div id="sidebar-overlay" class="sidebar-overlay"></div>
+  <div class="docs-layout">
+    <aside id="docs-sidebar" class="docs-sidebar" aria-label="Sidebar"></aside>
+    <div class="docs-content">
+      <div class="docs-body">
+        <div class="docs-article">
+          <header id="docs-header" class="docs-page-header"></header>
+          <main id="main" class="docs-main">
+<h1>System Admin</h1>
+      <p class="lead">Platform operator console for Nabta staff — manages schools and platform health, not school academic features.</p>
+
+      <h2>Purpose</h2>
+      <p><strong>SYSTEM_ADMIN</strong> users operate the Nabta platform: onboard schools, monitor API health, and run cross-tenant ops. Lives at <code>apps/system-admin</code>. Distinct from school <strong>ADMIN</strong> who manages a single tenant in <code>apps/web</code>.</p>
+
+      <h2>v1 Capabilities (Phase 1c bootstrap)</h2>
+      <table>
+        <thead><tr><th>Area</th><th>Content</th></tr></thead>
+        <tbody>
+          <tr><td><strong>Auth</strong></td><td>SYSTEM_ADMIN login; JWT flow shared with API</td></tr>
+          <tr><td><strong>Dashboard</strong></td><td>Platform overview — school count, health status placeholders</td></tr>
+          <tr><td><strong>Schools</strong></td><td>List schools; create/edit tenant records (name, slug, status)</td></tr>
+          <tr><td><strong>Health</strong></td><td>Surface API <code>/api/v1/health</code> status (DB, Redis)</td></tr>
+          <tr><td><strong>Shell</strong></td><td>App layout, EN/AR, light/dark theme — same design tokens as web</td></tr>
+        </tbody>
+      </table>
+
+      <h2>Stack</h2>
+      <ul>
+        <li>React 19 + Vite + Tailwind CSS v4 + HeroUI v3 (<code>@heroui/react</code> + <code>@heroui/styles</code>)</li>
+        <li>Shared <code>packages/i18n</code> for EN/AR</li>
+        <li>Dev port <code>5175</code>; <code>pnpm dev:system-admin</code></li>
+        <li><code>Dockerfile.system-admin</code> and Docker Compose profile</li>
+      </ul>
+
+      <h2>In Scope (Phase 1c)</h2>
+      <ul>
+        <li><code>apps/system-admin</code> scaffold with auth shell and operator layout</li>
+        <li>SYSTEM_ADMIN role and API guards</li>
+        <li>School tenant list and basic CRUD</li>
+        <li>Platform health dashboard (read-only)</li>
+        <li>EN/AR with RTL support</li>
+        <li>Light/dark theme toggle</li>
+      </ul>
+
+      <h2>Out of Scope</h2>
+      <ul>
+        <li>School academic features — classes, subjects, assignments, grades</li>
+        <li>Student or teacher portal functionality</li>
+        <li>Billing or payment configuration (future)</li>
+        <li>Impersonating school users</li>
+      </ul>
+
+      <h2>Acceptance Criteria</h2>
+      <ul class="checklist">
+        <li>SYSTEM_ADMIN can log in to <code>apps/system-admin</code></li>
+        <li>Non–SYSTEM_ADMIN users cannot access the console</li>
+        <li>School tenant list renders with create/edit</li>
+        <li>Health page reflects API health check</li>
+        <li>EN/AR and RTL work; light/dark themes work</li>
+        <li>Runs via Docker Compose (<code>--profile full</code>) on port <code>5175</code></li>
+      </ul>
+
+      <div class="related-links">
+        <h2>Related</h2>
+        <p><span class="badge badge-phase">Phases</span> <a href="../roadmap/01c-system-admin/">Phase 1c — System Admin</a></p>
+        <p><span class="badge badge-arch">Architecture</span> <a href="../technical/docker-and-deployment.html">Docker &amp; Deployment</a>, <a href="../technical/frontend-architecture.html">Frontend Architecture</a></p>
+        <p>Also see: <a href="roles-and-permissions.html">Roles &amp; Permissions</a>, <a href="internationalization.html">Internationalization</a></p>
+      </div>
+      <p class="source-footnote">Source: bootstrap plan — system admin</p>
+          </main>
+          <footer id="docs-pager" class="docs-pager-wrap"></footer>
+        </div>
+        <aside id="docs-toc" class="docs-toc" aria-label="Table of contents"></aside>
+      </div>
+    </div>
+  </div>
+  <script src="../assets/nav-config.js"></script>
+  <script src="../assets/layout.js"></script>
+  <script src="../assets/docs.js"></script>
+</body>
+</html>

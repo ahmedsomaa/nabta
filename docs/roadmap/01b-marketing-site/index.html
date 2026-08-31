@@ -68,9 +68,9 @@
 
 
       <h2>Implementation slices</h2>
-      <p>Derived from this phase’s acceptance criteria. Complete in order; each slice is independently verifiable. Do not implement Phase 2+.</p>
+      <p>Derived from this phase’s acceptance criteria. Complete in order; each slice is independently verifiable. Do not implement Phase 1c+ or Phase 2+.</p>
       <ol>
-        <li><strong>Marketing app scaffold</strong> — <code>apps/marketing</code> with React 19 + Vite + Tailwind v4 + HeroUI v3; <code>Dockerfile.marketing</code> and Compose profile. Verify: the app runs via Docker Compose <code>--profile full</code>.</li>
+        <li><strong>Marketing app scaffold</strong> — <code>apps/marketing</code> with React 19 + Vite + Tailwind v4 + HeroUI v3; <code>Dockerfile.marketing</code> and Compose profile. Verify: the app runs via Docker Compose <code>--profile full</code> on port <code>5174</code>.</li>
         <li><strong>v1 pages</strong> — Home, Features, For Schools, Pricing (placeholder), Contact/Demo. Verify: all pages render.</li>
         <li><strong>EN/AR + RTL</strong> — shared <code>packages/i18n</code>. Verify: all v1 pages render in EN and AR with correct RTL.</li>
         <li><strong>Theme</strong> — light and dark toggle on every marketing page. Verify: both themes work on all pages.</li>

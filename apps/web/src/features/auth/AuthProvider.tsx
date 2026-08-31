@@ -115,6 +115,7 @@ export function useAuth() {
 }
 
 export function roleHome(role: AuthUser['role']) {
+  if (role === 'SYSTEM_ADMIN') return '/login';
   if (role === 'TEACHER') return '/teacher/dashboard';
   if (role === 'ADMIN') return '/admin/dashboard';
   return '/student/dashboard';

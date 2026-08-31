@@ -8,6 +8,7 @@ import { EmailModule } from './modules/email/email.module';
 import { StorageModule } from './modules/storage/storage.module';
 import { HealthController } from './health.controller';
 import { AdminController } from './modules/admin/admin.controller';
+import { PlatformController } from './modules/platform/platform.controller';
 import { PrismaModule } from './prisma/prisma.module';
 
 @Module({
@@ -20,7 +21,7 @@ import { PrismaModule } from './prisma/prisma.module';
     UsersModule,
     AuthModule,
   ],
-  controllers: [HealthController, AdminController],
+  controllers: [HealthController, AdminController, PlatformController],
   providers: [{ provide: APP_GUARD, useClass: ThrottlerGuard }],
 })
 export class AppModule {}

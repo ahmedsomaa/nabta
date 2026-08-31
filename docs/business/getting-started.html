@@ -23,7 +23,7 @@
       <p class="lead">How to use the Nabta documentation to build the platform incrementally.</p>
 
       <div class="callout">
-        <p><strong>Golden rule:</strong> Implement <strong>one phase folder at a time</strong> (for example <code>docs/roadmap/01-foundation/</code>). Do not implement Phase 1b or Phase 2+ while working on Phase 1. Each phase page links to the requirements, design, and technical pages it needs.</p>
+        <p><strong>Golden rule:</strong> Implement <strong>one phase folder at a time</strong> (for example <code>docs/roadmap/01-foundation/</code>). Do not implement Phase 1b–1e or Phase 2+ while working on Phase 1. Each phase page links to the requirements, design, and technical pages it needs.</p>
       </div>
 
       <h2>Documentation Structure</h2>
@@ -50,8 +50,13 @@
       <h2>Phase Order</h2>
       <pre class="mermaid">flowchart LR
   P1[Phase 1 Foundation] --> P1b[Phase 1b Marketing]
-  P1 --> P2[Phase 2 Academic Core]
-  P1b --> P2
+  P1 --> P1c[Phase 1c System Admin]
+  P1 --> P1d[Phase 1d Mobile Student]
+  P1 --> P1e[Phase 1e Mobile Staff]
+  P1b --> P2[Phase 2 Academic Core]
+  P1c --> P2
+  P1d --> P2
+  P1e --> P2
   P2 --> P3[Phase 3 Student]
   P2 --> P4[Phase 4 Teacher]
   P3 --> P5[Phase 5 Assessments]
@@ -63,6 +68,51 @@
   P6 --> P7
   P7 --> P8[Phase 8 Hardening]
   P8 -.-> Future[Future Roadmap]</pre>
+
+      <h2>Local Development</h2>
+      <p>Prerequisites: Node.js 22+, pnpm 10+, Docker Desktop (Postgres, Redis, MinIO).</p>
+      <pre><code>pnpm install
+cp .env.example .env
+pnpm docker:up
+pnpm db:generate
+pnpm db:migrate
+pnpm db:seed</code></pre>
+      <p>Database URL is configured in <code>packages/database/prisma.config.ts</code> (reads the monorepo root <code>.env</code>). After schema changes, run <code>pnpm db:generate</code> before starting apps.</p>
+      <p>Start the four browser/API apps (no mobile):</p>
+      <pre><code>pnpm start:web</code></pre>
+      <div class="table-wrap"><table>
+        <thead><tr><th>Command</th><th>App</th><th>Port / runtime</th></tr></thead>
+        <tbody>
+          <tr><td><code>pnpm start:web</code></td><td>API + web + marketing + system-admin</td><td>3000, 5173, 5174, 5175</td></tr>
+          <tr><td><code>pnpm dev</code></td><td>All Turbo dev tasks (includes mobile)</td><td>See below</td></tr>
+          <tr><td><code>pnpm dev:marketing</code></td><td><code>apps/marketing</code></td><td><code>5174</code></td></tr>
+          <tr><td><code>pnpm dev:system-admin</code></td><td><code>apps/system-admin</code></td><td><code>5175</code></td></tr>
+          <tr><td><code>pnpm dev:mobile-student</code></td><td><code>apps/mobile-student</code></td><td>Expo dev server (scan QR / simulator)</td></tr>
+          <tr><td><code>pnpm dev:mobile-staff</code></td><td><code>apps/mobile-staff</code></td><td>Expo dev server (scan QR / simulator)</td></tr>
+        </tbody>
+      </table></div>
+      <h3>Local URLs</h3>
+      <div class="table-wrap"><table>
+        <thead><tr><th>Surface</th><th>URL</th></tr></thead>
+        <tbody>
+          <tr><td>School portals</td><td><code>http://localhost:5173</code></td></tr>
+          <tr><td>Marketing</td><td><code>http://localhost:5174</code></td></tr>
+          <tr><td>System admin</td><td><code>http://localhost:5175</code></td></tr>
+          <tr><td>API</td><td><code>http://localhost:3000/api/v1</code></td></tr>
+        </tbody>
+      </table></div>
+      <h3>Seeded demo users</h3>
+      <p>Password for all: <code>Password123!</code></p>
+      <div class="table-wrap"><table>
+        <thead><tr><th>Email</th><th>Role</th><th>App</th></tr></thead>
+        <tbody>
+          <tr><td><code>admin@nabta.local</code></td><td>ADMIN</td><td>Web portal</td></tr>
+          <tr><td><code>teacher@nabta.local</code></td><td>TEACHER</td><td>Web portal</td></tr>
+          <tr><td><code>student@nabta.local</code></td><td>STUDENT</td><td>Web portal</td></tr>
+          <tr><td><code>system@nabta.local</code></td><td>SYSTEM_ADMIN</td><td>System admin</td></tr>
+        </tbody>
+      </table></div>
+      <p>Mobile apps use <code>EXPO_PUBLIC_API_URL</code> (default <code>http://localhost:3000</code>) to reach the API. Use Expo Go or a dev build on a device on the same network.</p>
 
       <h2>Cursor Working Rules</h2>
       <ul>
@@ -77,9 +127,12 @@
       <h2>Monorepo Structure</h2>
       <pre><code>nabta/
 ├── apps/
-│   ├── web/           # Nabta portals
-│   ├── api/           # NestJS
-│   └── marketing/     # Public site (Phase 1b)
+│   ├── web/              # School portals (student/teacher/admin)
+│   ├── api/              # NestJS
+│   ├── marketing/        # Public site (Phase 1b)
+│   ├── system-admin/     # Platform operator console (Phase 1c)
+│   ├── mobile-student/   # Student mobile app (Phase 1d)
+│   └── mobile-staff/     # Staff mobile app (Phase 1e)
 ├── packages/
 │   ├── database/
 │   ├── types/

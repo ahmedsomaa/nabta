@@ -1,0 +1,5 @@
+-- AlterEnum
+ALTER TYPE "UserRole" ADD VALUE IF NOT EXISTS 'SYSTEM_ADMIN';
+
+-- AlterTable
+ALTER TABLE "User" ALTER COLUMN "schoolId" DROP NOT NULL;

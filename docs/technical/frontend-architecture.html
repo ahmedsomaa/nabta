@@ -24,9 +24,29 @@
           <header id="docs-header" class="docs-page-header"></header>
           <main id="main" class="docs-main">
 <h1>Frontend Architecture</h1>
-      <p class="lead">Feature-based organization, state management, role layouts, and routing.</p>
+      <p class="lead">Six client surfaces — web portals, marketing, system admin, and two mobile apps — sharing packages and API conventions.</p>
 
-      <h2>Directory Structure</h2>
+      <h2>Client Surfaces</h2>
+      <div class="table-wrap"><table>
+        <thead><tr><th>App</th><th>Path</th><th>UI library</th><th>Dev port</th></tr></thead>
+        <tbody>
+          <tr><td>School portals</td><td><code>apps/web</code></td><td>HeroUI v3 (<code>@heroui/react</code>)</td><td><code>5173</code></td></tr>
+          <tr><td>Marketing</td><td><code>apps/marketing</code></td><td>HeroUI v3</td><td><code>5174</code></td></tr>
+          <tr><td>System admin</td><td><code>apps/system-admin</code></td><td>HeroUI v3</td><td><code>5175</code></td></tr>
+          <tr><td>Mobile student</td><td><code>apps/mobile-student</code></td><td>HeroUI Native + Uniwind</td><td>Expo</td></tr>
+          <tr><td>Mobile staff</td><td><code>apps/mobile-staff</code></td><td>HeroUI Native + Uniwind</td><td>Expo</td></tr>
+        </tbody>
+      </table></div>
+
+      <h2>Web vs Native HeroUI</h2>
+      <ul>
+        <li><strong>Web</strong> (<code>apps/web</code>, <code>apps/marketing</code>, <code>apps/system-admin</code>): HeroUI v3 on React Aria + Tailwind CSS v4. Theme via CSS variable overrides (oklch) — see <a href="../design/theming.html">Theming</a>.</li>
+        <li><strong>Native</strong> (<code>apps/mobile-student</code>, <code>apps/mobile-staff</code>): HeroUI Native on Uniwind. Theme via HSL semantic tokens aligned to Nabta green intent — see <a href="../design/theming.html#native">Theming — Native</a>.</li>
+        <li>Do not mix libraries — web apps use <code>@heroui/react</code>; mobile apps use <code>heroui-native</code>. Share business logic via <code>packages/types</code>, <code>packages/validation</code>, and <code>packages/i18n</code>.</li>
+        <li>Agent skills: <code>heroui-react</code> for web; <code>heroui-native</code> for mobile.</li>
+      </ul>
+
+      <h2>Directory Structure — <code>apps/web</code></h2>
       <pre><code>apps/web/src/
 ├── app/                  # App shell, providers
 ├── components/

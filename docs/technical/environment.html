@@ -51,18 +51,41 @@
           <tr><td><code>MINIO_BUCKET</code></td><td><code>nabta-files</code></td><td>Default object storage bucket</td></tr>
           <tr><td><code>MINIO_USE_SSL</code></td><td><code>false</code></td><td>SSL for MinIO (true in production S3/R2)</td></tr>
           <tr><td><code>WEB_URL</code></td><td><code>http://localhost:5173</code></td><td>Portal app URL (CORS, email links)</td></tr>
-          <tr><td><code>API_URL</code></td><td><code>http://localhost:3000</code></td><td>API base URL (web app config)</td></tr>
+          <tr><td><code>API_URL</code></td><td><code>http://localhost:3000</code></td><td>API base URL (server-side references)</td></tr>
+          <tr><td><code>VITE_API_URL</code></td><td><code>http://localhost:3000</code></td><td>API base URL for Vite apps (<code>apps/web</code>)</td></tr>
         </tbody>
       </table></div>
 
-      <h2>Phase 1b — Marketing Site</h2>
+      <h2>Phase 1b — Marketing Site (<code>apps/marketing</code>)</h2>
       <div class="table-wrap"><table>
         <thead><tr><th>Variable</th><th>Example</th><th>Purpose</th></tr></thead>
         <tbody>
-          <tr><td><code>VITE_WEB_URL</code></td><td><code>http://localhost:5173</code></td><td>Login link target (portal app)</td></tr>
+          <tr><td><code>VITE_WEB_URL</code></td><td><code>http://localhost:5173</code></td><td>Login link target (school portals)</td></tr>
           <tr><td><code>VITE_API_URL</code></td><td><code>http://localhost:3000</code></td><td>Contact/demo form API endpoint</td></tr>
+          <tr><td><code>VITE_MARKETING_URL</code></td><td><code>http://localhost:5174</code></td><td>Self-reference / canonical marketing URL</td></tr>
         </tbody>
       </table></div>
+
+      <h2>Phase 1c — System Admin (<code>apps/system-admin</code>)</h2>
+      <div class="table-wrap"><table>
+        <thead><tr><th>Variable</th><th>Example</th><th>Purpose</th></tr></thead>
+        <tbody>
+          <tr><td><code>VITE_API_URL</code></td><td><code>http://localhost:3000</code></td><td>Platform API endpoint</td></tr>
+          <tr><td><code>VITE_WEB_URL</code></td><td><code>http://localhost:5173</code></td><td>Link to school portals</td></tr>
+          <tr><td><code>VITE_SYSTEM_ADMIN_URL</code></td><td><code>http://localhost:5175</code></td><td>Self-reference for system-admin app</td></tr>
+          <tr><td><code>SYSTEM_ADMIN_URL</code></td><td><code>http://localhost:5175</code></td><td>Server-side CORS / email links to operator console</td></tr>
+          <tr><td><code>MARKETING_URL</code></td><td><code>http://localhost:5174</code></td><td>Link to public marketing site (API emails, cross-nav)</td></tr>
+        </tbody>
+      </table></div>
+
+      <h2>Phase 1d / 1e — Mobile Apps</h2>
+      <div class="table-wrap"><table>
+        <thead><tr><th>Variable</th><th>Example</th><th>Purpose</th></tr></thead>
+        <tbody>
+          <tr><td><code>EXPO_PUBLIC_API_URL</code></td><td><code>http://localhost:3000</code></td><td>API base URL for <code>apps/mobile-student</code> and <code>apps/mobile-staff</code></td></tr>
+        </tbody>
+      </table></div>
+      <p>Expo reads <code>EXPO_PUBLIC_*</code> at build time. On a physical device, use your machine's LAN IP instead of <code>localhost</code>.</p>
 
       <h2>Production additions (Phase 8+)</h2>
       <div class="table-wrap"><table>
@@ -93,7 +116,14 @@ MINIO_SECRET_KEY=minioadmin
 MINIO_BUCKET=nabta-files
 MINIO_USE_SSL=false
 WEB_URL=http://localhost:5173
-API_URL=http://localhost:3000</code></pre>
+API_URL=http://localhost:3000
+VITE_API_URL=http://localhost:3000
+VITE_WEB_URL=http://localhost:5173
+VITE_MARKETING_URL=http://localhost:5174
+VITE_SYSTEM_ADMIN_URL=http://localhost:5175
+MARKETING_URL=http://localhost:5174
+SYSTEM_ADMIN_URL=http://localhost:5175
+EXPO_PUBLIC_API_URL=http://localhost:3000</code></pre>
 
       <div class="related-links">
         <h2>Related</h2>

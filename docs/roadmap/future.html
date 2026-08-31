@@ -24,31 +24,26 @@
           <header id="docs-header" class="docs-page-header"></header>
           <main id="main" class="docs-main">
 <h1>Future Roadmap</h1>
-      <p class="lead">Mobile apps, payments, and LLM integration — documented for architecture readiness, not implemented in current phases.</p>
+      <p class="lead">Push notifications, offline sync, payments, and LLM integration — documented for architecture readiness, not implemented in current phases.</p>
 
       <div class="callout callout-warning">
         <p>These features are <strong>not in scope</strong> for Phases 1–8. This page documents how the architecture should be prepared so they can be added without a rewrite.</p>
       </div>
 
-      <h2>Mobile Apps</h2>
-      <h3>Likely v1 Mobile</h3>
-      <p><strong>Student app</strong> — assignments, grades, schedule, notifications, lesson content.</p>
-      <h3>Possible Later</h3>
-      <p><strong>Teacher app</strong> — grading, attendance recording on-the-go.</p>
-
-      <h3>Approach</h3>
+      <h2>Push Notifications &amp; Offline</h2>
+      <p>Mobile app scaffolds ship in Phases 1d and 1e. Push delivery and offline material sync are deferred here.</p>
       <ul>
-        <li>React Native (Expo) in monorepo as <code>apps/mobile-student</code></li>
-        <li>Share <code>packages/types</code>, <code>packages/validation</code>, <code>packages/i18n</code></li>
-        <li>API already versioned (<code>/api/v1</code>) — mobile is another API client</li>
-        <li>Push notifications via Expo + backend notification service</li>
-        <li>Offline support for downloaded materials (future consideration)</li>
+        <li>Push notifications via Expo + backend notification service (Phase 7+ integration)</li>
+        <li>Offline support for downloaded lesson materials (future consideration)</li>
+        <li>Background sync for assignments and grades when connectivity returns</li>
       </ul>
 
       <pre class="mermaid">flowchart LR
   MobileStudent[apps/mobile-student] --> API[apps/api /api/v1]
-  MobileTeacher[apps/mobile-teacher future] --> API
-  Web[apps/web] --> API</pre>
+  MobileStaff[apps/mobile-staff] --> API
+  Web[apps/web] --> API
+  Push[Expo Push] --> MobileStudent
+  Push --> MobileStaff</pre>
 
       <h2>Payments</h2>
       <div class="callout">
