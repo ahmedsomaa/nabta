@@ -1,5 +1,6 @@
 import { BrowserRouter, Navigate, Route, Routes } from 'react-router-dom';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { Toast } from '@heroui/react';
 import { AuthProvider, roleHome, useAuth } from '@/features/auth/AuthProvider';
 import { ThemeProvider } from '@/features/theme/ThemeProvider';
 import {
@@ -13,6 +14,12 @@ import { StudentLayout } from '@/layouts/StudentLayout';
 import { TeacherLayout } from '@/layouts/TeacherLayout';
 import { AdminLayout } from '@/layouts/AdminLayout';
 import { PlaceholderPage } from '@/components/shared/PlaceholderPage';
+import { StudentDashboardPage } from '@/features/student/StudentDashboardPage';
+import { StudentClassesPage } from '@/features/student/StudentClassesPage';
+import { StudentSubjectPage } from '@/features/student/StudentSubjectPage';
+import { StudentLessonPage } from '@/features/student/StudentLessonPage';
+import { StudentAssignmentsPage } from '@/features/student/StudentAssignmentsPage';
+import { StudentAssignmentPage } from '@/features/student/StudentAssignmentPage';
 
 const queryClient = new QueryClient();
 
@@ -27,6 +34,7 @@ export function App() {
   return (
     <QueryClientProvider client={queryClient}>
       <ThemeProvider>
+        <Toast.Provider placement="top end" />
         <AuthProvider>
           <BrowserRouter>
             <Routes>
@@ -38,11 +46,14 @@ export function App() {
 
               <Route element={<RequireAuth roles={['STUDENT']} />}>
                 <Route path="/student" element={<StudentLayout />}>
-                  <Route path="dashboard" element={<PlaceholderPage titleKey="dashboard.studentTitle" />} />
-                  <Route path="classes" element={<PlaceholderPage titleKey="nav.myClasses" />} />
-                  <Route path="assignments" element={<PlaceholderPage titleKey="nav.assignments" />} />
+                  <Route index element={<Navigate to="dashboard" replace />} />
+                  <Route path="dashboard" element={<StudentDashboardPage />} />
+                  <Route path="classes" element={<StudentClassesPage />} />
+                  <Route path="classes/:subjectId" element={<StudentSubjectPage />} />
+                  <Route path="classes/:subjectId/lessons/:lessonId" element={<StudentLessonPage />} />
+                  <Route path="assignments" element={<StudentAssignmentsPage />} />
+                  <Route path="assignments/:id" element={<StudentAssignmentPage />} />
                   <Route path="grades" element={<PlaceholderPage titleKey="nav.grades" />} />
-                  <Route path="more" element={<PlaceholderPage titleKey="nav.more" />} />
                 </Route>
               </Route>
 
@@ -52,7 +63,6 @@ export function App() {
                   <Route path="classes" element={<PlaceholderPage titleKey="nav.classes" />} />
                   <Route path="assignments" element={<PlaceholderPage titleKey="nav.assignments" />} />
                   <Route path="gradebook" element={<PlaceholderPage titleKey="nav.gradebook" />} />
-                  <Route path="more" element={<PlaceholderPage titleKey="nav.more" />} />
                 </Route>
               </Route>
 

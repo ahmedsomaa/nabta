@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Phase 3 — Detailed implementation plan — Nabta</title>
+  <link rel="stylesheet" href="../../assets/docs.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500&family=Quicksand:wght@400;500;600;700&family=Zain:wght@400;700&display=swap" rel="stylesheet">
+</head>
+<body data-section="roadmap" data-title="Phase 3 — Detailed plan">
+  <a href="#main" class="skip-link">Skip to content</a>
+  <header id="docs-topnav" class="docs-topnav" aria-label="Top navigation"></header>
+  <div class="docs-mobile-bar">
+    <button type="button" id="sidebar-toggle" class="sidebar-toggle" aria-expanded="false" aria-label="Open menu">&#9776;</button>
+    <a href="../../index.html" class="docs-mobile-brand">Nabta</a>
+  </div>
+  <div id="sidebar-overlay" class="sidebar-overlay"></div>
+  <div class="docs-layout">
+    <aside id="docs-sidebar" class="docs-sidebar" aria-label="Sidebar"></aside>
+    <div class="docs-content">
+      <div class="docs-body">
+        <div class="docs-article">
+          <header id="docs-header" class="docs-page-header"></header>
+          <main id="main" class="docs-main">
+      <h1>Phase 3 — Detailed implementation plan</h1>
+      <p class="lead"><span class="badge badge-phase">Phase 3</span> <span class="badge badge-complete">Complete</span> Historical execution plan — student portal, student-scoped APIs, and seeded Grade 10 Mathematics content.</p>
+
+      <div class="callout">
+        <p><strong>Companion to</strong> <a href="index.html">Phase 3 — Student Experience</a> (scope guards and acceptance criteria). This page is the execution plan: models, student APIs, seed data, and <code>apps/web</code> screens. Slices 0–1 are data/API prerequisites; slices 2–6 map to the five user-facing slices on the phase index.</p>
+      </div>
+
+      <div class="callout">
+        <p><strong>Web student portal only.</strong> Teacher create/grade is <a href="../04-teacher-experience/">Phase 4</a>. Quizzes are <a href="../05-assessments/">Phase 5</a>. Keep <code>/student/grades</code> as an explicit later-phase placeholder. Phase 3 <strong>seeds</strong> published lessons and assignments so the student flow is real without teacher CRUD.</p>
+      </div>
+
+      <h2>Slice order</h2>
+      <p>Slices 0–1 first (nothing to show without content and APIs). Then dashboard → classes → lessons → assignments → UX polish. Sequential; each slice is independently verifiable.</p>
+
+      <pre class="mermaid">flowchart TB
+  subgraph data [Data and APIs]
+    S0[Content models plus seed]
+    S1[Student APIs plus storage presign]
+    S0 --> S1
+  end
+  subgraph ui [apps/web student UI]
+    S2[Dashboard]
+    S3[Classes and subject]
+    S4[Lesson viewer and progress]
+    S5[Assignments submit]
+    S6[UX states]
+    S2 --> S3 --> S4 --> S5 --> S6
+  end
+  S1 --> S2</pre>
+
+      <h2>Ground truth before this phase</h2>
+      <ul>
+        <li>Academic core: School → Year → Grade → Class → Subject, Enrollment, TeachingAssignment — all with <code>schoolId</code>.</li>
+        <li>Seed: Egyptian International School, 2026/2027, Omar Farouk in <strong>10A</strong>, Nadia Hassan teaching <strong>Mathematics</strong>. Login: <code>student@nabta.local</code> / <code>Password123!</code>.</li>
+        <li>No <code>Unit</code>, <code>Lesson</code>, <code>Assignment</code>, <code>AssignmentSubmission</code>, or progress models yet.</li>
+        <li><code>apps/api/src/modules/academic/students.controller.ts</code> was ADMIN/TEACHER only — no student self endpoint.</li>
+        <li>Student routes in <code>apps/web/src/app/App.tsx</code> rendered <code>PlaceholderPage</code>. Shell already had desktop sidebar and mobile bottom nav (<code>StudentLayout</code> / <code>AppShell</code>).</li>
+        <li><code>StorageService</code> had <code>putObject</code> and presigned <strong>GET</strong> only. Spec required presigned <strong>PUT</strong> and structured keys — see <a href="../../requirements/search-and-files.html">Search &amp; Files</a>.</li>
+        <li>Greeting had to use seeded given name <strong>Omar</strong>, not the email local-part — see <a href="../../requirements/student.html">Student Portal</a>.</li>
+      </ul>
+
+      <h2>Original agent prompt</h2>
+      <pre><code>Implement Phase 3 only per docs/roadmap/03-student-experience/plan.html.
+Student portal + student APIs + seed content. Do not implement teacher
+builder/grading (Phase 4), assessments (Phase 5), or notifications.</code></pre>
+
+      <h2>In scope</h2>
+      <ul>
+        <li>Dashboard: today’s schedule, upcoming assignments, continue learning, light overview (completion count only)</li>
+        <li>My Classes and subject page (teacher, units, lessons, materials, assignments, progress)</li>
+        <li>Lesson viewer + progress tracking</li>
+        <li>Assignment view, upload/replace before deadline, submit, status</li>
+        <li>MinIO via storage abstraction (presigned upload/download)</li>
+        <li>EN/AR + RTL; loading / empty / error / success per <a href="../../design/ux-states.html">UX States</a></li>
+      </ul>
+
+      <h2>Out of scope</h2>
+      <ul>
+        <li>Teacher portal: course builder, assignment create/publish, grading, feedback (<a href="../04-teacher-experience/">Phase 4</a>)</li>
+        <li>Assessments / quizzes (<a href="../05-assessments/">Phase 5</a>)</li>
+        <li>GPA, gradebook UI, attendance screens</li>
+        <li>Assignment notifications, BullMQ events (<a href="../07-notifications/">Phase 7</a>)</li>
+        <li>Global search (<a href="../../requirements/search-and-files.html">Search &amp; Files</a> — later)</li>
+        <li><code>apps/mobile-student</code> (Phase 1d Remaining)</li>
+        <li><code>POST /api/v1/assignments</code> for teachers — seed published rows instead</li>
+      </ul>
+
+      <h2>Slice 0 — Content models + demo seed</h2>
+      <p><strong>Goal:</strong> persist units, lessons, timetable, assignments, submissions, and progress. Tenant isolation on every query (<code>schoolId</code> from JWT context, never from the body).</p>
+      <p><strong>Models:</strong> Prisma in <code>packages/database/prisma/schema.prisma</code>. All school-owned entities: UUID <code>id</code>, <code>schoolId</code>, <code>createdAt</code>, <code>updatedAt</code>.</p>
+      <div class="table-wrap"><table>
+        <thead><tr><th>Model</th><th>Role</th></tr></thead>
+        <tbody>
+          <tr><td><code>Unit</code></td><td>Ordered block under <code>Subject</code> (optionally scoped to class)</td></tr>
+          <tr><td><code>Lesson</code></td><td>Under <code>Unit</code>. <code>type</code>: <code>RICH_TEXT</code> | <code>VIDEO</code> | <code>PDF</code> | <code>IMAGE</code> | <code>EXTERNAL</code>. Body/url fields — not blobs in PostgreSQL</td></tr>
+          <tr><td><code>LearningMaterial</code></td><td>File metadata on a lesson (<code>storageKey</code>, <code>mimeType</code>, <code>size</code>, <code>checksum</code>)</td></tr>
+          <tr><td><code>TimetableSlot</code></td><td>Weekday + start/end + room + <code>classId</code> + <code>subjectId</code>. Enough for “today’s schedule” without a timetable admin UI</td></tr>
+          <tr><td><code>Assignment</code></td><td>Title, instructions, <code>dueAt</code>, <code>subjectId</code>, <code>classId</code>, <code>publishedAt</code>. No teacher POST in this phase</td></tr>
+          <tr><td><code>AssignmentSubmission</code></td><td>Per student. Status: <code>DRAFT</code> | <code>SUBMITTED</code> | <code>LATE</code> (set <code>LATE</code> on submit if after <code>dueAt</code>). Enum may include <code>GRADED</code> / <code>RETURNED</code> but unused until Phase 4</td></tr>
+          <tr><td><code>SubmissionFile</code></td><td>Metadata for uploaded files</td></tr>
+          <tr><td><code>LessonProgress</code></td><td><code>studentId</code> + <code>lessonId</code>, <code>lastAccessedAt</code>, <code>completedAt</code></td></tr>
+        </tbody>
+      </table></div>
+      <p>Do <strong>not</strong> add Assessment, Question, Attendance, GradeRecord, Notification, or AuditLog models.</p>
+      <p><strong>Seed</strong> (<code>packages/database/prisma/seed.ts</code>), Grade 10 Mathematics / 10A:</p>
+      <ul>
+        <li>One unit</li>
+        <li>Three lessons: rich text, external link, PDF (MinIO object or inline placeholder)</li>
+        <li>Two published assignments (one due soon, one later)</li>
+        <li>Timetable slots that include a period on “today”</li>
+        <li>Optional in-progress lesson so Continue Learning is non-empty</li>
+      </ul>
+      <p><strong>Verify:</strong> <code>pnpm db:seed</code> produces queryable units, lessons, timetable slots, and published assignments for 10A Mathematics.</p>
+
+      <h2>Slice 1 — Student APIs + storage</h2>
+      <p><strong>Goal:</strong> student-scoped REST under <code>/api/v1/me</code>. Role <code>STUDENT</code> + existing <code>TenantGuard</code>. Scope by enrollment — a student cannot read another class’s content or another school’s rows.</p>
+      <p><strong>Module:</strong> <code>apps/api/src/modules/student/</code>. DTOs in <code>packages/validation</code>; types in <code>packages/types</code>. List/single/error envelopes from <a href="../../technical/api-design.html">API Design</a>.</p>
+      <p><strong>Key endpoints:</strong></p>
+      <pre><code>GET  /api/v1/me
+GET  /api/v1/me/dashboard
+GET  /api/v1/me/subjects
+GET  /api/v1/me/subjects/:id
+GET  /api/v1/me/lessons/:id
+POST /api/v1/me/lessons/:id/progress     { completed?: boolean }
+GET  /api/v1/me/assignments
+GET  /api/v1/me/assignments/:id
+POST /api/v1/me/files/presign            { purpose, mimeType, size }
+POST /api/v1/me/assignments/:id/draft    { storageKey }
+POST /api/v1/me/assignments/:id/submit</code></pre>
+      <p><strong>Storage:</strong> extend <code>StorageService</code> with presigned upload. Keys:</p>
+      <pre><code>{schoolId}/submissions/{assignmentId}/{studentId}/{uuid}.{ext}
+{schoolId}/materials/{subjectId}/{lessonId}/{uuid}.{ext}</code></pre>
+      <p>MIME type and file size limits on presign. Never public buckets. DB stores <code>storageKey</code>, <code>mimeType</code>, <code>size</code>, <code>checksum</code> — not file bytes.</p>
+      <p><strong>Tests:</strong> enrollment isolation; submit → status <code>SUBMITTED</code> (or <code>LATE</code> after due date).</p>
+      <p><strong>Verify:</strong> authenticated student can load dashboard payload and submit an assignment; a user from another school cannot.</p>
+
+      <h2>Slice 2 — Dashboard</h2>
+      <p><strong>Route:</strong> <code>/student/dashboard</code> in <code>apps/web</code>. Replace <code>PlaceholderPage</code>.</p>
+      <p><strong>UI:</strong> HeroUI v3 (<code>heroui-react</code> skill) — Card, Skeleton, Alert. TanStack Query + existing <code>apiFetch</code>. Copy under <code>student.*</code> in EN and AR.</p>
+      <ul>
+        <li>Header: time-of-day greeting + <code>givenName</code> (e.g. “Good morning, Omar”)</li>
+        <li>Today’s schedule from <code>TimetableSlot</code></li>
+        <li>Upcoming: assignments only (no quizzes)</li>
+        <li>Continue learning: last <code>LessonProgress</code></li>
+        <li>Overview: assignment completion count only — not GPA or attendance</li>
+      </ul>
+      <p><strong>Verify:</strong> after login as student, dashboard shows schedule and upcoming work.</p>
+
+      <h2>Slice 3 — Classes + subject page</h2>
+      <p><strong>Routes:</strong></p>
+      <ul>
+        <li><code>/student/classes</code> — enrolled subjects (class + teaching assignments)</li>
+        <li><code>/student/classes/:subjectId</code> — teacher name, units, lessons, materials, assignments, progress %</li>
+      </ul>
+      <p>Nested routes in <code>App.tsx</code>. Breadcrumbs: role → My Classes → subject. Wire <code>AppShell</code> current item so nested subject URLs still highlight My Classes.</p>
+      <p><strong>Verify:</strong> student can browse enrolled subjects and open Grade 10 Mathematics.</p>
+
+      <h2>Slice 4 — Lesson viewer + progress</h2>
+      <p><strong>Route:</strong> <code>/student/classes/:subjectId/lessons/:lessonId</code></p>
+      <p>Content pane + unit/lesson sidebar. RTL-safe (sidebar follows <code>dir</code>).</p>
+      <p>Render by <code>type</code>: rich text/HTML, video URL, PDF (presigned GET), image, external link.</p>
+      <p>On open: upsert <code>LessonProgress.lastAccessedAt</code>. Complete control sets <code>completedAt</code>.</p>
+      <p><strong>Verify:</strong> student can open a lesson; progress persists after reload.</p>
+
+      <h2>Slice 5 — Assignments</h2>
+      <p><strong>Routes:</strong></p>
+      <ul>
+        <li><code>/student/assignments</code> — list with status + due date</li>
+        <li><code>/student/assignments/:id</code> — instructions, due date, resources, upload/replace before deadline, submit</li>
+      </ul>
+      <p>Status chips: Not started / Draft / Submitted / Late. Do <strong>not</strong> show grade or feedback UI (Phase 4).</p>
+      <p>After submit, status is Submitted (or Late). Success confirmation — HeroUI Toast or inline success per <a href="../../design/ux-states.html">UX States</a>.</p>
+      <p><strong>Verify:</strong> upload + submit updates status to Submitted.</p>
+
+      <h2>Slice 6 — UX + mobile</h2>
+      <p>Apply on every new screen: Skeleton loading, empty copy, Alert + retry, submit success. No blank screens.</p>
+      <p>Mobile bottom nav and <code>pb-24</code> already exist in <code>AppShell</code> — verify they still work with nested lesson/assignment URLs (parent nav item active).</p>
+      <p><code>/student/grades</code> stays a later-phase placeholder (<code>app.comingSoon</code> or equivalent).</p>
+      <p><strong>Verify:</strong> no blank screens; mobile nav works; EN/AR + RTL; light and dark themes.</p>
+
+      <h2>Index mapping</h2>
+      <p>The phase <a href="index.html">index</a> keeps five user-facing slices. This plan’s slices 0–1 are prerequisites; 2–6 match the index:</p>
+      <div class="table-wrap"><table>
+        <thead><tr><th>Index slice</th><th>This plan</th></tr></thead>
+        <tbody>
+          <tr><td>1. Student dashboard</td><td>Slice 2 (after 0–1)</td></tr>
+          <tr><td>2. Classes + subject page</td><td>Slice 3</td></tr>
+          <tr><td>3. Lesson viewer + progress</td><td>Slice 4</td></tr>
+          <tr><td>4. Assignments</td><td>Slice 5</td></tr>
+          <tr><td>5. UX + mobile</td><td>Slice 6</td></tr>
+        </tbody>
+      </table></div>
+
+      <h2>Acceptance (phase index)</h2>
+      <ul class="checklist">
+        <li>Login as student → dashboard shows schedule and upcoming work</li>
+        <li>Browse 10A Mathematics → open a lesson → progress saved</li>
+        <li>Open assignment → upload → submit → status Submitted</li>
+        <li>All screens have loading, empty, and error states</li>
+        <li>Mobile-responsive student navigation works</li>
+        <li>EN/AR + RTL; light and dark themes</li>
+      </ul>
+
+      <div class="related-links">
+        <h2>Related</h2>
+        <p><strong>Phase spec:</strong> <a href="index.html">Phase 3 — Student Experience</a></p>
+        <p><strong>Requirements:</strong> <a href="../../requirements/student.html">Student Portal</a>, <a href="../../requirements/search-and-files.html">Search &amp; Files</a></p>
+        <p><strong>Architecture:</strong> <a href="../../technical/data-model.html">Data Model</a>, <a href="../../technical/api-design.html">API Design</a>, <a href="../../technical/frontend-architecture.html">Frontend Architecture</a>, <a href="../../technical/sequences.html">Sequence Diagrams</a></p>
+        <p><strong>Design:</strong> <a href="../../design/ux-states.html">UX States</a>, <a href="../../technical/heroui-agents.md">HeroUI agents</a></p>
+        <p><strong>Previous:</strong> <a href="../02-academic-core/">Phase 2</a> (complete) · <strong>Next:</strong> <a href="../04-teacher-experience/">Phase 4</a></p>
+      </div>
+      <p class="source-footnote">Source: Phase 3 roadmap; student portal requirements; search-and-files; UX states</p>
+          </main>
+          <footer id="docs-pager" class="docs-pager-wrap"></footer>
+        </div>
+        <aside id="docs-toc" class="docs-toc" aria-label="Table of contents"></aside>
+      </div>
+    </div>
+  </div>
+  <script src="../../assets/nav-config.js"></script>
+  <script src="../../assets/layout.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.min.js"></script>
+  <script src="../../assets/docs.js"></script>
+</body>
+</html>

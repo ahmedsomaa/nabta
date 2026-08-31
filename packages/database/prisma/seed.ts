@@ -183,6 +183,141 @@ async function main() {
     },
   });
 
+  const UNIT_ID = '00000000-0000-4000-8000-000000000101';
+  const LESSON_IDS = [
+    '00000000-0000-4000-8000-000000000111',
+    '00000000-0000-4000-8000-000000000112',
+    '00000000-0000-4000-8000-000000000113',
+  ] as const;
+  const ASSIGNMENT_IDS = [
+    '00000000-0000-4000-8000-000000000121',
+    '00000000-0000-4000-8000-000000000122',
+  ] as const;
+
+  await prisma.unit.upsert({
+    where: { id: UNIT_ID },
+    update: { title: 'Linear equations', sortOrder: 0, classId: class10A.id },
+    create: {
+      id: UNIT_ID,
+      schoolId: school.id,
+      subjectId: math.id,
+      classId: class10A.id,
+      title: 'Linear equations',
+      sortOrder: 0,
+    },
+  });
+
+  await prisma.lesson.upsert({
+    where: { id: LESSON_IDS[0] },
+    update: {},
+    create: {
+      id: LESSON_IDS[0],
+      schoolId: school.id,
+      unitId: UNIT_ID,
+      title: 'What is a linear equation?',
+      type: 'RICH_TEXT',
+      body: 'A linear equation is an equation whose graph is a straight line. In Grade 10 we write it as y = mx + c, where m is the gradient and c is the y-intercept.\n\nWorked example: 2x + 3 = 11. Subtract 3 from both sides: 2x = 8. Divide by 2: x = 4.',
+      sortOrder: 0,
+    },
+  });
+
+  await prisma.lesson.upsert({
+    where: { id: LESSON_IDS[1] },
+    update: {},
+    create: {
+      id: LESSON_IDS[1],
+      schoolId: school.id,
+      unitId: UNIT_ID,
+      title: 'Khan Academy — graphing lines',
+      type: 'EXTERNAL',
+      url: 'https://www.khanacademy.org/math/algebra/x2f8bb11595b61c86:linear-equations-graphs',
+      sortOrder: 1,
+    },
+  });
+
+  await prisma.lesson.upsert({
+    where: { id: LESSON_IDS[2] },
+    update: {},
+    create: {
+      id: LESSON_IDS[2],
+      schoolId: school.id,
+      unitId: UNIT_ID,
+      title: 'Practice worksheet (PDF)',
+      type: 'PDF',
+      url: 'https://mozilla.github.io/pdf.js/web/compressed.tracemonkey-pldi-09.pdf',
+      sortOrder: 2,
+    },
+  });
+
+  for (let weekday = 0; weekday <= 6; weekday += 1) {
+    const slotId = `00000000-0000-4000-8000-0000000002${String(weekday).padStart(2, '0')}`;
+    await prisma.timetableSlot.upsert({
+      where: { id: slotId },
+      update: {},
+      create: {
+        id: slotId,
+        schoolId: school.id,
+        classId: class10A.id,
+        subjectId: math.id,
+        weekday,
+        startsAt: '08:00',
+        endsAt: '08:45',
+        room: '204',
+      },
+    });
+  }
+
+  const soon = new Date();
+  soon.setDate(soon.getDate() + 5);
+  soon.setHours(16, 0, 0, 0);
+  const later = new Date();
+  later.setDate(later.getDate() + 21);
+  later.setHours(16, 0, 0, 0);
+  const publishedAt = new Date();
+
+  await prisma.assignment.upsert({
+    where: { id: ASSIGNMENT_IDS[0] },
+    update: { dueAt: soon, publishedAt },
+    create: {
+      id: ASSIGNMENT_IDS[0],
+      schoolId: school.id,
+      subjectId: math.id,
+      classId: class10A.id,
+      title: 'Linear equations worksheet',
+      instructions:
+        'Complete questions 1–8 on solving linear equations. Upload a single PDF or photo of your work before the deadline.',
+      dueAt: soon,
+      publishedAt,
+    },
+  });
+
+  await prisma.assignment.upsert({
+    where: { id: ASSIGNMENT_IDS[1] },
+    update: { dueAt: later, publishedAt },
+    create: {
+      id: ASSIGNMENT_IDS[1],
+      schoolId: school.id,
+      subjectId: math.id,
+      classId: class10A.id,
+      title: 'Gradient and intercept',
+      instructions:
+        'Sketch y = 2x − 1 and y = −x + 4 on the same axes. Label the intercepts. Submit one PDF.',
+      dueAt: later,
+      publishedAt,
+    },
+  });
+
+  await prisma.lessonProgress.upsert({
+    where: { studentId_lessonId: { studentId: student.id, lessonId: LESSON_IDS[0] } },
+    update: { lastAccessedAt: new Date() },
+    create: {
+      schoolId: school.id,
+      studentId: student.id,
+      lessonId: LESSON_IDS[0],
+      lastAccessedAt: new Date(),
+    },
+  });
+
   console.log('Seeded Egyptian International School (2026/2027, Grades 7–12)');
   console.log('  admin@nabta.local / teacher@nabta.local / student@nabta.local');
   console.log('  system@nabta.local (SYSTEM_ADMIN)');

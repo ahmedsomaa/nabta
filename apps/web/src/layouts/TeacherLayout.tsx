@@ -1,4 +1,4 @@
-import { BookOpen, ClipboardList, GraduationCap, LayoutDashboard, MoreHorizontal } from 'lucide-react';
+import { BookOpen, ClipboardList, GraduationCap, LayoutDashboard } from 'lucide-react';
 import { AppShell } from './AppShell';
 
 export function TeacherLayout() {
@@ -11,7 +11,6 @@ export function TeacherLayout() {
         { to: '/teacher/assignments', labelKey: 'nav.assignments', icon: ClipboardList },
         { to: '/teacher/gradebook', labelKey: 'nav.gradebook', icon: GraduationCap },
       ]}
-      moreItems={[{ to: '/teacher/more', labelKey: 'nav.more', icon: MoreHorizontal }]}
     />
   );
 }

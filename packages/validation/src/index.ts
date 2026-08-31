@@ -145,4 +145,25 @@ export type CreateTeacherInput = z.infer<typeof createTeacherSchema>;
 export type UpdateTeacherInput = z.infer<typeof updateTeacherSchema>;
 export type CreateEnrollmentInput = z.infer<typeof createEnrollmentSchema>;
 export type CreateTeachingAssignmentInput = z.infer<typeof createTeachingAssignmentSchema>;
-export type MarketingContactInput = z.infer<typeof marketingContactSchema>;
+export const lessonProgressSchema = z.object({
+  completed: z.boolean().optional(),
+});
+
+export const filePresignSchema = z.object({
+  purpose: z.literal('submission'),
+  assignmentId: z.string().uuid(),
+  mimeType: z.string().min(1).max(120),
+  size: z.number().int().min(1).max(10 * 1024 * 1024),
+  fileName: z.string().min(1).max(180),
+});
+
+export const assignmentDraftSchema = z.object({
+  storageKey: z.string().min(1).max(500),
+  mimeType: z.string().min(1).max(120),
+  size: z.number().int().min(1).max(10 * 1024 * 1024),
+  fileName: z.string().min(1).max(180),
+});
+
+export type LessonProgressInput = z.infer<typeof lessonProgressSchema>;
+export type FilePresignInput = z.infer<typeof filePresignSchema>;
+export type AssignmentDraftInput = z.infer<typeof assignmentDraftSchema>;

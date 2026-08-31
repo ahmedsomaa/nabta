@@ -1,4 +1,4 @@
-import { BookOpen, ClipboardList, GraduationCap, House, MoreHorizontal } from 'lucide-react';
+import { BookOpen, ClipboardList, GraduationCap, House } from 'lucide-react';
 import { AppShell } from './AppShell';
 
 export function StudentLayout() {
@@ -11,7 +11,6 @@ export function StudentLayout() {
         { to: '/student/assignments', labelKey: 'nav.assignments', icon: ClipboardList },
         { to: '/student/grades', labelKey: 'nav.grades', icon: GraduationCap },
       ]}
-      moreItems={[{ to: '/student/more', labelKey: 'nav.more', icon: MoreHorizontal }]}
     />
   );
 }

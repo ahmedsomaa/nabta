@@ -50,7 +50,7 @@ export function PlatformShell() {
 
   return (
     <div className="flex min-h-svh bg-surface text-foreground">
-      <aside className="hidden w-64 shrink-0 flex-col md:flex">
+      <aside className="sticky top-0 hidden h-svh w-64 shrink-0 flex-col md:flex">
         <div className="flex h-16 items-center px-3">
           <NavLink
             to="/"
@@ -64,7 +64,7 @@ export function PlatformShell() {
           </NavLink>
         </div>
 
-        <div className="flex flex-1 flex-col gap-6 overflow-y-auto px-3 py-2">
+        <div className="flex min-h-0 flex-1 flex-col gap-6 overflow-y-auto px-3 py-2">
           <NavGroup label={t('nav.workspace')}>
             {items.map((item) => (
               <ShellLink key={item.to} item={item} />
@@ -72,7 +72,7 @@ export function PlatformShell() {
           </NavGroup>
         </div>
 
-        <div className="mt-auto p-3">
+        <div className="mt-auto shrink-0 p-3">
           <UserMenu />
         </div>
       </aside>

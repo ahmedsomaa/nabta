@@ -66,7 +66,10 @@ export function AppShell({
   const { user } = useAuth();
   const location = useLocation();
   const allItems = [...items, ...moreItems];
-  const current = allItems.find((item) => location.pathname === item.to) ?? allItems[0];
+  const current =
+    [...allItems].sort((a, b) => b.to.length - a.to.length).find(
+      (item) => location.pathname === item.to || location.pathname.startsWith(`${item.to}/`),
+    ) ?? allItems[0];
   const isSystemAdmin = isSystemAdminRole(user?.role);
   const schoolName = user?.schoolName || t('app.name');
   const orgLabel = isSystemAdmin ? t('app.name') : schoolName;
@@ -76,7 +79,7 @@ export function AppShell({
 
   return (
     <div className="flex min-h-svh bg-surface text-foreground">
-      <aside className="hidden w-64 shrink-0 flex-col md:flex">
+      <aside className="sticky top-0 hidden h-svh w-64 shrink-0 flex-col md:flex">
         <div className="flex h-16 items-center px-3">
           <NavLink
             to={homeTo}
@@ -94,7 +97,7 @@ export function AppShell({
           </NavLink>
         </div>
 
-        <div className="flex flex-1 flex-col gap-6 overflow-y-auto px-3 py-2">
+        <div className="flex min-h-0 flex-1 flex-col gap-6 overflow-y-auto px-3 py-2">
           <NavGroup label={t('nav.workspace')}>
             {items.map((item) => (
               <ShellLink key={item.to} item={item} />
@@ -109,7 +112,7 @@ export function AppShell({
           ) : null}
         </div>
 
-        <div className="mt-auto p-3">
+        <div className="mt-auto shrink-0 p-3">
           <UserMenu />
         </div>
       </aside>
@@ -151,11 +154,13 @@ export function AppShell({
             <NavLink
               key={item.to}
               to={item.to}
-              className={({ isActive }) =>
-                `flex flex-1 flex-col items-center gap-1 py-2.5 text-[10px] no-underline ${
-                  isActive ? 'text-accent font-semibold' : 'text-muted'
-                }`
-              }
+              className={({ isActive }) => {
+                const nested = location.pathname.startsWith(`${item.to}/`);
+                const on = isActive || nested;
+                return `flex flex-1 flex-col items-center gap-1 py-2.5 text-[10px] no-underline ${
+                  on ? 'text-accent font-semibold' : 'text-muted'
+                }`;
+              }}
             >
               <Icon className="size-4" aria-hidden />
               {t(item.labelKey)}
@@ -178,14 +183,16 @@ function NavGroup({ label, children }: { label: string; children: ReactNode }) {
 
 function ShellLink({ item }: { item: NavItem }) {
   const { t } = useTranslation();
+  const location = useLocation();
   const Icon = item.icon;
+  const nested = location.pathname.startsWith(`${item.to}/`);
 
   return (
     <NavLink
       to={item.to}
       className={({ isActive }) =>
         `flex items-center gap-2 rounded-lg px-2 py-2 text-sm no-underline ${
-          isActive ? 'bg-accent/10 font-medium text-accent' : 'text-foreground hover:bg-overlay'
+          isActive || nested ? 'bg-accent/10 font-medium text-accent' : 'text-foreground hover:bg-overlay'
         }`
       }
     >
