@@ -23,7 +23,7 @@
       <p class="lead">How to use the Nabta documentation to build the platform incrementally.</p>
 
       <div class="callout">
-        <p><strong>Golden rule:</strong> Implement <strong>one phase folder at a time</strong>. Phase 1 track (Foundation + 1b–1e bootstrap) is <span class="badge badge-complete">Complete</span>. Start with <a href="../roadmap/02-academic-core/index.html">Phase 2 — Academic Core</a>. Do not implement Phase 3+ while working on Phase 2.</p>
+        <p><strong>Golden rule:</strong> Implement <strong>one phase folder at a time</strong>. Phase 1 track and Phase 2 Academic Core are <span class="badge badge-complete">Complete</span>. Start with <a href="../roadmap/03-student-experience/index.html">Phase 3 — Student Experience</a>. Do not implement Phase 4+ while working on Phase 3.</p>
       </div>
 
       <h2>Documentation Structure</h2>
@@ -40,16 +40,16 @@
 
       <h2>Recommended Workflow</h2>
       <ol>
-        <li>Read the current phase folder — <a href="../roadmap/02-academic-core/index.html">Phase 2 — Academic Core</a></li>
+        <li>Read the current phase folder — <a href="../roadmap/03-student-experience/index.html">Phase 3 — Student Experience</a></li>
         <li>Review linked requirement, design, and technical pages</li>
-        <li>Give Cursor a focused prompt: <em>"Implement Phase 2 only. Do not implement Phase 3+ functionality."</em></li>
+        <li>Give Cursor a focused prompt: <em>"Implement Phase 3 only. Do not implement Phase 4+ functionality."</em></li>
         <li>Verify acceptance criteria on the phase page</li>
         <li>Move to the next phase when complete</li>
       </ol>
 
       <h2>Phase Order</h2>
       <pre class="mermaid">flowchart LR
-  P1["Phase 1 Foundation ✓"] --> P2[Phase 2 Academic Core]
+  P1["Phase 1 Foundation ✓"] --> P2["Phase 2 Academic Core ✓"]
   P1b["Phase 1b Marketing ✓"] --> P2
   P1c["Phase 1c System Admin ✓"] --> P2
   P1d["Phase 1d Mobile Student ✓"] --> P2
@@ -99,7 +99,7 @@ pnpm db:seed</code></pre>
         </tbody>
       </table></div>
       <h3>Seeded demo users</h3>
-      <p>Password for all: <code>Password123!</code></p>
+      <p>Password for all: <code>Password123!</code>. Demo school: Egyptian International School (2026/2027, Grades 7–12).</p>
       <div class="table-wrap"><table>
         <thead><tr><th>Email</th><th>Role</th><th>App</th></tr></thead>
         <tbody>
@@ -142,8 +142,8 @@ pnpm db:seed</code></pre>
 
       <h2>Start Here</h2>
       <div class="docs-hero-actions">
-        <a href="../roadmap/02-academic-core/index.html" class="btn btn-primary">Phase 2 — Academic Core</a>
-        <a href="../roadmap/01-foundation/index.html" class="btn btn-secondary">Phase 1 (complete)</a>
+        <a href="../roadmap/03-student-experience/index.html" class="btn btn-primary">Phase 3 — Student Experience</a>
+        <a href="../roadmap/02-academic-core/index.html" class="btn btn-secondary">Phase 2 (complete)</a>
         <a href="../technical/system-architecture.html" class="btn btn-secondary">System Architecture</a>
       </div>
 

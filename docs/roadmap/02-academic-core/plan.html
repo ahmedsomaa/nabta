@@ -1,0 +1,238 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Phase 2 — Detailed implementation plan — Nabta</title>
+  <link rel="stylesheet" href="../../assets/docs.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500&family=Quicksand:wght@400;500;600;700&family=Zain:wght@400;700&display=swap" rel="stylesheet">
+</head>
+<body data-section="roadmap" data-title="Phase 2 — Detailed plan">
+  <a href="#main" class="skip-link">Skip to content</a>
+  <header id="docs-topnav" class="docs-topnav" aria-label="Top navigation"></header>
+  <div class="docs-mobile-bar">
+    <button type="button" id="sidebar-toggle" class="sidebar-toggle" aria-expanded="false" aria-label="Open menu">&#9776;</button>
+    <a href="../../index.html" class="docs-mobile-brand">Nabta</a>
+  </div>
+  <div id="sidebar-overlay" class="sidebar-overlay"></div>
+  <div class="docs-layout">
+    <aside id="docs-sidebar" class="docs-sidebar" aria-label="Sidebar"></aside>
+    <div class="docs-content">
+      <div class="docs-body">
+        <div class="docs-article">
+          <header id="docs-header" class="docs-page-header"></header>
+          <main id="main" class="docs-main">
+      <h1>Phase 2 — Detailed implementation plan</h1>
+      <p class="lead"><span class="badge badge-phase">Phase 2</span> <span class="badge badge-complete">Complete</span> Historical execution plan — Academic Core APIs, seed data, and marketing home polish.</p>
+
+      <div class="callout">
+        <p><strong>Companion to</strong> <a href="index.html">Phase 2 — Academic Core</a> (scope guards and acceptance criteria). This page is the execution plan: models, modules, endpoints, and marketing sections.</p>
+      </div>
+
+      <div class="callout">
+        <p><strong>Landing anatomy</strong> adapted from <strong>Namya Khan</strong> — “Anatomy of a high-converting SaaS landing page.” Navbar → hero → benefits → how it works → testimonials → FAQ → final CTA → footer.</p>
+      </div>
+
+      <h2>Two parallel tracks</h2>
+      <p>Track A (Academic Core) and Track B (marketing polish) may proceed in parallel. Track A slices 1–5 are sequential. Track B is one implementation slice (slice 6) built in Namya section order.</p>
+
+      <pre class="mermaid">flowchart TB
+  subgraph trackA [Track A: Academic Core]
+    S1[School tenant]
+    S2[Hierarchy APIs]
+    S3[People and assignments]
+    S4[Configurable subjects]
+    S5[Demo seed]
+    S1 --> S2 --> S3 --> S4 --> S5
+  end
+  subgraph trackB [Track B: Marketing polish]
+    M1[Navbar and footer]
+    M2[Hero and social proof]
+    M3[Benefits and how it works]
+    M4[Testimonials FAQ CTA]
+    M1 --> M2 --> M3 --> M4
+  end
+  trackA -.->|"parallel OK"| trackB</pre>
+
+      <h2>As shipped</h2>
+      <ul>
+        <li><code>packages/database/prisma/schema.prisma</code> includes academic models (<code>AcademicYear</code>, <code>Grade</code>, <code>SchoolClass</code>, <code>Subject</code>, <code>Student</code>, <code>Teacher</code>, <code>Enrollment</code>, <code>TeachingAssignment</code>) with <code>schoolId</code>.</li>
+        <li>API: <code>/api/v1/</code> academic CRUD, JWT tenant guard, Zod in <code>packages/validation</code>.</li>
+        <li>Seed: Egyptian International School, 2026/2027, Grades 7–12, demo enrollments and teaching assignments.</li>
+        <li>Marketing: one-page Namya landing in <code>apps/marketing</code>; demo form <code>POST /api/v1/marketing/contact</code>.</li>
+      </ul>
+
+      <h2>Agent prompt</h2>
+      <pre><code>Implement Phase 2 only. Complete Academic Core APIs and seed data.
+Also polish the marketing home page per the Namya Khan section anatomy in plan.html.
+Do not implement Phase 3+ portal features.</code></pre>
+
+      <h2>Track A — Academic Core</h2>
+      <p>Domain rules: <a href="../../requirements/academic-structure.html">Academic Structure</a>. Hierarchy: School → Academic Year → Grade → Class/Section → Subject.</p>
+
+      <h3>Slice 1 — School tenant</h3>
+      <p><strong>Goal:</strong> every academic entity is scoped by <code>schoolId</code>; isolation is enforced on the server.</p>
+      <p><strong>Models:</strong> extend <code>School</code> if needed (<code>slug</code>, default locale). All new models in later slices must include <code>schoolId</code>, UUID <code>id</code>, <code>createdAt</code>, <code>updatedAt</code>.</p>
+      <p><strong>Modules:</strong> tenant guard or interceptor on academic modules — derive <code>schoolId</code> from JWT for ADMIN / TEACHER / STUDENT. Never trust <code>schoolId</code> from request body or params. SYSTEM_ADMIN may operate across tenants (platform APIs only; not required for school academic CRUD in this phase).</p>
+      <p><strong>Key endpoints:</strong> none new required if existing school row is enough; the guard must wrap slices 2–3.</p>
+      <p><strong>Verify:</strong> a user from school A cannot read or write school B entities.</p>
+
+      <h3>Slice 2 — Hierarchy APIs</h3>
+      <p><strong>Models:</strong> <code>AcademicYear</code>, <code>Grade</code>, <code>Class</code> (section), <code>Subject</code> — all with <code>schoolId</code>.</p>
+      <p><strong>Relationships:</strong> School → Year → Grade → Class. Subject scoped to school (optionally linked to grade). Do not add Lesson, Assignment, or Assessment models.</p>
+      <p><strong>Modules:</strong> NestJS modules under <code>apps/api/src/modules/</code> — e.g. <code>academic-years</code>, <code>grades</code>, <code>classes</code>, <code>subjects</code>. DTOs in <code>packages/validation</code>; types in <code>packages/types</code>.</p>
+      <p><strong>Key endpoints (ADMIN):</strong></p>
+      <pre><code>POST/GET    /api/v1/academic-years
+GET/PATCH/DELETE /api/v1/academic-years/:id
+POST/GET    /api/v1/grades
+GET/PATCH/DELETE /api/v1/grades/:id
+POST/GET    /api/v1/classes
+GET/PATCH/DELETE /api/v1/classes/:id
+POST/GET    /api/v1/subjects
+GET/PATCH/DELETE /api/v1/subjects/:id</code></pre>
+      <p>Follow list/single/error shapes in <a href="../../technical/api-design.html">API Design</a>. Pagination: <code>?page=&amp;limit=</code>.</p>
+      <p><strong>Verify:</strong> an admin can create the full year → grade → class → subject chain via API.</p>
+
+      <h3>Slice 3 — People + assignments</h3>
+      <p><strong>Models:</strong> <code>Student</code> and <code>Teacher</code> profiles (1:1 with <code>User</code>); <code>Enrollment</code> (student ↔ class); <code>TeachingAssignment</code> (teacher ↔ subject/class).</p>
+      <p><strong>Modules:</strong> <code>students</code>, <code>teachers</code> (or nested routes under classes/subjects). Link profiles to existing seeded users.</p>
+      <p><strong>Key endpoints:</strong></p>
+      <pre><code>POST/GET    /api/v1/students
+GET/PATCH   /api/v1/students/:id
+POST        /api/v1/classes/:id/enrollments
+GET         /api/v1/classes/:id/enrollments
+POST/GET    /api/v1/teachers
+GET/PATCH   /api/v1/teachers/:id
+POST        /api/v1/teaching-assignments
+GET         /api/v1/classes/:id/teaching-assignments</code></pre>
+      <p><strong>Verify:</strong> enrollments and teaching assignments persist to PostgreSQL; list endpoints respect tenant isolation.</p>
+
+      <h3>Slice 4 — Configurable subjects</h3>
+      <p>No hardcoded subject enums in application code. Subjects are database rows. Seed may insert defaults (Mathematics, Physics, English, Biology, Computer Science) but create/update must work without a code change.</p>
+      <p><strong>Verify:</strong> a new subject created via API appears in listings.</p>
+
+      <h3>Slice 5 — Demo seed</h3>
+      <p>Extend <code>packages/database/prisma/seed.ts</code>:</p>
+      <ul>
+        <li>Rename or replace demo school to <strong>Egyptian International School</strong></li>
+        <li>Academic year <strong>2026/2027</strong></li>
+        <li>Grades <strong>7–12</strong> with sample sections (e.g. 10A, 10B)</li>
+        <li>Subjects per grade; enroll the seeded student; assign the seeded teacher</li>
+      </ul>
+      <p><strong>Verify:</strong> <code>pnpm db:seed</code> produces a queryable demo hierarchy.</p>
+
+      <h2>Track B — Marketing polish (Namya Khan anatomy)</h2>
+      <p>Messaging source: <a href="../../business/what-is-nabta.html">What is Nabta?</a> and existing <code>marketing.*</code> keys in <code>packages/i18n/locales/{en,ar}.json</code>. Design: HeroUI v3 + Nabta tokens; display type for hero per <a href="../../design/typography.html">Typography</a>.</p>
+      <p>Current home is hero + three role cards. Rebuild as a <strong>one-page</strong> landing in this section order. Navbar items (Features, For schools, Pricing) scroll to sections; sticky CTA and demo buttons scroll to <code>#contact</code> (the form). Old routes <code>/features</code>, <code>/for-schools</code>, <code>/pricing</code>, <code>/contact</code> redirect to those hashes.</p>
+
+      <h3>Section anatomy</h3>
+      <div class="table-wrap"><table>
+        <thead><tr><th>#</th><th>Section</th><th>Namya guidance</th><th>Nabta implementation</th></tr></thead>
+        <tbody>
+          <tr>
+            <td>1</td>
+            <td><strong>Navbar</strong></td>
+            <td>Main links only; sticky CTA</td>
+            <td>Refine <code>SiteLayout.tsx</code>: essential nav (Features, For schools, Pricing) as hash links; sticky header; primary CTA “Request a demo” → <code>#contact</code>; Login stays secondary</td>
+          </tr>
+          <tr>
+            <td>2</td>
+            <td><strong>Hero</strong></td>
+            <td>USP headline (benefit-driven); subheading explains the claim; primary CTA; product visual; social-proof strip</td>
+            <td>Benefit headline (not clever or vague); subheading cites academic structure + bilingual + school-first; CTAs (demo + features); screenshot/mock placeholder (no video required for v1); logo strip placeholder (“Trusted by schools”)</td>
+          </tr>
+          <tr>
+            <td>3</td>
+            <td><strong>Benefits</strong></td>
+            <td>2×2 grid; benefits sell, features support</td>
+            <td>Four cards: academic structure, role portals, EN/AR, assessments — <code>#features</code> from <code>marketing.features.benefits.*</code></td>
+          </tr>
+          <tr>
+            <td>4</td>
+            <td><strong>How it works</strong></td>
+            <td>3–5 numbered steps</td>
+            <td>(1) Set up school structure (2) Enroll students and assign teachers (3) Run the year — <code>#for-schools</code>, adopt copy from <code>marketing.forSchools.steps.*</code></td>
+          </tr>
+          <tr>
+            <td>5</td>
+            <td><strong>Testimonials</strong></td>
+            <td>Quotes, logos, badges</td>
+            <td>Placeholder testimonials OK for v1 (label as placeholders); structure ready for real quotes later</td>
+          </tr>
+          <tr>
+            <td>6</td>
+            <td><strong>Pricing</strong></td>
+            <td>Offer without a public grid</td>
+            <td>Talk-to-us card at <code>#pricing</code>; CTA scrolls to the form</td>
+          </tr>
+          <tr>
+            <td>7</td>
+            <td><strong>FAQ</strong></td>
+            <td>Simple Q&amp;A</td>
+            <td>4–6 accordions: pricing, curriculum flexibility, bilingual, data/hosting, demo process — EN/AR</td>
+          </tr>
+          <tr>
+            <td>8</td>
+            <td><strong>Final CTA</strong></td>
+            <td>What’s the next step</td>
+            <td>On-page contact form at <code>#contact</code> (<code>POST /api/v1/marketing/contact</code>)</td>
+          </tr>
+          <tr>
+            <td>9</td>
+            <td><strong>Footer</strong></td>
+            <td>Logo, links, legal, contact</td>
+            <td>Multi-column: same section hashes, contact email placeholder, copyright, privacy/terms placeholders</td>
+          </tr>
+        </tbody>
+      </table></div>
+
+      <h3>Slice 6 — Marketing home</h3>
+      <p><strong>Components:</strong> <code>apps/marketing/src/components/sections/</code> — <code>HeroSection</code>, <code>BenefitsSection</code>, <code>HowItWorksSection</code>, <code>TestimonialsSection</code>, <code>PricingSection</code>, <code>FaqSection</code>, <code>ContactSection</code>, <code>MarketingFooter</code>.</p>
+      <p><strong>Compose</strong> in <code>HomePage.tsx</code> in Namya order. Navbar stays in <code>SiteLayout.tsx</code> (sticky hash links). Footer uses the same hashes.</p>
+      <p><strong>i18n:</strong> keys under <code>marketing.home.*</code>, plus section copy from <code>marketing.features</code>, <code>marketing.forSchools</code>, <code>marketing.pricing</code>, <code>marketing.contact</code> in EN and AR. RTL-safe layout.</p>
+      <p><strong>Contact form:</strong> on-page at <code>#contact</code>, <code>POST /api/v1/marketing/contact</code> (Resend). Closes Phase 1b Remaining #2 (form backend). Public endpoint; rate-limit; do not require JWT.</p>
+      <pre><code>POST /api/v1/marketing/contact
+Body: { name, email, message }
+Response: { data: { ok: true } }</code></pre>
+      <p><strong>Out of scope for this slice:</strong> production deploy (stays Phase 1b Remaining), blog/CMS, real customer logos or product video.</p>
+      <p><strong>Verify:</strong></p>
+      <ul class="checklist">
+        <li>Home renders Namya sections in order on mobile and desktop</li>
+        <li>Navbar items scroll to <code>#features</code>, <code>#for-schools</code>, <code>#pricing</code>; sticky CTA to <code>#contact</code></li>
+        <li>EN/AR + RTL for every new string</li>
+        <li>Light and dark themes on all sections</li>
+        <li>Old paths redirect to the matching hash</li>
+        <li>Contact form submits to the API and shows success</li>
+      </ul>
+
+      <h2>Out of scope (both tracks)</h2>
+      <ul>
+        <li>Student / teacher / admin portal UIs (Phase 3 / 4 / 6)</li>
+        <li>Assignments, assessments, attendance (Phase 5)</li>
+        <li>Notifications (Phase 7)</li>
+        <li>Marketing production deploy (Phase 1b Remaining)</li>
+      </ul>
+
+      <div class="related-links">
+        <h2>Related</h2>
+        <p><strong>Phase spec:</strong> <a href="index.html">Phase 2 — Academic Core</a></p>
+        <p><strong>Requirements:</strong> <a href="../../requirements/academic-structure.html">Academic Structure</a>, <a href="../../requirements/marketing-site.html">Marketing Site</a></p>
+        <p><strong>Architecture:</strong> <a href="../../technical/data-model.html">Data Model</a>, <a href="../../technical/api-design.html">API Design</a></p>
+        <p><strong>Design:</strong> <a href="../../design/typography.html">Typography</a>, <a href="../../business/what-is-nabta.html">What is Nabta?</a></p>
+        <p><strong>Previous:</strong> <a href="../01-foundation/">Phase 1 track</a> (complete) · <strong>Next:</strong> <a href="../03-student-experience/">Phase 3</a></p>
+      </div>
+      <p class="source-footnote">Source: Phase 2 roadmap; Namya Khan landing anatomy; academic-structure requirements</p>
+          </main>
+          <footer id="docs-pager" class="docs-pager-wrap"></footer>
+        </div>
+        <aside id="docs-toc" class="docs-toc" aria-label="Table of contents"></aside>
+      </div>
+    </div>
+  </div>
+  <script src="../../assets/nav-config.js"></script>
+  <script src="../../assets/layout.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.min.js"></script>
+  <script src="../../assets/docs.js"></script>
+</body>
+</html>

@@ -87,13 +87,98 @@
       "features": "Features",
       "forSchools": "For schools",
       "pricing": "Pricing",
-      "contact": "Contact"
+      "contact": "Contact",
+      "demo": "Request a demo"
     },
     "home": {
-      "heroTitle": "The school platform for Egyptian international schools",
-      "heroBody": "Nabta combines LMS, academic structure, and day-to-day classroom workflows — bilingual from day one.",
+      "heroTitle": "Run your school the way it actually works",
+      "heroBody": "Nabta maps to academic years, grades, classes, and subjects — bilingual English and Arabic from day one, built for Egyptian international schools.",
       "ctaDemo": "Request a demo",
       "ctaFeatures": "See features",
+      "ctaSecondary": "See features",
+      "heroVisualLabel": "School structure",
+      "socialProof": "Trusted by schools preparing for launch",
+      "proof": {
+        "one": "Egyptian International School",
+        "two": "Cairo Bilingual Academy",
+        "three": "Delta British School"
+      },
+      "benefitsTitle": "Built for how schools operate",
+      "benefitsSubtitle": "Features tell, but benefits sell — structure, language, and roles that match your day.",
+      "benefits": {
+        "structure": {
+          "title": "Your hierarchy, not a course catalog",
+          "body": "School → year → grade → class → subject as first-class concepts. Admins stop fighting the LMS."
+        },
+        "bilingual": {
+          "title": "English and Arabic as equals",
+          "body": "Proper RTL, shared translations, and a bilingual product UI — not a bolted-on language pack."
+        },
+        "portals": {
+          "title": "The right portal for each role",
+          "body": "Students, teachers, and school admins each get a workspace that matches their job."
+        },
+        "rollout": {
+          "title": "Grow without ripping out the core",
+          "body": "Start with academic structure, then add classrooms, assessments, and admin tools phase by phase."
+        }
+      },
+      "howTitle": "How it works",
+      "howSubtitle": "Three steps from empty tenant to a living school year.",
+      "steps": {
+        "one": {
+          "title": "Set up school structure",
+          "body": "Create the academic year, grades, classes, and subjects — configurable lists, not hardcoded curricula."
+        },
+        "two": {
+          "title": "Enroll people",
+          "body": "Link students to classes and assign teachers to subjects. Tenant isolation keeps each school’s data private."
+        },
+        "three": {
+          "title": "Run the school year",
+          "body": "Portals and classroom workflows sit on this core. You are not remodeling a course catalog into a school."
+        }
+      },
+      "testimonialsTitle": "What school leaders tell us",
+      "testimonialsSubtitle": "Placeholder quotes until first customer references ship.",
+      "placeholderBadge": "Placeholder",
+      "testimonials": {
+        "one": {
+          "quote": "We need software that already understands Grade 10A, not another Moodle plugin stack.",
+          "name": "Head of Academics",
+          "org": "International school, Cairo"
+        },
+        "two": {
+          "quote": "Bilingual from day one is non-negotiable. Arabic cannot be an afterthought.",
+          "name": "School principal",
+          "org": "Egyptian international school"
+        }
+      },
+      "faqTitle": "Questions schools ask",
+      "faq": {
+        "pricing": {
+          "q": "How much does Nabta cost?",
+          "a": "Pricing is still being defined. Request a demo and we will follow up with a school-fit proposal."
+        },
+        "curriculum": {
+          "q": "Does it lock us into one curriculum?",
+          "a": "No. Years, grades, classes, and subjects are configuration — British, American, or IB-style structures all fit."
+        },
+        "bilingual": {
+          "q": "Is Arabic a first-class language?",
+          "a": "Yes. English and Arabic share the same product, with proper right-to-left layout."
+        },
+        "hosting": {
+          "q": "Where does our data live?",
+          "a": "Each school is isolated by schoolId on the server. Hosting and data-residency options are discussed during onboarding."
+        },
+        "demo": {
+          "q": "What happens after I request a demo?",
+          "a": "We read your note, follow up by email, and walk through a school-shaped demo — not a generic LMS tour."
+        }
+      },
+      "ctaTitle": "See Nabta with your school in mind",
+      "ctaBody": "Tell us about your structure. We will show you years, grades, and classes — not a course catalog.",
       "cards": {
         "students": {
           "title": "Students",
@@ -112,6 +197,89 @@
     "features": {
       "title": "Features",
       "subtitle": "Built for school operations — not generic course catalogs.",
+      "heroTitle": "Capabilities that match how a school actually runs",
+      "heroBody": "Academic structure, role portals, bilingual UI, and assessments that grow with you — not a pile of course plugins.",
+      "ctaDemo": "Request a demo",
+      "ctaSecondary": "For schools",
+      "heroVisualLabel": "Role portals",
+      "socialProof": "Designed with Egyptian international schools in mind",
+      "proof": {
+        "one": "Egyptian International School",
+        "two": "Cairo Bilingual Academy",
+        "three": "Delta British School"
+      },
+      "benefitsTitle": "What you get — in school language",
+      "benefitsSubtitle": "Benefits first. Specs support the claim.",
+      "benefits": {
+        "structure": {
+          "title": "Academic structure",
+          "body": "School → year → grade → class → subject as first-class concepts. Admins stop fighting a course catalog."
+        },
+        "portals": {
+          "title": "Role portals",
+          "body": "Student, teacher, and school admin each get a workspace that matches their job."
+        },
+        "i18n": {
+          "title": "EN / AR + RTL",
+          "body": "Bilingual product UI with proper right-to-left layout — Arabic is not an add-on."
+        },
+        "assessment": {
+          "title": "Assignments & assessments",
+          "body": "Submit, grade, and track as later phases land — the academic core is already in place."
+        }
+      },
+      "howTitle": "A day in each portal",
+      "howSubtitle": "Three roles, one product — without forcing everyone into the same screen.",
+      "steps": {
+        "one": {
+          "title": "Students see their year",
+          "body": "Classes, work, and progress in a daily view — not a dump of unrelated courses."
+        },
+        "two": {
+          "title": "Teachers run the class",
+          "body": "Plan, collect, and grade against the subjects and sections they actually teach."
+        },
+        "three": {
+          "title": "Admins keep the structure honest",
+          "body": "Years, grades, classes, and users stay aligned with how the school is organised."
+        }
+      },
+      "testimonialsTitle": "What operators want from features",
+      "testimonialsSubtitle": "Placeholder quotes until first customer references ship.",
+      "placeholderBadge": "Placeholder",
+      "testimonials": {
+        "one": {
+          "quote": "If Grade 10A is not a first-class object, teachers will not trust the rest of the product.",
+          "name": "IT director",
+          "org": "International school, Giza"
+        },
+        "two": {
+          "quote": "We need one bilingual product — not an English LMS with an Arabic skin.",
+          "name": "Academic coordinator",
+          "org": "Egyptian international school"
+        }
+      },
+      "faqTitle": "What ships now vs later",
+      "faq": {
+        "now": {
+          "q": "What can we use today?",
+          "a": "Academic structure APIs and seed data, plus this marketing site. Student, teacher, and admin classroom UIs arrive in later phases."
+        },
+        "later": {
+          "q": "When do assignments and gradebook land?",
+          "a": "Assessments and attendance are Phase 5. Portals for students and teachers are Phases 3 and 4. The hierarchy you configure now is what those features sit on."
+        },
+        "bilingual": {
+          "q": "Is every screen bilingual?",
+          "a": "Shell and marketing copy ship in EN and AR with RTL. Feature strings roll out with each phase."
+        },
+        "lockIn": {
+          "q": "Are subjects hardcoded?",
+          "a": "No. Subjects are database rows. You create the list that matches your school."
+        }
+      },
+      "ctaTitle": "See the structure in a school-shaped demo",
+      "ctaBody": "We will walk years, grades, and classes — not a generic feature tour.",
       "items": {
         "structure": {
           "title": "Academic structure",
@@ -134,6 +302,89 @@
     "forSchools": {
       "title": "For schools",
       "body": "Designed for Egyptian international schools running British, American, or IB-style structures — with room to grow across MENA.",
+      "heroTitle": "Built for Egyptian international schools",
+      "heroBody": "British, American, or IB-style years and sections — as configuration, with English and Arabic as equals, and room to grow across MENA.",
+      "ctaDemo": "Request a demo",
+      "ctaSecondary": "See features",
+      "heroVisualLabel": "Your school year",
+      "socialProof": "Launch focus: Egypt, then the region",
+      "proof": {
+        "one": "Egyptian International School",
+        "two": "Cairo Bilingual Academy",
+        "three": "Delta British School"
+      },
+      "benefitsTitle": "Why this market, this product",
+      "benefitsSubtitle": "Schools here do not fail because they lack another course catalog.",
+      "benefits": {
+        "egypt": {
+          "title": "Egypt first",
+          "body": "Launch focus is Egyptian international schools — the hierarchy and bilingual UI match how you already operate."
+        },
+        "curriculum": {
+          "title": "Curriculum as configuration",
+          "body": "Years, grades, classes, and subjects are data. No British-vs-IB plugin maze."
+        },
+        "bilingual": {
+          "title": "English and Arabic as equals",
+          "body": "Proper RTL and shared translations. Arabic is not a language pack bolted on later."
+        },
+        "isolation": {
+          "title": "Your school’s data stays yours",
+          "body": "Every academic record is scoped by schoolId on the server — not filtered in the browser."
+        }
+      },
+      "howTitle": "How a school adopts Nabta",
+      "howSubtitle": "Three steps from empty tenant to a living year.",
+      "steps": {
+        "one": {
+          "title": "Set up structure",
+          "body": "Academic year, grades, classes, subjects — lists you control."
+        },
+        "two": {
+          "title": "Enroll people",
+          "body": "Students into sections, teachers onto subjects. Tenant isolation stays on."
+        },
+        "three": {
+          "title": "Run the year",
+          "body": "Portals and classroom tools sit on this core instead of remodeling Moodle into a school."
+        }
+      },
+      "testimonialsTitle": "What school leaders tell us",
+      "testimonialsSubtitle": "Placeholder quotes until first customer references ship.",
+      "placeholderBadge": "Placeholder",
+      "testimonials": {
+        "one": {
+          "quote": "We are not a university. Stop making us pretend our Grade 10 is a course.",
+          "name": "Principal",
+          "org": "International school, Cairo"
+        },
+        "two": {
+          "quote": "If Arabic is second-class, parents will notice before IT does.",
+          "name": "Head of inclusion",
+          "org": "Egyptian international school"
+        }
+      },
+      "faqTitle": "Questions from school leadership",
+      "faq": {
+        "curriculum": {
+          "q": "Does it lock us into one curriculum?",
+          "a": "No. Structure is configuration — British, American, or IB-style years all fit."
+        },
+        "data": {
+          "q": "Can another school see our records?",
+          "a": "No. Tenant isolation is enforced in the API. Frontend filtering is not the security boundary."
+        },
+        "bilingual": {
+          "q": "Will Arabic layout actually work?",
+          "a": "Yes. EN/AR share the same product with proper right-to-left layout."
+        },
+        "mena": {
+          "q": "Is this only for Egypt?",
+          "a": "Launch focus is Egypt. The model is built so more MENA schools can follow without a rewrite."
+        }
+      },
+      "ctaTitle": "Walk through your school, not a catalog",
+      "ctaBody": "Tell us your year structure. We will demo Nabta around it.",
       "points": {
         "egypt": "Launch focus: Egyptian international schools",
         "curriculum": "Curriculum as configuration, not plugins",
@@ -144,7 +395,89 @@
       "title": "Pricing",
       "cardTitle": "Talk to us",
       "cardBody": "Pricing is still being defined. Request a demo and we will follow up with a school-fit proposal.",
-      "cta": "Contact sales"
+      "cta": "Contact sales",
+      "heroTitle": "Pricing that fits the school — not a public grid yet",
+      "heroBody": "We do not publish a self-serve price list. Request a demo and we will follow up with a proposal that matches your size and structure.",
+      "ctaDemo": "Request a demo",
+      "heroVisualLabel": "Talk to us",
+      "socialProof": "School-fit proposals, not a one-row SaaS table",
+      "proof": {
+        "one": "Egyptian International School",
+        "two": "Cairo Bilingual Academy",
+        "three": "Delta British School"
+      },
+      "benefitsTitle": "How we think about commercial fit",
+      "benefitsSubtitle": "No lock-in to a curriculum SKU. Demo first.",
+      "benefits": {
+        "fit": {
+          "title": "School-fit, not a SKU maze",
+          "body": "We talk about years, sections, and roles — then propose what matches your school."
+        },
+        "noLockIn": {
+          "title": "No curriculum lock-in",
+          "body": "British, American, or IB-style structures are configuration, not paid add-ons."
+        },
+        "bilingual": {
+          "title": "Bilingual included",
+          "body": "English and Arabic are the product, not a premium language pack."
+        },
+        "demoFirst": {
+          "title": "Demo before numbers",
+          "body": "See the hierarchy with your school in mind, then we talk commercial terms."
+        }
+      },
+      "howTitle": "How a pricing conversation works",
+      "howSubtitle": "Three steps. No self-serve checkout.",
+      "steps": {
+        "one": {
+          "title": "Request a demo",
+          "body": "Tell us about your school — years, size, and what you use today."
+        },
+        "two": {
+          "title": "School-fit proposal",
+          "body": "We follow up with a proposal shaped around your structure, not a generic list price."
+        },
+        "three": {
+          "title": "Walkthrough",
+          "body": "We show years, grades, and classes — then answer commercial questions with that context."
+        }
+      },
+      "testimonialsTitle": "What finance and principals ask",
+      "testimonialsSubtitle": "Placeholder quotes until first customer references ship.",
+      "placeholderBadge": "Placeholder",
+      "testimonials": {
+        "one": {
+          "quote": "Do not make us buy ‘IB mode’ as a plugin. That is not how a school buys software.",
+          "name": "Business manager",
+          "org": "International school, Cairo"
+        },
+        "two": {
+          "quote": "Show us the year first. Then we can talk about cost.",
+          "name": "Board member",
+          "org": "Egyptian international school"
+        }
+      },
+      "faqTitle": "Pricing questions",
+      "faq": {
+        "tbd": {
+          "q": "How much does Nabta cost?",
+          "a": "Pricing is still being defined. Request a demo and we will follow up with a school-fit proposal."
+        },
+        "signup": {
+          "q": "Can we sign up online?",
+          "a": "Not yet. There is no self-serve checkout. Contact us and we will walk you through a demo."
+        },
+        "hidden": {
+          "q": "Are Arabic or extra curricula extra fees?",
+          "a": "Bilingual UI and configurable structure are core. We do not sell ‘Arabic’ or ‘IB’ as bolt-on SKUs."
+        },
+        "demo": {
+          "q": "What if we are only exploring?",
+          "a": "That is expected. A demo request is a conversation, not a purchase."
+        }
+      },
+      "ctaTitle": "Get a school-fit proposal",
+      "ctaBody": "No public price grid — tell us about your school and we will follow up."
     },
     "contact": {
       "title": "Contact / demo",
@@ -153,7 +486,91 @@
       "email": "Email",
       "message": "Message",
       "submit": "Send request",
-      "success": "Thanks — we received your request."
+      "success": "Thanks — we received your request.",
+      "error": "Could not send your request. Please try again.",
+      "heroTitle": "Request a demo",
+      "heroBody": "Tell us about your school. We will follow up by email and walk through a school-shaped demo — not a generic LMS tour.",
+      "heroVisualLabel": "Demo request",
+      "socialProof": "Schools exploring Nabta",
+      "proof": {
+        "one": "Egyptian International School",
+        "two": "Cairo Bilingual Academy",
+        "three": "Delta British School"
+      },
+      "benefitsTitle": "Why this is a low-pressure next step",
+      "benefitsSubtitle": "A conversation, not a hard sell.",
+      "benefits": {
+        "isolation": {
+          "title": "Your data stays yours",
+          "body": "Each school is isolated by schoolId on the server from day one."
+        },
+        "bilingual": {
+          "title": "Bilingual from the first screen",
+          "body": "English and Arabic with proper RTL — we demo in the language you use."
+        },
+        "egypt": {
+          "title": "Egypt-shaped, not generic",
+          "body": "Years, grades, and sections — the model Egyptian international schools already run."
+        },
+        "noHardSell": {
+          "title": "No purchase required",
+          "body": "A demo request starts a conversation. Pricing is discussed after you have seen the structure."
+        }
+      },
+      "howTitle": "What happens after you submit",
+      "howSubtitle": "Three steps. No automated spam sequence.",
+      "steps": {
+        "one": {
+          "title": "We read your note",
+          "body": "A person reviews what you told us about your school."
+        },
+        "two": {
+          "title": "We email you",
+          "body": "You get a follow-up to schedule a walkthrough — not a drip campaign."
+        },
+        "three": {
+          "title": "School-shaped demo",
+          "body": "We show years, grades, and classes around your context — not a course catalog."
+        }
+      },
+      "testimonialsTitle": "What people say after a walkthrough",
+      "testimonialsSubtitle": "Placeholder quotes until first customer references ship.",
+      "placeholderBadge": "Placeholder",
+      "testimonials": {
+        "one": {
+          "quote": "Finally a demo that started with Grade 10A instead of ‘create a course’.",
+          "name": "Deputy head",
+          "org": "International school, Cairo"
+        },
+        "two": {
+          "quote": "They did not rush us into a contract. They showed the year first.",
+          "name": "Principal",
+          "org": "Egyptian international school"
+        }
+      },
+      "faqTitle": "Before you send",
+      "faq": {
+        "pricing": {
+          "q": "Will you quote a price on the call?",
+          "a": "We can discuss commercial fit after you have seen the structure. There is no public price list yet."
+        },
+        "demo": {
+          "q": "How long is the demo?",
+          "a": "Long enough to walk a year, a grade, and a class — typically a focused conversation, not a two-hour webinar."
+        },
+        "commitment": {
+          "q": "Does this commit us to anything?",
+          "a": "No. Sending this form only starts a conversation."
+        }
+      }
+    },
+    "footer": {
+      "tagline": "Learn. Grow. Thrive.",
+      "product": "Product",
+      "legal": "Legal",
+      "privacy": "Privacy",
+      "terms": "Terms",
+      "contactEmail": "hello@nabta.local"
     }
   },
   "platform": {

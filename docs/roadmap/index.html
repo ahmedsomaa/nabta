@@ -20,10 +20,10 @@
           <header id="docs-header" class="docs-page-header"></header>
           <main id="main" class="docs-main">
 <h1>Implementation Phases</h1>
-      <p class="lead">Phase 1 track complete. Implement <strong>Phase 2 — Academic Core</strong> next — one phase folder at a time.</p>
+      <p class="lead">Phase 2 Academic Core complete. Implement <strong>Phase 3 — Student Experience</strong> next — one phase folder at a time.</p>
 
       <div class="callout callout-warning">
-        <p><strong>Working rule:</strong> Use this as the master specification, then give Cursor focused prompts such as: <em>"Implement Phase 2 only. Do not implement Phase 3+ functionality."</em> Phase 1 (Foundation + 1b–1e bootstrap) is complete.</p>
+        <p><strong>Working rule:</strong> Use this as the master specification, then give Cursor focused prompts such as: <em>"Implement Phase 3 only. Do not implement Phase 4+ functionality."</em> Phase 1 track and Phase 2 Academic Core are complete.</p>
       </div>
 
       <h2>Phase Map</h2>
@@ -33,8 +33,8 @@
         <a href="01c-system-admin/index.html" class="card"><h3>Phase 1c — System Admin <span class="badge badge-complete">Bootstrap</span></h3><p>Platform operator console — schools, health, ops</p></a>
         <a href="01d-mobile-student/index.html" class="card"><h3>Phase 1d — Mobile Student <span class="badge badge-complete">Bootstrap</span></h3><p>Expo student app — auth shell, EN/AR, Nabta theme</p></a>
         <a href="01e-mobile-staff/index.html" class="card"><h3>Phase 1e — Mobile Staff <span class="badge badge-complete">Bootstrap</span></h3><p>Expo staff app — teacher + admin roles, shared shell</p></a>
-        <a href="02-academic-core/index.html" class="card"><h3>Phase 2 — Academic Core <span class="badge badge-current">Current</span></h3><p>Schools, years, grades, classes, enrollments</p></a>
-        <a href="03-student-experience/index.html" class="card"><h3>Phase 3 — Student Experience</h3><p>Dashboard, lessons, assignments, progress</p></a>
+        <a href="02-academic-core/index.html" class="card"><h3>Phase 2 — Academic Core <span class="badge badge-complete">Complete</span></h3><p>Schools, years, grades, classes, enrollments</p></a>
+        <a href="03-student-experience/index.html" class="card"><h3>Phase 3 — Student Experience <span class="badge badge-current">Current</span></h3><p>Dashboard, lessons, assignments, progress</p></a>
         <a href="04-teacher-experience/index.html" class="card"><h3>Phase 4 — Teacher Experience</h3><p>Class mgmt, lesson builder, gradebook</p></a>
         <a href="05-assessments/index.html" class="card"><h3>Phase 5 — Assessments</h3><p>Quiz builder, attempts, scoring, results</p></a>
         <a href="06-administration/index.html" class="card"><h3>Phase 6 — Administration</h3><p>Admin dashboard, users, analytics</p></a>
@@ -44,7 +44,7 @@
 
       <h2>Dependency Order</h2>
       <pre class="mermaid">flowchart LR
-  P1["Phase 1 Foundation ✓"] --> P2[Phase 2 Academic Core]
+  P1["Phase 1 Foundation ✓"] --> P2["Phase 2 Academic Core ✓"]
   P1b["Phase 1b Marketing ✓"] --> P2
   P1c["Phase 1c System Admin ✓"] --> P2
   P1d["Phase 1d Mobile Student ✓"] --> P2

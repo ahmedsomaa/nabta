@@ -4,21 +4,22 @@ How to run the Nabta monorepo locally.
 
 ## Current phase
 
-**Phase 2 — Academic Core** is the active implementation target. The Phase 1 track is complete:
+**Phase 3 — Student Experience** is the active implementation target. Phase 1 track and Phase 2 Academic Core are complete:
 
 | Phase | Status |
 |-------|--------|
 | Phase 1 — Foundation | Complete |
-| Phase 1b — Marketing | Bootstrap complete |
+| Phase 1b — Marketing | Bootstrap complete (landing polish in Phase 2) |
 | Phase 1c — System Admin | Bootstrap complete |
 | Phase 1d — Mobile Student | Bootstrap complete |
 | Phase 1e — Mobile Staff | Bootstrap complete |
+| Phase 2 — Academic Core | Complete |
 
-Read [`docs/roadmap/02-academic-core/`](docs/roadmap/02-academic-core/index.html) before implementing new features.
+Read [`docs/roadmap/03-student-experience/`](docs/roadmap/03-student-experience/index.html) before implementing new features.
 
 Example Cursor prompt:
 
-> Implement Phase 2 only. Do not implement Phase 3+ functionality.
+> Implement Phase 3 only. Do not implement Phase 4+ functionality.
 
 ## Prerequisites
 
@@ -101,7 +102,7 @@ Mobile apps use `EXPO_PUBLIC_API_URL` (default `http://localhost:3000`) to reach
 
 ## Seeded users
 
-After `pnpm db:seed`, these accounts are available (demo school **Nabta Demo School**):
+After `pnpm db:seed`, these accounts are available (demo school **Egyptian International School**):
 
 | Email | Password | Role | App |
 |-------|----------|------|-----|

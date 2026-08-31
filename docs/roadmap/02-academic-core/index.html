@@ -24,10 +24,10 @@
           <header id="docs-header" class="docs-page-header"></header>
           <main id="main" class="docs-main">
 <h1>Phase 2 — Academic Core</h1>
-      <p class="lead"><span class="badge badge-phase">Phase 2</span> <span class="badge badge-current">Current</span> Implement this phase only. Do not implement Phase 3+ functionality.</p>
+      <p class="lead"><span class="badge badge-phase">Phase 2</span> <span class="badge badge-complete">Complete</span> Historical specification — do not re-implement unless fixing regressions.</p>
 
       <div class="callout">
-        <p><strong>Current phase.</strong> Phase 1 track (Foundation + 1b–1e bootstrap) is complete. Start here for academic entities.</p>
+        <p><strong>Status:</strong> Complete — academic hierarchy APIs with tenant isolation, Egyptian International School seed (2026/2027, Grades 7–12), one-page marketing landing (Namya Khan) with on-page demo form. <strong>Next:</strong> <a href="../03-student-experience/">Phase 3 — Student Experience</a>.</p>
       </div>
 
       <h2>Depends On</h2>
@@ -40,7 +40,7 @@
       </ul>
 
       <h2>Goal</h2>
-      <p>Implement the core academic domain: schools, academic years, grades, classes, subjects, students, teachers, enrollments, and teaching assignments.</p>
+      <p>Implement the core academic domain: schools, academic years, grades, classes, subjects, students, teachers, enrollments, and teaching assignments. In parallel, polish the marketing home page to a high-converting SaaS landing layout.</p>
 
       <h2>In Scope</h2>
       <ul>
@@ -51,14 +51,17 @@
         <li>Teaching assignments (teacher → subject/class)</li>
         <li>Seed data: Egyptian International School, 2026/2027, Grades 7–12</li>
         <li>API endpoints for all academic entities</li>
+        <li>Marketing home polish (Namya Khan landing anatomy) in <code>apps/marketing</code></li>
+        <li>Contact/demo form backend (<code>POST /api/v1/marketing/contact</code>)</li>
       </ul>
 
       <h2>Out of Scope</h2>
       <ul>
-        <li>Student/teacher portal UIs (dashboards, lessons)</li>
-        <li>Assignments, assessments, attendance</li>
-        <li>Admin dashboard analytics</li>
-        <li>Notifications</li>
+        <li>Student/teacher portal UIs (dashboards, lessons) — Phase 3 / 4</li>
+        <li>Assignments, assessments, attendance — Phase 5</li>
+        <li>Admin dashboard analytics — Phase 6</li>
+        <li>Notifications — Phase 7</li>
+        <li>Marketing production deploy — remains <a href="../01b-marketing-site/">Phase 1b Remaining</a></li>
       </ul>
 
       <h2>Acceptance Criteria</h2>
@@ -70,24 +73,30 @@
         <li>Seed script populates realistic demo data</li>
         <li>Subject lists are configurable, not hardcoded</li>
         <li>All relationships persist to PostgreSQL</li>
+        <li>Marketing home renders navbar, hero, benefits, how it works, testimonials, pricing, FAQ, contact form, and footer</li>
+        <li>New marketing copy works in EN and AR with RTL</li>
+        <li>Light and dark themes apply to all home sections</li>
+        <li>Navbar and CTAs scroll to in-page sections (<code>#features</code>, <code>#for-schools</code>, <code>#pricing</code>, <code>#contact</code>); contact form submits to the API</li>
       </ul>
 
 
       <h2>Implementation slices</h2>
-      <p>Derived from this phase’s acceptance criteria. Complete in order; each slice is independently verifiable. Do not implement Phase 3+.</p>
+      <p>Derived from this phase’s acceptance criteria. Slices 1–5 are sequential (Academic Core). Slice 6 (marketing) may run in parallel. Do not implement Phase 3+. Full detail: <a href="plan.html">detailed plan</a>.</p>
       <ol>
         <li><strong>School tenant</strong> — school entity with <code>schoolId</code> scoping. Verify: tenant isolation is enforced on academic entities.</li>
         <li><strong>Hierarchy APIs</strong> — CRUD for academic year → grade → class → subject. Verify: an admin can create the full hierarchy via API.</li>
         <li><strong>People + assignments</strong> — student and teacher profiles; enrollments (student → class); teaching assignments (teacher → subject/class). Verify: enrollments and assignments persist to PostgreSQL.</li>
         <li><strong>Configurable subjects</strong> — subject lists are data, not hardcoded. Verify: subjects can be created without code changes.</li>
         <li><strong>Demo seed</strong> — Egyptian International School, 2026/2027, Grades 7–12. Verify: seed script populates realistic demo data.</li>
+        <li><strong>Marketing home polish</strong> — Namya Khan anatomy as a one-page site with section nav; contact form on-page → API. Verify: sections render; hash nav; EN/AR + themes; form works.</li>
       </ol>
 
       <div class="related-links">
         <h2>Related</h2>
-        <p><strong>Requirements:</strong> <a href="../../requirements/academic-structure.html">Academic Structure</a>, <a href="../../requirements/admin.html">Admin Portal</a></p>
+        <p><strong>Detailed plan:</strong> <a href="plan.html">Phase 2 implementation plan</a></p>
+        <p><strong>Requirements:</strong> <a href="../../requirements/academic-structure.html">Academic Structure</a>, <a href="../../requirements/admin.html">Admin Portal</a>, <a href="../../requirements/marketing-site.html">Marketing Site</a></p>
         <p><strong>Architecture:</strong> <a href="../../technical/data-model.html">Data Model</a>, <a href="../../technical/api-design.html">API Design</a></p>
-        <p><strong>Previous:</strong> <a href="../01-foundation/">Phase 1 track</a> (complete) · <strong>Next:</strong> <a href="../03-student-experience/">Phase 3</a></p>
+        <p><strong>Previous:</strong> <a href="../01-foundation/">Phase 1 track</a> (complete) · <strong>Next:</strong> <a href="../03-student-experience/">Phase 3</a> (current phase)</p>
       </div>
       <p class="source-footnote">Source: requirements.md §51 Phase 2, §45</p>
           </main>

@@ -6,6 +6,8 @@ import { AuthModule } from './modules/auth/auth.module';
 import { UsersModule } from './modules/users/users.module';
 import { EmailModule } from './modules/email/email.module';
 import { StorageModule } from './modules/storage/storage.module';
+import { AcademicModule } from './modules/academic/academic.module';
+import { MarketingModule } from './modules/marketing/marketing.module';
 import { HealthController } from './health.controller';
 import { AdminController } from './modules/admin/admin.controller';
 import { PlatformController } from './modules/platform/platform.controller';
@@ -20,6 +22,8 @@ import { PrismaModule } from './prisma/prisma.module';
     StorageModule,
     UsersModule,
     AuthModule,
+    AcademicModule,
+    MarketingModule,
   ],
   controllers: [HealthController, AdminController, PlatformController],
   providers: [{ provide: APP_GUARD, useClass: ThrottlerGuard }],

@@ -61,6 +61,8 @@ services:
       MINIO_ENDPOINT: minio
       MINIO_PORT: "9000"
       WEB_URL: http://localhost:5173
+      MARKETING_URL: http://localhost:5174
+      SYSTEM_ADMIN_URL: http://localhost:5175
       API_URL: http://localhost:3000
     ports:
       - "3000:3000"

@@ -34,26 +34,37 @@ enum ThemePreference {
 model School {
   id        String   @id @default(uuid()) @db.Uuid
   name      String
+  slug      String   @unique
+  locale    Locale   @default(en)
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
-  users     User[]
+
+  users         User[]
+  academicYears AcademicYear[]
+  grades        Grade[]
+  classes       SchoolClass[]
+  subjects      Subject[]
+  students      Student[]
+  teachers      Teacher[]
 }
 
 model User {
-  id           String           @id @default(uuid()) @db.Uuid
-  email        String           @unique
+  id           String          @id @default(uuid()) @db.Uuid
+  email        String          @unique
   passwordHash String
   role         UserRole
-  schoolId     String?          @db.Uuid
-  locale       Locale           @default(en)
-  theme        ThemePreference  @default(system)
-  status       UserStatus       @default(active)
-  createdAt    DateTime         @default(now())
-  updatedAt    DateTime         @updatedAt
+  schoolId     String?         @db.Uuid
+  locale       Locale          @default(en)
+  theme        ThemePreference @default(system)
+  status       UserStatus      @default(active)
+  createdAt    DateTime        @default(now())
+  updatedAt    DateTime        @updatedAt
 
   school              School?              @relation(fields: [schoolId], references: [id], onDelete: Cascade)
   refreshTokens       RefreshToken[]
   passwordResetTokens PasswordResetToken[]
+  student             Student?
+  teacher             Teacher?
 
   @@index([schoolId])
 }
@@ -84,4 +95,140 @@ model PasswordResetToken {
 
   @@index([userId])
   @@index([tokenHash])
+}
+
+model AcademicYear {
+  id        String    @id @default(uuid()) @db.Uuid
+  schoolId  String    @db.Uuid
+  name      String
+  startsOn  DateTime?
+  endsOn    DateTime?
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+
+  school School  @relation(fields: [schoolId], references: [id], onDelete: Cascade)
+  grades Grade[]
+
+  @@unique([schoolId, name])
+  @@index([schoolId])
+}
+
+model Grade {
+  id             String   @id @default(uuid()) @db.Uuid
+  schoolId       String   @db.Uuid
+  academicYearId String   @db.Uuid
+  name           String
+  level          Int
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  school       School         @relation(fields: [schoolId], references: [id], onDelete: Cascade)
+  academicYear AcademicYear   @relation(fields: [academicYearId], references: [id], onDelete: Cascade)
+  classes      SchoolClass[]
+  subjects     Subject[]
+
+  @@unique([academicYearId, level])
+  @@index([schoolId])
+}
+
+model SchoolClass {
+  id        String   @id @default(uuid()) @db.Uuid
+  schoolId  String   @db.Uuid
+  gradeId   String   @db.Uuid
+  name      String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  school               School                @relation(fields: [schoolId], references: [id], onDelete: Cascade)
+  grade                Grade                 @relation(fields: [gradeId], references: [id], onDelete: Cascade)
+  enrollments          Enrollment[]
+  teachingAssignments  TeachingAssignment[]
+
+  @@unique([gradeId, name])
+  @@index([schoolId])
+  @@map("Class")
+}
+
+model Subject {
+  id        String   @id @default(uuid()) @db.Uuid
+  schoolId  String   @db.Uuid
+  gradeId   String?  @db.Uuid
+  name      String
+  code      String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  school              School               @relation(fields: [schoolId], references: [id], onDelete: Cascade)
+  grade               Grade?               @relation(fields: [gradeId], references: [id], onDelete: SetNull)
+  teachingAssignments TeachingAssignment[]
+
+  @@unique([schoolId, name])
+  @@index([schoolId])
+  @@index([gradeId])
+}
+
+model Student {
+  id         String   @id @default(uuid()) @db.Uuid
+  schoolId   String   @db.Uuid
+  userId     String   @unique @db.Uuid
+  givenName  String
+  familyName String
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  school      School       @relation(fields: [schoolId], references: [id], onDelete: Cascade)
+  user        User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  enrollments Enrollment[]
+
+  @@index([schoolId])
+}
+
+model Teacher {
+  id         String   @id @default(uuid()) @db.Uuid
+  schoolId   String   @db.Uuid
+  userId     String   @unique @db.Uuid
+  givenName  String
+  familyName String
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  school              School               @relation(fields: [schoolId], references: [id], onDelete: Cascade)
+  user                User                 @relation(fields: [userId], references: [id], onDelete: Cascade)
+  teachingAssignments TeachingAssignment[]
+
+  @@index([schoolId])
+}
+
+model Enrollment {
+  id        String   @id @default(uuid()) @db.Uuid
+  schoolId  String   @db.Uuid
+  studentId String   @db.Uuid
+  classId   String   @db.Uuid
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  student Student     @relation(fields: [studentId], references: [id], onDelete: Cascade)
+  class   SchoolClass @relation(fields: [classId], references: [id], onDelete: Cascade)
+
+  @@unique([studentId, classId])
+  @@index([schoolId])
+  @@index([classId])
+}
+
+model TeachingAssignment {
+  id        String   @id @default(uuid()) @db.Uuid
+  schoolId  String   @db.Uuid
+  teacherId String   @db.Uuid
+  subjectId String   @db.Uuid
+  classId   String   @db.Uuid
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  teacher Teacher     @relation(fields: [teacherId], references: [id], onDelete: Cascade)
+  subject Subject     @relation(fields: [subjectId], references: [id], onDelete: Cascade)
+  class   SchoolClass @relation(fields: [classId], references: [id], onDelete: Cascade)
+
+  @@unique([teacherId, subjectId, classId])
+  @@index([schoolId])
+  @@index([classId])
 }

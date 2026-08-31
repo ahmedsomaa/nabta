@@ -31,6 +31,19 @@ export class AuthService {
     @Inject(EMAIL_SERVICE) private readonly email: EmailService,
   ) {}
 
+  private schoolSlug(name: string) {
+    const base =
+      name
+        .toLowerCase()
+        .normalize('NFKD')
+        .replace(/[^\w\s-]/g, '')
+        .trim()
+        .replace(/[\s_]+/g, '-')
+        .replace(/-+/g, '-')
+        .slice(0, 40) || 'school';
+    return `${base}-${randomBytes(3).toString('hex')}`;
+  }
+
   private hashToken(token: string) {
     return createHash('sha256').update(token).digest('hex');
   }
@@ -77,7 +90,7 @@ export class AuthService {
     const passwordHash = await argon2.hash(input.password);
     const result = await this.prisma.$transaction(async (tx) => {
       const school = await tx.school.create({
-        data: { name: input.schoolName },
+        data: { name: input.schoolName, slug: this.schoolSlug(input.schoolName) },
       });
       const user = await tx.user.create({
         data: {

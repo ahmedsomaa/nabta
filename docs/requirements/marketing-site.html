@@ -29,18 +29,38 @@
       <h2>Purpose</h2>
       <p>Attract and inform prospective schools, parents, and educators. Drive demo requests and provide a professional brand presence. Lives at <code>apps/marketing</code> in the monorepo.</p>
 
-      <h2>v1 Pages</h2>
+      <h2>v1 Site</h2>
+      <p>One landing page. Navbar items scroll to sections (Namya Khan). Sticky CTA and demo buttons scroll to <code>#contact</code>. Old paths <code>/features</code>, <code>/for-schools</code>, <code>/pricing</code>, <code>/contact</code> redirect to the matching hash.</p>
       <table>
-        <thead><tr><th>Page</th><th>Content</th></tr></thead>
+        <thead><tr><th>Section</th><th>Content</th></tr></thead>
         <tbody>
-          <tr><td><strong>Home</strong></td><td>Hero, value proposition, key features, CTA to demo/contact</td></tr>
-          <tr><td><strong>Features</strong></td><td>Student, teacher, admin capabilities overview</td></tr>
-          <tr><td><strong>For Schools</strong></td><td>Why international schools in Egypt, curriculum flexibility</td></tr>
-          <tr><td><strong>Pricing</strong></td><td>Placeholder — "Contact us" until pricing model is defined</td></tr>
-          <tr><td><strong>Contact / Demo</strong></td><td>Form to request a demo or get in touch</td></tr>
+          <tr><td><strong>Hero</strong></td><td>Home USP, product visual, social proof. Primary CTA → <code>#contact</code>; secondary → <code>#features</code></td></tr>
+          <tr><td><strong>Features</strong> <code>#features</code></td><td>Benefits 2×2: structure, portals, i18n, assessment</td></tr>
+          <tr><td><strong>For Schools</strong> <code>#for-schools</code></td><td>How it works — adopt steps: structure → people → year</td></tr>
+          <tr><td><strong>Testimonials</strong></td><td>Placeholder quotes (labeled)</td></tr>
+          <tr><td><strong>Pricing</strong> <code>#pricing</code></td><td>Talk-to-us offer (no public list). Card CTA → <code>#contact</code></td></tr>
+          <tr><td><strong>FAQ</strong></td><td>Price, curriculum, bilingual, hosting, demo</td></tr>
+          <tr><td><strong>Contact / Demo</strong> <code>#contact</code></td><td>Form as the final CTA. Submits to <code>POST /api/v1/marketing/contact</code></td></tr>
         </tbody>
       </table>
-      <p>Header includes: Login link to <code>apps/web</code>, locale switcher (EN/AR), theme toggle (light/dark).</p>
+      <p>Header includes: Login link to <code>apps/web</code>, locale switcher (EN/AR), theme toggle (light/dark). Sticky navbar CTA: Request a demo → <code>#contact</code>.</p>
+
+      <h2>Home page sections</h2>
+      <p>Landing anatomy adapted from Namya Khan — “Anatomy of a high-converting SaaS landing page.” Full implementation detail: <a href="../roadmap/02-academic-core/plan.html">Phase 2 detailed plan</a> (Track B).</p>
+      <div class="table-wrap"><table>
+        <thead><tr><th>#</th><th>Section</th><th>Purpose</th></tr></thead>
+        <tbody>
+          <tr><td>1</td><td>Navbar</td><td>Main links only; sticky CTA (Request a demo)</td></tr>
+          <tr><td>2</td><td>Hero</td><td>Benefit-driven USP, supporting subheading, CTAs, product visual, social-proof strip</td></tr>
+          <tr><td>3</td><td>Benefits</td><td>2×2 grid — value to schools, not a feature dump (<code>#features</code>)</td></tr>
+          <tr><td>4</td><td>How it works</td><td>3–5 numbered steps from school setup to daily use (<code>#for-schools</code>)</td></tr>
+          <tr><td>5</td><td>Testimonials</td><td>Quotes / logos / badges (placeholders OK in Phase 2)</td></tr>
+          <tr><td>6</td><td>Pricing</td><td>Talk-to-us offer; no public list (<code>#pricing</code>)</td></tr>
+          <tr><td>7</td><td>FAQ</td><td>Simple answers to common objections</td></tr>
+          <tr><td>8</td><td>Final CTA</td><td>Contact form on-page (<code>#contact</code>)</td></tr>
+          <tr><td>9</td><td>Footer</td><td>Logo, same section links, legal placeholders, contact</td></tr>
+        </tbody>
+      </table></div>
 
       <h2>Stack</h2>
       <ul>
@@ -52,7 +72,7 @@
 
       <h2>In Scope (Phase 1b)</h2>
       <ul>
-        <li>All v1 pages listed above</li>
+        <li>One-page landing with section nav listed above</li>
         <li>Responsive design (mobile-first)</li>
         <li>EN/AR with RTL support</li>
         <li>Light/dark theme toggle</li>
@@ -73,9 +93,10 @@
 
       <h2>Acceptance Criteria</h2>
       <ul class="checklist">
-        <li>All v1 pages render correctly in EN and AR</li>
+        <li>One-page landing renders correctly in EN and AR</li>
         <li>RTL layout works for Arabic</li>
-        <li>Light and dark themes work on all pages</li>
+        <li>Light and dark themes work on all sections</li>
+        <li>Navbar items scroll to in-page sections</li>
         <li>Login link navigates to LMS app</li>
         <li>Contact/demo form submits successfully</li>
         <li>Site is responsive at all breakpoints</li>
@@ -84,7 +105,7 @@
 
       <div class="related-links">
         <h2>Related</h2>
-        <p><span class="badge badge-phase">Phases</span> <a href="../roadmap/01b-marketing-site/">Phase 1b — Marketing Site</a></p>
+        <p><span class="badge badge-phase">Phases</span> <a href="../roadmap/01b-marketing-site/">Phase 1b — Marketing Site</a> <span class="badge badge-complete">Bootstrap</span> · <a href="../roadmap/02-academic-core/plan.html">Phase 2 — detailed plan</a> (home polish) <span class="badge badge-complete">Complete</span></p>
         <p><span class="badge badge-arch">Architecture</span> <a href="../technical/docker-and-deployment.html">Docker &amp; Deployment</a>, <a href="../technical/frontend-architecture.html">Frontend Architecture</a></p>
         <p>Also see: <a href="internationalization.html">Internationalization</a>, <a href="../design/philosophy.html">UX &amp; Design</a></p>
       </div>

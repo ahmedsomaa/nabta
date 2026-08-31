@@ -7,7 +7,11 @@ async function bootstrap() {
   const app = await NestFactory.create(AppModule);
   app.setGlobalPrefix('api/v1');
   app.enableCors({
-    origin: process.env.WEB_URL ?? 'http://localhost:5173',
+    origin: [
+      process.env.WEB_URL ?? 'http://localhost:5173',
+      process.env.MARKETING_URL ?? 'http://localhost:5174',
+      process.env.SYSTEM_ADMIN_URL ?? 'http://localhost:5175',
+    ],
     credentials: true,
   });
   app.useGlobalFilters(new GlobalExceptionFilter());
