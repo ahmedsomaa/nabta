@@ -118,7 +118,7 @@ export class StudentService {
     const classIds = this.classIds(student);
     const weekday = new Date().getDay();
 
-    const [slots, assignments, continueRow, submittedCount] = await Promise.all([
+    const [slots, assignments, quizzes, continueRow, submittedCount] = await Promise.all([
       this.prisma.timetableSlot.findMany({
         where: { schoolId, classId: { in: classIds }, weekday },
         include: { subject: true },
@@ -135,6 +135,15 @@ export class StudentService {
           submissions: { where: { studentId: student.id } },
         },
         orderBy: { dueAt: 'asc' },
+        take: 8,
+      }),
+      this.prisma.assessment.findMany({
+        where: { schoolId, classId: { in: classIds }, publishedAt: { not: null } },
+        include: {
+          subject: true,
+          attempts: { where: { studentId: student.id } },
+        },
+        orderBy: { createdAt: 'desc' },
         take: 8,
       }),
       this.prisma.lessonProgress.findFirst({
@@ -165,13 +174,34 @@ export class StudentService {
         subjectId: slot.subjectId,
         subjectName: slot.subject.name,
       })),
-      upcoming: assignments.map((row) => ({
-        id: row.id,
-        title: row.title,
-        dueAt: row.dueAt.toISOString(),
-        subjectName: row.subject.name,
-        status: this.displayStatus(row.dueAt, row.submissions[0] ?? null),
-      })),
+      upcoming: [
+        ...assignments.map((row) => ({
+          id: row.id,
+          kind: 'assignment' as const,
+          title: row.title,
+          dueAt: row.dueAt.toISOString(),
+          subjectName: row.subject.name,
+          status: this.displayStatus(row.dueAt, row.submissions[0] ?? null),
+        })),
+        ...quizzes
+          .filter((row) => {
+            const finished = row.attempts.filter((attempt) => attempt.status !== 'IN_PROGRESS');
+            const inProgress = row.attempts.some((attempt) => attempt.status === 'IN_PROGRESS');
+            return inProgress || finished.length < row.maxAttempts;
+          })
+          .map((row) => {
+            const inProgress = row.attempts.some((attempt) => attempt.status === 'IN_PROGRESS');
+            const submitted = row.attempts.some((attempt) => attempt.status !== 'IN_PROGRESS');
+            return {
+              id: row.id,
+              kind: 'assessment' as const,
+              title: row.title,
+              dueAt: null,
+              subjectName: row.subject.name,
+              status: inProgress ? 'IN_PROGRESS' : submitted ? 'SUBMITTED' : 'NOT_STARTED',
+            };
+          }),
+      ],
       continueLearning: continueRow
         ? {
             lessonId: continueRow.lessonId,
@@ -233,6 +263,14 @@ export class StudentService {
           orderBy: { dueAt: 'asc' },
           include: { submissions: { where: { studentId: student.id } } },
         },
+        assessments: {
+          where: { classId: teaching.classId, publishedAt: { not: null } },
+          orderBy: { createdAt: 'desc' },
+          include: {
+            attempts: { where: { studentId: student.id } },
+            questions: { select: { points: true } },
+          },
+        },
       },
     });
     if (!subject) throw new NotFoundException('Subject not found.');
@@ -274,6 +312,37 @@ export class StudentService {
         subjectName: subject.name,
         status: this.displayStatus(row.dueAt, row.submissions[0] ?? null),
       })),
+      assessments: subject.assessments.map((row) => {
+        const inProgress = row.attempts.find((attempt) => attempt.status === 'IN_PROGRESS');
+        const finished = row.attempts.filter((attempt) => attempt.status !== 'IN_PROGRESS');
+        const maxScore = row.questions.reduce((sum, question) => sum + question.points, 0);
+        const best = finished.reduce<number | null>((acc, attempt) => {
+          if (attempt.score == null) return acc;
+          const value = Number(attempt.score);
+          return acc == null || value > acc ? value : acc;
+        }, null);
+        return {
+          id: row.id,
+          title: row.title,
+          subjectName: subject.name,
+          timeLimitMinutes: row.timeLimitMinutes,
+          maxAttempts: row.maxAttempts,
+          passingScore: row.passingScore,
+          attemptsUsed: finished.length + (inProgress ? 1 : 0),
+          attemptsRemaining: Math.max(0, row.maxAttempts - finished.length - (inProgress ? 1 : 0)),
+          inProgressAttemptId: inProgress?.id ?? null,
+          bestScore: best,
+          maxScore,
+          passed: best == null || maxScore <= 0 ? null : (best / maxScore) * 100 >= row.passingScore,
+          status: inProgress
+            ? 'IN_PROGRESS'
+            : finished.some((attempt) => attempt.status === 'EXPIRED') && finished.every((attempt) => attempt.status !== 'SUBMITTED')
+              ? 'EXPIRED'
+              : finished.length > 0
+                ? 'SUBMITTED'
+                : 'NOT_STARTED',
+        };
+      }),
     };
   }
 

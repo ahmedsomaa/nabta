@@ -4,7 +4,7 @@ One important change I'd make for Cursor
 
 I would not paste this and tell Cursor "build the whole thing." Cursor is much more effective if this becomes the master specification, then you give it smaller implementation prompts such as:
 
-"Implement Phase 5 only. Do not implement Phase 6+ functionality."
+"Implement Phase 6 only. Do not implement Phase 7+ functionality."
 
 Then move phase-by-phase.
 
@@ -43,7 +43,7 @@ Use the HTML documentation under docs/ as the working spec (authoritative — no
 - `docs/requirements/` — what the product must do (portals, platform capabilities)
 - `docs/design/` — philosophy, colors, typography, logos, UX states
 - `docs/technical/` — stack, architecture, deployment, diagrams
-- `docs/roadmap/` — implementation phases (Phases 1–4 complete; start with `05-assessments/`)
+- `docs/roadmap/` — implementation phases (Phases 1–5 complete; start with `06-administration/`)
 - `AGENTS.md` — AI entry point at repo root
 
 Golden rule: implement **one phase folder at a time**.

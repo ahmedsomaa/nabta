@@ -145,10 +145,11 @@ export interface TimetableSlotView {
 
 export interface UpcomingAssignment {
   id: string;
+  kind?: 'assignment' | 'assessment';
   title: string;
-  dueAt: string;
+  dueAt: string | null;
   subjectName: string;
-  status: StudentAssignmentStatus;
+  status: string;
 }
 
 export interface ContinueLearning {
@@ -198,6 +199,7 @@ export interface StudentSubjectDetail {
   progressPercent: number;
   units: StudentUnit[];
   assignments: UpcomingAssignment[];
+  assessments: StudentAssessmentListItem[];
 }
 
 export interface StudentLessonDetail {
@@ -271,7 +273,7 @@ export interface TeacherToGradeItem {
 }
 
 export interface TeacherAlert {
-  kind: 'missing_work' | 'low_progress';
+  kind: 'missing_work' | 'low_progress' | 'low_score';
   message: string;
   classId: string;
   subjectId: string;
@@ -400,11 +402,18 @@ export interface TeacherGradebook {
   subjectId: string;
   students: { id: string; givenName: string; familyName: string }[];
   assignments: { id: string; title: string; maxScore: number; publishedAt: string | null }[];
+  assessments: { id: string; title: string; maxScore: number; publishedAt: string | null }[];
   cells: {
     studentId: string;
     assignmentId: string;
     score: number | null;
     status: StudentAssignmentStatus;
+  }[];
+  assessmentCells: {
+    studentId: string;
+    assessmentId: string;
+    score: number | null;
+    passed: boolean | null;
   }[];
 }
 
@@ -415,5 +424,201 @@ export interface TeacherAttendance {
     givenName: string;
     familyName: string;
     status: AttendanceStatus | null;
+  }[];
+}
+
+export type QuestionType = 'MULTIPLE_CHOICE' | 'MULTIPLE_ANSWER' | 'TRUE_FALSE' | 'SHORT_ANSWER';
+export type AttemptStatus = 'IN_PROGRESS' | 'SUBMITTED' | 'EXPIRED';
+export type StudentAssessmentStatus = 'NOT_STARTED' | AttemptStatus;
+
+export interface TeacherQuestionOption {
+  id: string;
+  text: string;
+  isCorrect: boolean;
+  sortOrder: number;
+}
+
+export interface TeacherQuestion {
+  id: string;
+  type: QuestionType;
+  prompt: string;
+  points: number;
+  sortOrder: number;
+  feedback: string | null;
+  options: TeacherQuestionOption[];
+}
+
+export interface TeacherAssessmentListItem {
+  id: string;
+  title: string;
+  publishedAt: string | null;
+  classId: string;
+  className: string;
+  subjectId: string;
+  subjectName: string;
+  questionCount: number;
+  attemptCount: number;
+}
+
+export interface TeacherAssessmentDetail {
+  id: string;
+  title: string;
+  instructions: string;
+  timeLimitMinutes: number | null;
+  maxAttempts: number;
+  passingScore: number;
+  randomizeQuestions: boolean;
+  publishedAt: string | null;
+  classId: string;
+  className: string;
+  subjectId: string;
+  subjectName: string;
+  unitId: string | null;
+  questions: TeacherQuestion[];
+}
+
+export interface TeacherAssessmentResults {
+  assessmentId: string;
+  title: string;
+  passingScore: number;
+  attemptCount: number;
+  average: number | null;
+  passRate: number | null;
+  students: {
+    studentId: string;
+    givenName: string;
+    familyName: string;
+    bestScore: number | null;
+    maxScore: number;
+    passed: boolean | null;
+    attemptId: string | null;
+  }[];
+}
+
+export interface TeacherAttemptReview {
+  id: string;
+  studentId: string;
+  givenName: string;
+  familyName: string;
+  status: AttemptStatus;
+  score: number | null;
+  maxScore: number;
+  passed: boolean | null;
+  submittedAt: string | null;
+  questions: {
+    id: string;
+    prompt: string;
+    type: QuestionType;
+    points: number;
+    feedback: string | null;
+    correct: boolean;
+    options: TeacherQuestionOption[];
+    selectedOptionIds: string[];
+    textAnswer: string | null;
+  }[];
+}
+
+export interface StudentAssessmentListItem {
+  id: string;
+  title: string;
+  subjectName: string;
+  timeLimitMinutes: number | null;
+  maxAttempts: number;
+  passingScore: number;
+  attemptsUsed: number;
+  attemptsRemaining: number;
+  inProgressAttemptId: string | null;
+  bestScore: number | null;
+  maxScore: number;
+  passed: boolean | null;
+  status: StudentAssessmentStatus;
+}
+
+export interface StudentAssessmentOverview {
+  id: string;
+  title: string;
+  instructions: string;
+  subjectName: string;
+  timeLimitMinutes: number | null;
+  maxAttempts: number;
+  passingScore: number;
+  randomizeQuestions: boolean;
+  questionCount: number;
+  attemptsUsed: number;
+  attemptsRemaining: number;
+  inProgressAttemptId: string | null;
+  canStart: boolean;
+  bestScore: number | null;
+  maxScore: number;
+  passed: boolean | null;
+}
+
+export interface StudentAttemptQuestion {
+  id: string;
+  type: QuestionType;
+  prompt: string;
+  points: number;
+  options: { id: string; text: string; sortOrder: number }[];
+  selectedOptionIds: string[];
+  textAnswer: string | null;
+}
+
+export interface StudentAttemptView {
+  id: string;
+  assessmentId: string;
+  status: AttemptStatus;
+  expiresAt: string | null;
+  questions: StudentAttemptQuestion[];
+}
+
+export interface StudentAttemptResult {
+  id: string;
+  assessmentId: string;
+  title: string;
+  status: AttemptStatus;
+  score: number;
+  maxScore: number;
+  passed: boolean;
+  submittedAt: string | null;
+  questions: {
+    id: string;
+    type: QuestionType;
+    prompt: string;
+    points: number;
+    awarded: number;
+    feedback: string | null;
+    options: { id: string; text: string; sortOrder: number; isCorrect: boolean }[];
+    selectedOptionIds: string[];
+    textAnswer: string | null;
+  }[];
+}
+
+export interface StudentGradeListItem {
+  subjectId: string;
+  subjectName: string;
+  className: string;
+  percentage: number | null;
+  letter: string | null;
+}
+
+export interface StudentGradeDetail {
+  subjectId: string;
+  subjectName: string;
+  className: string;
+  percentage: number | null;
+  letter: string | null;
+  assignments: {
+    id: string;
+    title: string;
+    score: number | null;
+    maxScore: number;
+    feedback: string | null;
+  }[];
+  assessments: {
+    id: string;
+    title: string;
+    score: number | null;
+    maxScore: number;
+    passed: boolean | null;
   }[];
 }

@@ -3,10 +3,10 @@ import { useQuery } from '@tanstack/react-query';
 import { useTranslation } from 'react-i18next';
 import { Button, Card, Chip } from '@heroui/react';
 import { Check } from 'lucide-react';
-import type { StudentSubjectDetail } from '@nabta/types';
+import type { StudentAssignmentStatus, StudentSubjectDetail } from '@nabta/types';
 import { apiFetch } from '@/lib/api';
 import { EmptyCard, QueryError, QueryLoading } from './QueryState';
-import { StatusChip, formatDue } from './StatusChip';
+import { QuizStatusChip, StatusChip, formatDue } from './StatusChip';
 
 export function StudentSubjectPage() {
   const { t, i18n } = useTranslation();
@@ -88,7 +88,7 @@ export function StudentSubjectPage() {
                         {t('student.due', { date: formatDue(item.dueAt, i18n.language) })}
                       </Card.Description>
                     </div>
-                    <StatusChip status={item.status} />
+                    <StatusChip status={item.status as StudentAssignmentStatus} />
                   </div>
                 </Card.Header>
                 <div className="mt-3">
@@ -98,6 +98,43 @@ export function StudentSubjectPage() {
                     onPress={() => navigate(`/student/assignments/${item.id}`)}
                   >
                     {t('student.viewAssignment')}
+                  </Button>
+                </div>
+              </Card>
+            ))}
+          </div>
+        )}
+      </section>
+
+      <section className="space-y-3">
+        <h2 className="text-lg font-semibold">{t('grades.quizzes')}</h2>
+        {subject.assessments.length === 0 ? (
+          <EmptyCard>{t('assessment.empty')}</EmptyCard>
+        ) : (
+          <div className="grid gap-3">
+            {subject.assessments.map((item) => (
+              <Card key={item.id} className="p-4">
+                <Card.Header>
+                  <div className="flex flex-wrap items-start justify-between gap-2">
+                    <div>
+                      <Card.Title>{item.title}</Card.Title>
+                      <Card.Description>
+                        {t('assessment.attempts', { used: item.attemptsUsed, max: item.maxAttempts })}
+                        {item.timeLimitMinutes
+                          ? ` · ${t('assessment.timeLimit', { minutes: item.timeLimitMinutes })}`
+                          : ''}
+                      </Card.Description>
+                    </div>
+                    <QuizStatusChip status={item.status} />
+                  </div>
+                </Card.Header>
+                <div className="mt-3">
+                  <Button
+                    size="sm"
+                    variant="secondary"
+                    onPress={() => navigate(`/student/assessments/${item.id}`)}
+                  >
+                    {t('assessment.viewQuiz')}
                   </Button>
                 </div>
               </Card>

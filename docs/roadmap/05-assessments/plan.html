@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Phase 5 — Detailed implementation plan — Nabta</title>
+  <link rel="stylesheet" href="../../assets/docs.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500&family=Quicksand:wght@400;500;600;700&family=Zain:wght@400;700&display=swap" rel="stylesheet">
+</head>
+<body data-section="roadmap" data-title="Phase 5 — Detailed plan">
+  <a href="#main" class="skip-link">Skip to content</a>
+  <header id="docs-topnav" class="docs-topnav" aria-label="Top navigation"></header>
+  <div class="docs-mobile-bar">
+    <button type="button" id="sidebar-toggle" class="sidebar-toggle" aria-expanded="false" aria-label="Open menu">&#9776;</button>
+    <a href="../../index.html" class="docs-mobile-brand">Nabta</a>
+  </div>
+  <div id="sidebar-overlay" class="sidebar-overlay"></div>
+  <div class="docs-layout">
+    <aside id="docs-sidebar" class="docs-sidebar" aria-label="Sidebar"></aside>
+    <div class="docs-content">
+      <div class="docs-body">
+        <div class="docs-article">
+          <header id="docs-header" class="docs-page-header"></header>
+          <main id="main" class="docs-main">
+      <h1>Phase 5 — Detailed implementation plan</h1>
+      <p class="lead"><span class="badge badge-phase">Phase 5</span> <span class="badge badge-complete">Complete</span> Historical execution plan — quiz builder, student attempts, auto-score, and subject grades.</p>
+
+      <div class="callout">
+        <p><strong>Companion to</strong> <a href="index.html">Phase 5 — Assessments</a> (scope guards and acceptance criteria). This page is the execution plan: schema, APIs, seed, and <code>apps/web</code> screens. Slices 0–1 are data/API prerequisites; later slices map to the phase index.</p>
+      </div>
+
+      <div class="callout">
+        <p><strong>Web portals only.</strong> Admin is <a href="../06-administration/">Phase 6</a>. Notifications are <a href="../07-notifications/">Phase 7</a>. No essay/oral, GPA, or school grading-scheme admin. Do not add <code>/api/v1/grades</code> for marks — academic <code>GET /grades</code> is the year-level resource.</p>
+      </div>
+
+      <h2>Slice order</h2>
+      <p>Slices 0–1 first. Then quiz builder → student take flow → teacher results → student grades. Sequential; each slice is independently verifiable.</p>
+
+      <pre class="mermaid">flowchart TB
+  subgraph data [Data and APIs]
+    S0[Schema seed plus this plan]
+    S1[Quiz APIs plus scoring plus GradeRecord]
+    S0 --> S1
+  end
+  subgraph ui [apps/web]
+    S2[Teacher quiz builder]
+    S3[Student take flow]
+    S4[Teacher results and surfaces]
+    S5[Student grades page]
+    S2 --> S3 --> S4 --> S5
+  end
+  S1 --> S2</pre>
+
+      <h2>Ground truth before this phase</h2>
+      <ul>
+        <li>Nadia Hassan teaches <strong>10A Mathematics</strong>. Login: <code>teacher@nabta.local</code> / <code>Password123!</code>. Omar Farouk is enrolled: <code>student@nabta.local</code>.</li>
+        <li>No <code>Assessment</code>, <code>Question</code>, <code>AssessmentAttempt</code>, or <code>GradeRecord</code> models.</li>
+        <li>Teacher APIs and UI cover assignments only. Dashboard has no Create Quiz action.</li>
+        <li><code>/student/grades</code> is a later-phase placeholder.</li>
+        <li>Academic <code>GET /grades</code> lists year levels (Grade 7–12), not marks.</li>
+      </ul>
+
+      <h2>Original agent prompt</h2>
+      <pre><code>Implement Phase 5 only per docs/roadmap/05-assessments/plan.html.
+Quiz builder + student attempts + auto-score + GradeRecord grades view.
+Do not implement admin (Phase 6), notifications, essay/oral, GPA, or mobile-staff.</code></pre>
+
+      <h2>In scope</h2>
+      <ul>
+        <li>Quiz builder: MCQ, multiple answer, true/false, short answer; time limit, max attempts, passing score, randomization</li>
+        <li>Student flow: overview → start → questions → submit → result / feedback</li>
+        <li>Auto-score on submit (objectives + short-answer exact match); immediate student results</li>
+        <li><code>GradeRecord</code> rollup (percentage + letter); student grades list and subject drill-down</li>
+        <li>Teacher results (count, average, pass rate, per-student best) and gradebook quiz columns</li>
+        <li>EN/AR + RTL; loading / empty / error / success per <a href="../../design/ux-states.html">UX States</a></li>
+      </ul>
+
+      <h2>Out of scope</h2>
+      <ul>
+        <li>Admin portal, school analytics dashboards, global search</li>
+        <li>BullMQ / quiz-published notifications / announcements</li>
+        <li>Essay, oral, teacher short-answer grading queue</li>
+        <li>GPA and configurable grading schemes</li>
+        <li>Student attendance view</li>
+        <li><code>apps/mobile-staff</code>, TipTap</li>
+      </ul>
+
+      <h2>Locked API shape</h2>
+      <p>Role prefixes, not generic <code>/api/v1/assessments</code>. Sequence diagram maps to student routes under <code>/me</code>.</p>
+      <ul>
+        <li>Teacher: <code>/api/v1/teacher/assessments</code> (scoped by <code>TeachingAssignment</code>)</li>
+        <li>Student: <code>/api/v1/me/assessments</code>, <code>/me/attempts</code>, <code>/me/grades</code> (scoped by enrollment)</li>
+      </ul>
+
+      <h2>Slice 0 — Schema, seed, this plan</h2>
+      <p><strong>Goal:</strong> persist quizzes, attempts, and subject rollups. Tenant isolation (<code>schoolId</code> from JWT).</p>
+      <div class="table-wrap"><table>
+        <thead><tr><th>Model</th><th>Role</th></tr></thead>
+        <tbody>
+          <tr><td><code>Assessment</code></td><td>Class + subject quiz; optional <code>unitId</code>; time limit, max attempts, passing score, randomize, <code>publishedAt</code></td></tr>
+          <tr><td><code>Question</code> / <code>QuestionOption</code></td><td>Prompt, points, type; options (T/F = two rows; short-answer accepted strings are correct options)</td></tr>
+          <tr><td><code>AssessmentAttempt</code></td><td><code>IN_PROGRESS</code> / <code>SUBMITTED</code> / <code>EXPIRED</code>; <code>questionOrder</code>; <code>expiresAt</code></td></tr>
+          <tr><td><code>AttemptAnswer</code></td><td>Selected option ids and/or text</td></tr>
+          <tr><td><code>GradeRecord</code></td><td>Unique student + class + subject; percentage and letter</td></tr>
+        </tbody>
+      </table></div>
+      <p><strong>Seed:</strong> one published 10A Mathematics quiz (mixed types, 10 min, 2 attempts, passing 60, randomization on). Omar has no attempt. One unpublished draft quiz stays hidden from students.</p>
+      <p><strong>Verify:</strong> migration applies; draft quiz absent from student subject payload.</p>
+
+      <h2>Slice 1 — APIs + scoring + GradeRecord</h2>
+      <p><strong>Module:</strong> <code>apps/api/src/modules/assessments/</code>. Shared scoring; <code>GradeRecord</code> recompute on quiz submit and assignment publish-grades.</p>
+      <p><strong>Scoring:</strong> all-or-nothing per question. Short answer: trim + case-insensitive match against correct option text. <code>passed = (score/maxScore)*100 &gt;= passingScore</code>. Best submitted attempt feeds the rollup. Equal weight with published assignment percentages. Letter bands A–F. Hide <code>isCorrect</code> until submit.</p>
+      <p><strong>Verify:</strong> Nadia publishes; Omar starts/submits and is scored; second-school token cannot read the quiz; keys hidden before submit.</p>
+
+      <h2>Slice 2 — Teacher quiz builder</h2>
+      <p><strong>Routes:</strong> <code>/teacher/assessments</code>, <code>/new</code>, <code>/:id</code>, <code>/:id/results</code>.</p>
+      <p>Create Quiz on the dashboard; Add quiz on the class hub / builder. Debounced autosave. Publish/unpublish.</p>
+      <p><strong>Verify:</strong> Nadia builds a mixed-type quiz and publishes it.</p>
+
+      <h2>Slice 3 — Student take flow</h2>
+      <p><strong>Routes:</strong> overview, attempt (countdown from <code>expiresAt</code>), result. Dashboard upcoming and subject page list published quizzes.</p>
+      <p><strong>Verify:</strong> Omar overview → start → answer → submit → result. Remaining attempts and expiry are enforced.</p>
+
+      <h2>Slice 4 — Teacher results + surfaces</h2>
+      <p>Attempt count, average, pass rate, per-student best; review one attempt. Gradebook quiz columns. Low-score dashboard alert (below passing).</p>
+      <p><strong>Verify:</strong> after Omar submits, Nadia sees his score in results and gradebook.</p>
+
+      <h2>Slice 5 — Student grades view</h2>
+      <p>Replace <code>/student/grades</code> placeholder. List: subject, percentage, letter. Detail: published assignment scores + submitted quiz attempts.</p>
+      <p><strong>Verify:</strong> Omar’s grades page shows 10A Mathematics after he submits; unpublished assignment scores stay hidden.</p>
+
+      <h2>Index mapping</h2>
+      <div class="table-wrap"><table>
+        <thead><tr><th>Index slice</th><th>This plan</th></tr></thead>
+        <tbody>
+          <tr><td>1. Quiz builder</td><td>Slice 2 (after 0–1)</td></tr>
+          <tr><td>2. Attempt rules</td><td>Slice 1 (server) + Slice 2 (config) + Slice 3 (UX)</td></tr>
+          <tr><td>3. Student flow</td><td>Slice 3</td></tr>
+          <tr><td>4. Scoring + results</td><td>Slice 1 engine + Slice 3 result + Slice 4 teacher results</td></tr>
+          <tr><td>5. Grades view</td><td>Slice 5</td></tr>
+        </tbody>
+      </table></div>
+
+      <h2>Acceptance (phase index)</h2>
+      <ul class="checklist">
+        <li>Teacher can create quiz with multiple question types</li>
+        <li>Student can take assessment with time limit and attempt tracking</li>
+        <li>Objective questions are auto-scored</li>
+        <li>Student sees results and feedback after submission</li>
+        <li>Student grades page shows subject-level current grades</li>
+        <li>Assessment domain is extensible for future exam types</li>
+      </ul>
+
+      <div class="related-links">
+        <h2>Related</h2>
+        <p><strong>Phase spec:</strong> <a href="index.html">Phase 5 — Assessments</a></p>
+        <p><strong>Requirements:</strong> <a href="../../requirements/student.html">Student Portal</a>, <a href="../../requirements/teacher.html">Teacher Portal</a></p>
+        <p><strong>Architecture:</strong> <a href="../../technical/data-model.html">Data Model</a>, <a href="../../technical/api-design.html">API Design</a>, <a href="../../technical/sequences.html">Sequence Diagrams</a></p>
+        <p><strong>Design:</strong> <a href="../../design/ux-states.html">UX States</a></p>
+        <p><strong>Previous:</strong> <a href="../04-teacher-experience/">Phase 4</a> (complete) · <strong>Next:</strong> <a href="../06-administration/">Phase 6</a></p>
+      </div>
+      <p class="source-footnote">Source: Phase 5 roadmap; student and teacher portal requirements; sequences</p>
+          </main>
+          <footer id="docs-pager" class="docs-pager-wrap"></footer>
+        </div>
+        <aside id="docs-toc" class="docs-toc" aria-label="Table of contents"></aside>
+      </div>
+    </div>
+  </div>
+  <script src="../../assets/nav-config.js"></script>
+  <script src="../../assets/layout.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.min.js"></script>
+  <script src="../../assets/docs.js"></script>
+</body>
+</html>

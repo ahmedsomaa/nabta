@@ -49,6 +49,9 @@ export function TeacherDashboardPage() {
           <Button variant="primary" onPress={() => navigate('/teacher/assignments/new')}>
             {t('teacher.createAssignment')}
           </Button>
+          <Button variant="secondary" onPress={() => navigate('/teacher/assessments/new')}>
+            {t('teacher.createQuiz')}
+          </Button>
           <Button
             variant="secondary"
             isDisabled={!firstClass}

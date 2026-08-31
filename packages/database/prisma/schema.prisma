@@ -54,6 +54,19 @@ enum AttendanceStatus {
   EXCUSED
 }
 
+enum QuestionType {
+  MULTIPLE_CHOICE
+  MULTIPLE_ANSWER
+  TRUE_FALSE
+  SHORT_ANSWER
+}
+
+enum AttemptStatus {
+  IN_PROGRESS
+  SUBMITTED
+  EXPIRED
+}
+
 model School {
   id        String   @id @default(uuid()) @db.Uuid
   name      String
@@ -80,6 +93,12 @@ model School {
   assignmentFiles AssignmentFile[]
   attendanceSessions AttendanceSession[]
   attendanceRecords AttendanceRecord[]
+  assessments       Assessment[]
+  questions         Question[]
+  questionOptions   QuestionOption[]
+  assessmentAttempts AssessmentAttempt[]
+  attemptAnswers    AttemptAnswer[]
+  gradeRecords      GradeRecord[]
 }
 
 model User {
@@ -181,6 +200,8 @@ model SchoolClass {
   assignments          Assignment[]
   units                Unit[]
   attendanceSessions   AttendanceSession[]
+  assessments          Assessment[]
+  gradeRecords         GradeRecord[]
 
   @@unique([gradeId, name])
   @@index([schoolId])
@@ -203,6 +224,8 @@ model Subject {
   assignments         Assignment[]
   timetableSlots      TimetableSlot[]
   attendanceSessions  AttendanceSession[]
+  assessments         Assessment[]
+  gradeRecords        GradeRecord[]
 
   @@unique([schoolId, name])
   @@index([schoolId])
@@ -224,6 +247,8 @@ model Student {
   submissions  AssignmentSubmission[]
   progress     LessonProgress[]
   attendanceRecords AttendanceRecord[]
+  attempts     AssessmentAttempt[]
+  gradeRecords GradeRecord[]
 
   @@index([schoolId])
 }
@@ -290,8 +315,9 @@ model Unit {
 
   school  School       @relation(fields: [schoolId], references: [id], onDelete: Cascade)
   subject Subject      @relation(fields: [subjectId], references: [id], onDelete: Cascade)
-  class   SchoolClass? @relation(fields: [classId], references: [id], onDelete: Cascade)
-  lessons Lesson[]
+  class        SchoolClass?  @relation(fields: [classId], references: [id], onDelete: Cascade)
+  lessons      Lesson[]
+  assessments  Assessment[]
 
   @@index([schoolId])
   @@index([subjectId])
@@ -497,6 +523,137 @@ model AttendanceRecord {
   student Student            @relation(fields: [studentId], references: [id], onDelete: Cascade)
 
   @@unique([sessionId, studentId])
+  @@index([schoolId])
+  @@index([studentId])
+}
+
+model Assessment {
+  id                 String    @id @default(uuid()) @db.Uuid
+  schoolId           String    @db.Uuid
+  classId            String    @db.Uuid
+  subjectId          String    @db.Uuid
+  unitId             String?   @db.Uuid
+  title              String
+  instructions       String    @default("")
+  timeLimitMinutes   Int?
+  maxAttempts        Int       @default(1)
+  passingScore       Int       @default(60)
+  randomizeQuestions Boolean   @default(false)
+  publishedAt        DateTime?
+  createdAt          DateTime  @default(now())
+  updatedAt          DateTime  @updatedAt
+
+  school    School               @relation(fields: [schoolId], references: [id], onDelete: Cascade)
+  class     SchoolClass          @relation(fields: [classId], references: [id], onDelete: Cascade)
+  subject   Subject              @relation(fields: [subjectId], references: [id], onDelete: Cascade)
+  unit      Unit?                @relation(fields: [unitId], references: [id], onDelete: SetNull)
+  questions Question[]
+  attempts  AssessmentAttempt[]
+
+  @@index([schoolId])
+  @@index([classId])
+  @@index([subjectId])
+}
+
+model Question {
+  id         String       @id @default(uuid()) @db.Uuid
+  schoolId   String       @db.Uuid
+  assessmentId String     @db.Uuid
+  type       QuestionType
+  prompt     String
+  points     Int          @default(1)
+  sortOrder  Int          @default(0)
+  feedback   String?
+  createdAt  DateTime     @default(now())
+  updatedAt  DateTime     @updatedAt
+
+  school     School            @relation(fields: [schoolId], references: [id], onDelete: Cascade)
+  assessment Assessment        @relation(fields: [assessmentId], references: [id], onDelete: Cascade)
+  options    QuestionOption[]
+  answers    AttemptAnswer[]
+
+  @@index([schoolId])
+  @@index([assessmentId])
+}
+
+model QuestionOption {
+  id         String   @id @default(uuid()) @db.Uuid
+  schoolId   String   @db.Uuid
+  questionId String   @db.Uuid
+  text       String
+  isCorrect  Boolean  @default(false)
+  sortOrder  Int      @default(0)
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  school   School   @relation(fields: [schoolId], references: [id], onDelete: Cascade)
+  question Question @relation(fields: [questionId], references: [id], onDelete: Cascade)
+
+  @@index([schoolId])
+  @@index([questionId])
+}
+
+model AssessmentAttempt {
+  id            String        @id @default(uuid()) @db.Uuid
+  schoolId      String        @db.Uuid
+  assessmentId  String        @db.Uuid
+  studentId     String        @db.Uuid
+  status        AttemptStatus @default(IN_PROGRESS)
+  startedAt     DateTime      @default(now())
+  submittedAt   DateTime?
+  expiresAt     DateTime?
+  score         Decimal?      @db.Decimal(6, 2)
+  maxScore      Int           @default(0)
+  passed        Boolean?
+  questionOrder Json
+  createdAt     DateTime      @default(now())
+  updatedAt     DateTime      @updatedAt
+
+  school     School          @relation(fields: [schoolId], references: [id], onDelete: Cascade)
+  assessment Assessment      @relation(fields: [assessmentId], references: [id], onDelete: Cascade)
+  student    Student         @relation(fields: [studentId], references: [id], onDelete: Cascade)
+  answers    AttemptAnswer[]
+
+  @@index([schoolId])
+  @@index([assessmentId])
+  @@index([studentId])
+}
+
+model AttemptAnswer {
+  id         String   @id @default(uuid()) @db.Uuid
+  schoolId   String   @db.Uuid
+  attemptId  String   @db.Uuid
+  questionId String   @db.Uuid
+  optionIds  String[] @default([])
+  textAnswer String?
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  school   School            @relation(fields: [schoolId], references: [id], onDelete: Cascade)
+  attempt  AssessmentAttempt @relation(fields: [attemptId], references: [id], onDelete: Cascade)
+  question Question          @relation(fields: [questionId], references: [id], onDelete: Cascade)
+
+  @@unique([attemptId, questionId])
+  @@index([schoolId])
+}
+
+model GradeRecord {
+  id         String   @id @default(uuid()) @db.Uuid
+  schoolId   String   @db.Uuid
+  studentId  String   @db.Uuid
+  classId    String   @db.Uuid
+  subjectId  String   @db.Uuid
+  percentage Decimal  @db.Decimal(5, 2)
+  letter     String
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  school  School      @relation(fields: [schoolId], references: [id], onDelete: Cascade)
+  student Student     @relation(fields: [studentId], references: [id], onDelete: Cascade)
+  class   SchoolClass @relation(fields: [classId], references: [id], onDelete: Cascade)
+  subject Subject     @relation(fields: [subjectId], references: [id], onDelete: Cascade)
+
+  @@unique([studentId, classId, subjectId])
   @@index([schoolId])
   @@index([studentId])
 }

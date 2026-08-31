@@ -1,6 +1,6 @@
 import { Chip } from '@heroui/react';
 import { useTranslation } from 'react-i18next';
-import type { StudentAssignmentStatus } from '@nabta/types';
+import type { StudentAssignmentStatus, StudentAssessmentStatus } from '@nabta/types';
 
 const keyByStatus: Record<StudentAssignmentStatus, string> = {
   NOT_STARTED: 'student.statusNotStarted',
@@ -11,24 +11,50 @@ const keyByStatus: Record<StudentAssignmentStatus, string> = {
   RETURNED: 'student.statusReturned',
 };
 
-export function StatusChip({ status }: { status: StudentAssignmentStatus }) {
+export function StatusChip({ status }: { status: StudentAssignmentStatus | string }) {
   const { t } = useTranslation();
+  const typed = status as StudentAssignmentStatus;
   const color =
-    status === 'SUBMITTED' || status === 'GRADED' || status === 'RETURNED'
+    typed === 'SUBMITTED' || typed === 'GRADED' || typed === 'RETURNED'
       ? 'success'
-      : status === 'LATE'
+      : typed === 'LATE'
         ? 'danger'
-        : status === 'DRAFT'
+        : typed === 'DRAFT'
           ? 'warning'
           : 'default';
   return (
     <Chip size="sm" color={color} variant="soft">
-      {t(keyByStatus[status])}
+      {t(keyByStatus[typed] ?? 'student.statusNotStarted')}
     </Chip>
   );
 }
 
-export function formatDue(iso: string, locale: string) {
+const quizKeyByStatus: Record<StudentAssessmentStatus, string> = {
+  NOT_STARTED: 'assessment.statusNotStarted',
+  IN_PROGRESS: 'assessment.statusInProgress',
+  SUBMITTED: 'assessment.statusSubmitted',
+  EXPIRED: 'assessment.statusExpired',
+};
+
+export function QuizStatusChip({ status }: { status: StudentAssessmentStatus }) {
+  const { t } = useTranslation();
+  const color =
+    status === 'SUBMITTED'
+      ? 'success'
+      : status === 'EXPIRED'
+        ? 'danger'
+        : status === 'IN_PROGRESS'
+          ? 'warning'
+          : 'default';
+  return (
+    <Chip size="sm" color={color} variant="soft">
+      {t(quizKeyByStatus[status] ?? 'assessment.statusNotStarted')}
+    </Chip>
+  );
+}
+
+export function formatDue(iso: string | null, locale: string) {
+  if (!iso) return '';
   return new Intl.DateTimeFormat(locale.startsWith('ar') ? 'ar' : 'en', {
     day: 'numeric',
     month: 'short',

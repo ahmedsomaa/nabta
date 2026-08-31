@@ -2,10 +2,10 @@ import { useQuery } from '@tanstack/react-query';
 import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { Button, Card } from '@heroui/react';
-import type { StudentDashboard, StudentMe } from '@nabta/types';
+import type { StudentAssessmentStatus, StudentAssignmentStatus, StudentDashboard, StudentGradeListItem, StudentMe } from '@nabta/types';
 import { apiFetch } from '@/lib/api';
 import { EmptyCard, QueryError, QueryLoading } from './QueryState';
-import { StatusChip, formatDue } from './StatusChip';
+import { QuizStatusChip, StatusChip, formatDue } from './StatusChip';
 
 function greetingKey(hour: number) {
   if (hour < 12) return 'student.greetingMorning';
@@ -20,6 +20,10 @@ export function StudentDashboardPage() {
   const dash = useQuery({
     queryKey: ['student-dashboard'],
     queryFn: () => apiFetch<StudentDashboard>('/me/dashboard'),
+  });
+  const grades = useQuery({
+    queryKey: ['student-grades'],
+    queryFn: () => apiFetch<StudentGradeListItem[]>('/me/grades'),
   });
 
   if (me.isLoading || dash.isLoading) return <QueryLoading />;
@@ -71,30 +75,44 @@ export function StudentDashboardPage() {
           <EmptyCard>{t('student.emptyUpcoming')}</EmptyCard>
         ) : (
           <div className="grid gap-3">
-            {data.upcoming.map((item) => (
-              <Card key={item.id} className="p-4">
-                <Card.Header>
-                  <div className="flex flex-wrap items-start justify-between gap-2">
-                    <div>
-                      <Card.Title>{item.title}</Card.Title>
-                      <Card.Description>
-                        {item.subjectName} · {t('student.due', { date: formatDue(item.dueAt, i18n.language) })}
-                      </Card.Description>
+            {data.upcoming.map((item) => {
+              const isQuiz = item.kind === 'assessment';
+              return (
+                <Card key={`${item.kind ?? 'assignment'}-${item.id}`} className="p-4">
+                  <Card.Header>
+                    <div className="flex flex-wrap items-start justify-between gap-2">
+                      <div>
+                        <Card.Title>{item.title}</Card.Title>
+                        <Card.Description>
+                          {item.subjectName}
+                          {item.dueAt
+                            ? ` · ${t('student.due', { date: formatDue(item.dueAt, i18n.language) })}`
+                            : ` · ${t('assessment.overview')}`}
+                        </Card.Description>
+                      </div>
+                      {isQuiz ? (
+                        <QuizStatusChip status={item.status as StudentAssessmentStatus} />
+                      ) : (
+                        <StatusChip status={item.status as StudentAssignmentStatus} />
+                      )}
                     </div>
-                    <StatusChip status={item.status} />
+                  </Card.Header>
+                  <div className="mt-3">
+                    <Button
+                      size="sm"
+                      variant="secondary"
+                      onPress={() =>
+                        navigate(
+                          isQuiz ? `/student/assessments/${item.id}` : `/student/assignments/${item.id}`,
+                        )
+                      }
+                    >
+                      {isQuiz ? t('assessment.viewQuiz') : t('student.viewAssignment')}
+                    </Button>
                   </div>
-                </Card.Header>
-                <div className="mt-3">
-                  <Button
-                    size="sm"
-                    variant="secondary"
-                    onPress={() => navigate(`/student/assignments/${item.id}`)}
-                  >
-                    {t('student.viewAssignment')}
-                  </Button>
-                </div>
-              </Card>
-            ))}
+                </Card>
+              );
+            })}
           </div>
         )}
       </section>
@@ -137,6 +155,21 @@ export function StudentDashboardPage() {
               })}
             </Card.Description>
           </Card.Header>
+          {grades.data?.some((row) => row.percentage != null) ? (
+            <div className="mt-3 flex flex-wrap items-center gap-3">
+              {grades.data
+                .filter((row) => row.percentage != null)
+                .slice(0, 3)
+                .map((row) => (
+                  <p key={row.subjectId} className="text-sm">
+                    {row.subjectName}: {row.percentage}%{row.letter ? ` (${row.letter})` : ''}
+                  </p>
+                ))}
+              <Button size="sm" variant="tertiary" onPress={() => navigate('/student/grades')}>
+                {t('grades.title')}
+              </Button>
+            </div>
+          ) : null}
         </Card>
       </section>
     </div>

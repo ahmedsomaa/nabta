@@ -266,6 +266,72 @@ export const gradebookQuerySchema = z.object({
   subjectId: z.string().uuid(),
 });
 
+const questionTypeEnum = z.enum(['MULTIPLE_CHOICE', 'MULTIPLE_ANSWER', 'TRUE_FALSE', 'SHORT_ANSWER']);
+
+export const createAssessmentSchema = z.object({
+  classId: z.string().uuid(),
+  subjectId: z.string().uuid(),
+  unitId: z.string().uuid().optional().nullable(),
+  title: z.string().min(1).max(160),
+  instructions: z.string().max(20_000).optional(),
+  timeLimitMinutes: z.number().int().min(1).max(240).optional().nullable(),
+  maxAttempts: z.number().int().min(1).max(20).optional(),
+  passingScore: z.number().int().min(0).max(100).optional(),
+  randomizeQuestions: z.boolean().optional(),
+});
+
+export const updateAssessmentSchema = z.object({
+  title: z.string().min(1).max(160).optional(),
+  instructions: z.string().max(20_000).optional(),
+  unitId: z.string().uuid().optional().nullable(),
+  timeLimitMinutes: z.number().int().min(1).max(240).optional().nullable(),
+  maxAttempts: z.number().int().min(1).max(20).optional(),
+  passingScore: z.number().int().min(0).max(100).optional(),
+  randomizeQuestions: z.boolean().optional(),
+});
+
+export const createQuestionSchema = z.object({
+  type: questionTypeEnum,
+  prompt: z.string().min(1).max(4000),
+  points: z.number().int().min(1).max(100).optional(),
+  feedback: z.string().max(4000).optional().nullable(),
+  options: z
+    .array(
+      z.object({
+        text: z.string().min(1).max(500),
+        isCorrect: z.boolean().optional(),
+      }),
+    )
+    .optional(),
+});
+
+export const updateQuestionSchema = z.object({
+  prompt: z.string().min(1).max(4000).optional(),
+  points: z.number().int().min(1).max(100).optional(),
+  feedback: z.string().max(4000).optional().nullable(),
+  type: questionTypeEnum.optional(),
+});
+
+export const reorderQuestionsSchema = z.object({
+  ids: z.array(z.string().uuid()).min(1),
+});
+
+export const createQuestionOptionSchema = z.object({
+  text: z.string().min(1).max(500),
+  isCorrect: z.boolean().optional(),
+});
+
+export const updateQuestionOptionSchema = z.object({
+  text: z.string().min(1).max(500).optional(),
+  isCorrect: z.boolean().optional(),
+});
+
+export const saveAttemptAnswerSchema = z.object({
+  questionId: z.string().uuid(),
+  optionIds: z.array(z.string().uuid()).optional(),
+  textAnswer: z.string().max(2000).optional().nullable(),
+});
+
 export type LessonProgressInput = z.infer<typeof lessonProgressSchema>;
 export type FilePresignInput = z.infer<typeof filePresignSchema>;
 export type AssignmentDraftInput = z.infer<typeof assignmentDraftSchema>;

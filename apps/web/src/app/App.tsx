@@ -30,6 +30,13 @@ import { TeacherAssignmentFormPage } from '@/features/teacher/TeacherAssignmentF
 import { TeacherSubmissionsPage } from '@/features/teacher/TeacherSubmissionsPage';
 import { TeacherGradebookPage } from '@/features/teacher/TeacherGradebookPage';
 import { TeacherAttendancePage } from '@/features/teacher/TeacherAttendancePage';
+import { TeacherAssessmentsPage } from '@/features/teacher/TeacherAssessmentsPage';
+import { TeacherAssessmentFormPage } from '@/features/teacher/TeacherAssessmentFormPage';
+import { TeacherAssessmentResultsPage } from '@/features/teacher/TeacherAssessmentResultsPage';
+import { StudentAssessmentOverviewPage } from '@/features/student/StudentAssessmentOverviewPage';
+import { StudentAttemptPage } from '@/features/student/StudentAttemptPage';
+import { StudentAttemptResultPage } from '@/features/student/StudentAttemptResultPage';
+import { StudentGradesPage } from '@/features/student/StudentGradesPage';
 
 const queryClient = new QueryClient();
 
@@ -63,7 +70,14 @@ export function App() {
                   <Route path="classes/:subjectId/lessons/:lessonId" element={<StudentLessonPage />} />
                   <Route path="assignments" element={<StudentAssignmentsPage />} />
                   <Route path="assignments/:id" element={<StudentAssignmentPage />} />
-                  <Route path="grades" element={<PlaceholderPage titleKey="nav.grades" />} />
+                  <Route path="assessments/:id" element={<StudentAssessmentOverviewPage />} />
+                  <Route path="assessments/:id/attempts/:attemptId" element={<StudentAttemptPage />} />
+                  <Route
+                    path="assessments/:id/attempts/:attemptId/result"
+                    element={<StudentAttemptResultPage />}
+                  />
+                  <Route path="grades" element={<StudentGradesPage />} />
+                  <Route path="grades/:subjectId" element={<StudentGradesPage />} />
                 </Route>
               </Route>
 
@@ -83,6 +97,10 @@ export function App() {
                   <Route path="assignments/new" element={<TeacherAssignmentFormPage />} />
                   <Route path="assignments/:id" element={<TeacherAssignmentFormPage />} />
                   <Route path="assignments/:id/submissions" element={<TeacherSubmissionsPage />} />
+                  <Route path="assessments" element={<TeacherAssessmentsPage />} />
+                  <Route path="assessments/new" element={<TeacherAssessmentFormPage />} />
+                  <Route path="assessments/:id" element={<TeacherAssessmentFormPage />} />
+                  <Route path="assessments/:id/results" element={<TeacherAssessmentResultsPage />} />
                   <Route path="gradebook" element={<TeacherGradebookPage />} />
                   <Route path="gradebook/:classId/:subjectId" element={<TeacherGradebookPage />} />
                 </Route>

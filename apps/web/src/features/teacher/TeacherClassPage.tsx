@@ -59,6 +59,15 @@ export function TeacherClassPage() {
           <Button size="sm" variant="secondary" onPress={() => navigate('/teacher/assignments/new')}>
             {t('teacher.createAssignment')}
           </Button>
+          <Button
+            size="sm"
+            variant="secondary"
+            onPress={() =>
+              navigate(`/teacher/assessments/new?classId=${classId}&subjectId=${subjectId}`)
+            }
+          >
+            {t('teacher.createQuiz')}
+          </Button>
         </div>
       </div>
 

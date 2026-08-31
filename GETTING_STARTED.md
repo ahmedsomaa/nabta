@@ -4,7 +4,7 @@ How to run the Nabta monorepo locally.
 
 ## Current phase
 
-**Phase 5 — Assessments** is the active implementation target. Phase 1 track, Phase 2 Academic Core, Phase 3 Student Experience, and Phase 4 Teacher Experience are complete:
+**Phase 6 — Administration** is the active implementation target. Phase 1 track, Phase 2 Academic Core, Phase 3 Student Experience, Phase 4 Teacher Experience, and Phase 5 Assessments are complete:
 
 | Phase | Status |
 |-------|--------|
@@ -16,12 +16,13 @@ How to run the Nabta monorepo locally.
 | Phase 2 — Academic Core | Complete |
 | Phase 3 — Student Experience | Complete |
 | Phase 4 — Teacher Experience | Complete |
+| Phase 5 — Assessments | Complete |
 
-Read [`docs/roadmap/05-assessments/`](docs/roadmap/05-assessments/index.html) before implementing new features.
+Read [`docs/roadmap/06-administration/`](docs/roadmap/06-administration/index.html) before implementing new features.
 
 Example Cursor prompt:
 
-> Implement Phase 5 only. Do not implement Phase 6+ functionality.
+> Implement Phase 6 only. Do not implement Phase 7+ functionality.
 
 ## Prerequisites
 

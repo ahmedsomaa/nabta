@@ -4,6 +4,7 @@ import {
   Inject,
   Injectable,
   NotFoundException,
+  Optional,
 } from '@nestjs/common';
 import { randomUUID } from 'node:crypto';
 import type { AuthUser, StudentAssignmentStatus } from '@nabta/types';
@@ -27,6 +28,7 @@ import {
 import { PrismaService } from '../../prisma/prisma.service';
 import { requireSchoolId } from '../academic/school-scope';
 import { STORAGE_SERVICE, type StorageService } from '../storage/storage.service';
+import { GradeRecordService } from '../assessments/grade-record.service';
 
 const ALLOWED_MIME = new Set([
   'application/pdf',
@@ -63,6 +65,7 @@ export class TeacherService {
   constructor(
     private readonly prisma: PrismaService,
     @Inject(STORAGE_SERVICE) private readonly storage: StorageService,
+    @Optional() private readonly grades?: GradeRecordService,
   ) {}
 
   private schoolId(user: AuthUser) {
@@ -167,7 +170,7 @@ export class TeacherService {
     pairs: { classId: string; subjectId: string }[],
   ) {
     const alerts: {
-      kind: 'missing_work' | 'low_progress';
+      kind: 'missing_work' | 'low_progress' | 'low_score';
       message: string;
       classId: string;
       subjectId: string;
@@ -189,6 +192,40 @@ export class TeacherService {
         alerts.push({
           kind: 'low_progress',
           message: `${behind} student${behind === 1 ? '' : 's'} below 50% lesson progress`,
+          classId: pair.classId,
+          subjectId: pair.subjectId,
+        });
+      }
+      const quizzes = await this.prisma.assessment.findMany({
+        where: {
+          schoolId,
+          classId: pair.classId,
+          subjectId: pair.subjectId,
+          publishedAt: { not: null },
+        },
+        include: {
+          attempts: { where: { status: { in: ['SUBMITTED', 'EXPIRED'] } } },
+          questions: { select: { points: true } },
+        },
+      });
+      let lowScore = 0;
+      for (const quiz of quizzes) {
+        const maxScore = quiz.questions.reduce((sum, question) => sum + question.points, 0);
+        if (maxScore <= 0) continue;
+        const byStudent = new Map<string, number>();
+        for (const attempt of quiz.attempts) {
+          const value = Number(attempt.score ?? 0);
+          const current = byStudent.get(attempt.studentId);
+          if (current == null || value > current) byStudent.set(attempt.studentId, value);
+        }
+        for (const score of byStudent.values()) {
+          if ((score / maxScore) * 100 < quiz.passingScore) lowScore += 1;
+        }
+      }
+      if (lowScore > 0) {
+        alerts.push({
+          kind: 'low_score',
+          message: `${lowScore} quiz score${lowScore === 1 ? '' : 's'} below passing`,
           classId: pair.classId,
           subjectId: pair.subjectId,
         });
@@ -836,6 +873,18 @@ export class TeacherService {
       where: { assignmentId: assignment.id, status: 'GRADED' },
       data: { gradesPublishedAt: new Date(), status: 'RETURNED' },
     });
+    const published = await this.prisma.assignmentSubmission.findMany({
+      where: { assignmentId: assignment.id, gradesPublishedAt: { not: null } },
+      select: { studentId: true },
+    });
+    if (this.grades) {
+      await this.grades.recomputeForAssignment(
+        teacher.schoolId,
+        assignment.classId,
+        assignment.subjectId,
+        [...new Set(published.map((row) => row.studentId))],
+      );
+    }
     return this.listSubmissions(user, assignmentId);
   }
 
@@ -853,6 +902,16 @@ export class TeacherService {
       include: { submissions: true },
       orderBy: { dueAt: 'asc' },
     });
+    const assessments = await this.prisma.assessment.findMany({
+      where: {
+        schoolId: teacher.schoolId,
+        classId: input.classId,
+        subjectId: input.subjectId,
+        publishedAt: { not: null },
+      },
+      include: { attempts: true, questions: { select: { points: true } } },
+      orderBy: { createdAt: 'asc' },
+    });
     const cells = enrollments.flatMap((enrollment) =>
       assignments.map((assignment) => {
         const submission = assignment.submissions.find((row) => row.studentId === enrollment.studentId);
@@ -864,6 +923,25 @@ export class TeacherService {
           assignmentId: assignment.id,
           score: scoreNumber(submission?.score),
           status,
+        };
+      }),
+    );
+    const assessmentCells = enrollments.flatMap((enrollment) =>
+      assessments.map((assessment) => {
+        const attempts = assessment.attempts.filter(
+          (row) =>
+            row.studentId === enrollment.studentId &&
+            (row.status === 'SUBMITTED' || row.status === 'EXPIRED'),
+        );
+        const best = attempts.reduce<(typeof attempts)[number] | null>((current, attempt) => {
+          if (!current || Number(attempt.score ?? 0) > Number(current.score ?? 0)) return attempt;
+          return current;
+        }, null);
+        return {
+          studentId: enrollment.studentId,
+          assessmentId: assessment.id,
+          score: best?.score != null ? Number(best.score) : null,
+          passed: best?.passed ?? null,
         };
       }),
     );
@@ -881,7 +959,14 @@ export class TeacherService {
         maxScore: row.maxScore,
         publishedAt: row.publishedAt?.toISOString() ?? null,
       })),
+      assessments: assessments.map((row) => ({
+        id: row.id,
+        title: row.title,
+        maxScore: row.questions.reduce((sum, question) => sum + question.points, 0),
+        publishedAt: row.publishedAt?.toISOString() ?? null,
+      })),
       cells,
+      assessmentCells,
     };
   }
 

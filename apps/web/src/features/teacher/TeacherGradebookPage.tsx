@@ -51,7 +51,7 @@ export function TeacherGradebookPage() {
         <QueryLoading />
       ) : book.isError || !book.data ? (
         <QueryError onRetry={() => void book.refetch()} />
-      ) : book.data.assignments.length === 0 ? (
+      ) : book.data.assignments.length === 0 && book.data.assessments.length === 0 ? (
         <EmptyCard>{t('teacher.emptyAssignments')}</EmptyCard>
       ) : (
         <div className="overflow-x-auto rounded-xl border border-border">
@@ -69,6 +69,16 @@ export function TeacherGradebookPage() {
                     </Link>
                   </th>
                 ))}
+                {book.data.assessments.map((assessment) => (
+                  <th key={assessment.id} className="px-4 py-2 font-medium">
+                    <Link
+                      to={`/teacher/assessments/${assessment.id}/results`}
+                      className="text-accent no-underline"
+                    >
+                      {assessment.title}
+                    </Link>
+                  </th>
+                ))}
               </tr>
             </thead>
             <tbody>
@@ -83,6 +93,16 @@ export function TeacherGradebookPage() {
                     );
                     return (
                       <td key={assignment.id} className="px-4 py-3">
+                        {cell?.score != null ? cell.score : t('teacher.noGrade')}
+                      </td>
+                    );
+                  })}
+                  {book.data.assessments.map((assessment) => {
+                    const cell = book.data.assessmentCells.find(
+                      (row) => row.studentId === student.id && row.assessmentId === assessment.id,
+                    );
+                    return (
+                      <td key={assessment.id} className="px-4 py-3">
                         {cell?.score != null ? cell.score : t('teacher.noGrade')}
                       </td>
                     );

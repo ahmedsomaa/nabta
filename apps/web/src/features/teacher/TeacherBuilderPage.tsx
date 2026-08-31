@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
-import { Link, useParams } from 'react-router-dom';
+import { Link, useNavigate, useParams } from 'react-router-dom';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useTranslation } from 'react-i18next';
 import {
@@ -75,6 +75,7 @@ function SortableRow({ id, children }: { id: string; children: React.ReactNode }
 
 export function TeacherBuilderPage() {
   const { t } = useTranslation();
+  const navigate = useNavigate();
   const queryClient = useQueryClient();
   const { classId = '', subjectId = '' } = useParams();
   const sensors = useSensors(useSensor(PointerSensor, { activationConstraint: { distance: 6 } }));
@@ -176,6 +177,20 @@ export function TeacherBuilderPage() {
             </TextField>
             <Button variant="secondary" className="self-end" onPress={() => addUnit.mutate()}>
               {t('teacher.addUnit')}
+            </Button>
+            <Button
+              variant="secondary"
+              className="self-end"
+              onPress={() => {
+                const unitId = units.some((unit) => unit.id === selectedId)
+                  ? selectedId
+                  : units.find((unit) => unit.lessons.some((lesson) => lesson.id === selectedId))?.id;
+                const query = new URLSearchParams({ classId, subjectId });
+                if (unitId) query.set('unitId', unitId);
+                navigate(`/teacher/assessments/new?${query.toString()}`);
+              }}
+            >
+              {t('teacher.addQuiz')}
             </Button>
           </div>
 

@@ -369,6 +369,222 @@ async function main() {
     },
   });
 
+  const ASSESSMENT_IDS = [
+    '00000000-0000-4000-8000-000000000141',
+    '00000000-0000-4000-8000-000000000142',
+  ] as const;
+  const QUESTION_IDS = [
+    '00000000-0000-4000-8000-000000000151',
+    '00000000-0000-4000-8000-000000000152',
+    '00000000-0000-4000-8000-000000000153',
+    '00000000-0000-4000-8000-000000000154',
+  ] as const;
+  const OPTION_IDS = [
+    '00000000-0000-4000-8000-000000000161',
+    '00000000-0000-4000-8000-000000000162',
+    '00000000-0000-4000-8000-000000000163',
+    '00000000-0000-4000-8000-000000000164',
+    '00000000-0000-4000-8000-000000000165',
+    '00000000-0000-4000-8000-000000000166',
+    '00000000-0000-4000-8000-000000000167',
+    '00000000-0000-4000-8000-000000000168',
+    '00000000-0000-4000-8000-000000000169',
+    '00000000-0000-4000-8000-00000000016a',
+    '00000000-0000-4000-8000-00000000016b',
+  ] as const;
+
+  await prisma.assessment.upsert({
+    where: { id: ASSESSMENT_IDS[0] },
+    update: {
+      title: 'Linear equations check',
+      publishedAt,
+      timeLimitMinutes: 10,
+      maxAttempts: 2,
+      passingScore: 60,
+      randomizeQuestions: true,
+      unitId: UNIT_ID,
+    },
+    create: {
+      id: ASSESSMENT_IDS[0],
+      schoolId: school.id,
+      classId: class10A.id,
+      subjectId: math.id,
+      unitId: UNIT_ID,
+      title: 'Linear equations check',
+      instructions: 'Answer all questions. You have 10 minutes and two attempts. Best score counts.',
+      timeLimitMinutes: 10,
+      maxAttempts: 2,
+      passingScore: 60,
+      randomizeQuestions: true,
+      publishedAt,
+    },
+  });
+
+  await prisma.assessment.upsert({
+    where: { id: ASSESSMENT_IDS[1] },
+    update: { publishedAt: null, title: 'Draft: gradients quiz' },
+    create: {
+      id: ASSESSMENT_IDS[1],
+      schoolId: school.id,
+      classId: class10A.id,
+      subjectId: math.id,
+      title: 'Draft: gradients quiz',
+      instructions: 'Teacher draft — not visible to students until published.',
+      timeLimitMinutes: 15,
+      maxAttempts: 1,
+      passingScore: 50,
+      randomizeQuestions: false,
+      publishedAt: null,
+    },
+  });
+
+  await prisma.question.upsert({
+    where: { id: QUESTION_IDS[0] },
+    update: {},
+    create: {
+      id: QUESTION_IDS[0],
+      schoolId: school.id,
+      assessmentId: ASSESSMENT_IDS[0],
+      type: 'MULTIPLE_CHOICE',
+      prompt: 'Solve 2x + 3 = 11. What is x?',
+      points: 1,
+      sortOrder: 0,
+      feedback: 'Subtract 3, then divide by 2.',
+    },
+  });
+  const mcqOptions = [
+    { id: OPTION_IDS[0], text: '4', isCorrect: true, sortOrder: 0 },
+    { id: OPTION_IDS[1], text: '7', isCorrect: false, sortOrder: 1 },
+    { id: OPTION_IDS[2], text: '8', isCorrect: false, sortOrder: 2 },
+    { id: OPTION_IDS[3], text: '14', isCorrect: false, sortOrder: 3 },
+  ];
+  for (const option of mcqOptions) {
+    await prisma.questionOption.upsert({
+      where: { id: option.id },
+      update: {},
+      create: {
+        id: option.id,
+        schoolId: school.id,
+        questionId: QUESTION_IDS[0],
+        text: option.text,
+        isCorrect: option.isCorrect,
+        sortOrder: option.sortOrder,
+      },
+    });
+  }
+
+  await prisma.question.upsert({
+    where: { id: QUESTION_IDS[1] },
+    update: {},
+    create: {
+      id: QUESTION_IDS[1],
+      schoolId: school.id,
+      assessmentId: ASSESSMENT_IDS[0],
+      type: 'MULTIPLE_ANSWER',
+      prompt: 'Which of these are linear equations?',
+      points: 1,
+      sortOrder: 1,
+      feedback: 'A linear equation graphs as a straight line.',
+    },
+  });
+  const multiOptions = [
+    { id: OPTION_IDS[4], text: 'y = 2x + 1', isCorrect: true, sortOrder: 0 },
+    { id: OPTION_IDS[5], text: 'y = x²', isCorrect: false, sortOrder: 1 },
+    { id: OPTION_IDS[6], text: '2x − y = 4', isCorrect: true, sortOrder: 2 },
+  ];
+  for (const option of multiOptions) {
+    await prisma.questionOption.upsert({
+      where: { id: option.id },
+      update: {},
+      create: {
+        id: option.id,
+        schoolId: school.id,
+        questionId: QUESTION_IDS[1],
+        text: option.text,
+        isCorrect: option.isCorrect,
+        sortOrder: option.sortOrder,
+      },
+    });
+  }
+
+  await prisma.question.upsert({
+    where: { id: QUESTION_IDS[2] },
+    update: {},
+    create: {
+      id: QUESTION_IDS[2],
+      schoolId: school.id,
+      assessmentId: ASSESSMENT_IDS[0],
+      type: 'TRUE_FALSE',
+      prompt: 'The graph of y = mx + c is always a straight line.',
+      points: 1,
+      sortOrder: 2,
+      feedback: 'True — that is the definition of a linear equation in two variables.',
+    },
+  });
+  await prisma.questionOption.upsert({
+    where: { id: OPTION_IDS[7] },
+    update: {},
+    create: {
+      id: OPTION_IDS[7],
+      schoolId: school.id,
+      questionId: QUESTION_IDS[2],
+      text: 'True',
+      isCorrect: true,
+      sortOrder: 0,
+    },
+  });
+  await prisma.questionOption.upsert({
+    where: { id: OPTION_IDS[8] },
+    update: {},
+    create: {
+      id: OPTION_IDS[8],
+      schoolId: school.id,
+      questionId: QUESTION_IDS[2],
+      text: 'False',
+      isCorrect: false,
+      sortOrder: 1,
+    },
+  });
+
+  await prisma.question.upsert({
+    where: { id: QUESTION_IDS[3] },
+    update: {},
+    create: {
+      id: QUESTION_IDS[3],
+      schoolId: school.id,
+      assessmentId: ASSESSMENT_IDS[0],
+      type: 'SHORT_ANSWER',
+      prompt: 'In y = mx + c, what letter represents the gradient?',
+      points: 1,
+      sortOrder: 3,
+      feedback: 'm is the gradient (slope).',
+    },
+  });
+  await prisma.questionOption.upsert({
+    where: { id: OPTION_IDS[9] },
+    update: {},
+    create: {
+      id: OPTION_IDS[9],
+      schoolId: school.id,
+      questionId: QUESTION_IDS[3],
+      text: 'm',
+      isCorrect: true,
+      sortOrder: 0,
+    },
+  });
+  await prisma.questionOption.upsert({
+    where: { id: OPTION_IDS[10] },
+    update: {},
+    create: {
+      id: OPTION_IDS[10],
+      schoolId: school.id,
+      questionId: QUESTION_IDS[3],
+      text: 'M',
+      isCorrect: true,
+      sortOrder: 1,
+    },
+  });
+
   console.log('Seeded Egyptian International School (2026/2027, Grades 7–12)');
   console.log('  admin@nabta.local / teacher@nabta.local / student@nabta.local');
   console.log('  system@nabta.local (SYSTEM_ADMIN)');
