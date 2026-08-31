@@ -24,7 +24,17 @@
           <header id="docs-header" class="docs-page-header"></header>
           <main id="main" class="docs-main">
 <h1>Phase 1d — Mobile Student</h1>
-      <p class="lead"><span class="badge badge-phase">Phase 1d</span> Implement this phase only. Depends on Phase 1. Do not implement Phase 1e+ or Phase 2+ functionality.</p>
+      <p class="lead"><span class="badge badge-phase">Phase 1d</span> <span class="badge badge-complete">Bootstrap complete</span> Scaffold shipped — see <strong>Remaining</strong> for full-phase items.</p>
+
+      <div class="callout">
+        <p><strong>Status:</strong> Bootstrap complete — <code>apps/mobile-student</code> with Expo 54 + HeroUI Native + Uniwind, tab shell (Home, Classes, Assignments, Grades), EN/AR scaffolding, Nabta theme tokens, Metro workspace config.</p>
+      </div>
+
+      <h2>Remaining</h2>
+      <ul>
+        <li>API auth integration (login currently placeholder)</li>
+        <li>Role guard rejecting non-student users at login</li>
+      </ul>
 
       <h2>Goal</h2>
       <p>Scaffold the native student app at <code>apps/mobile-student</code> — Expo + HeroUI Native + Uniwind, auth shell, EN/AR, and Nabta theme.</p>
@@ -64,7 +74,7 @@
       </ul>
 
       <h2>Implementation slices</h2>
-      <p>Complete in order. Do not implement Phase 1e+ or Phase 2+.</p>
+      <p>Bootstrap slices shipped — historical reference. For active work, see <a href="../02-academic-core/">Phase 2 — Academic Core</a>.</p>
       <ol>
         <li><strong>Expo scaffold</strong> — <code>apps/mobile-student</code> with Expo Router, HeroUI Native, Uniwind. Verify: <code>pnpm dev:mobile-student</code> starts.</li>
         <li><strong>Auth</strong> — student login against API; secure token storage. Verify: STUDENT role succeeds; others fail.</li>
@@ -77,7 +87,7 @@
         <h2>Related</h2>
         <p><strong>Requirements:</strong> <a href="../../requirements/mobile-student.html">Mobile Student</a>, <a href="../../requirements/student.html">Student Portal</a>, <a href="../../requirements/internationalization.html">Internationalization</a></p>
         <p><strong>Architecture:</strong> <a href="../../technical/tech-stack.html">Tech Stack</a>, <a href="../../technical/frontend-architecture.html">Frontend Architecture</a>, <a href="../../design/theming.html#native">Theming — Native</a></p>
-        <p><strong>Previous:</strong> <a href="../01c-system-admin/">Phase 1c</a> · <strong>Next:</strong> <a href="../01e-mobile-staff/">Phase 1e — Mobile Staff</a></p>
+        <p><strong>Previous:</strong> <a href="../01c-system-admin/">Phase 1c</a> · <strong>Next:</strong> <a href="../02-academic-core/">Phase 2 — Academic Core</a> (current phase)</p>
       </div>
       <p class="source-footnote">Source: bootstrap plan — mobile student</p>
           </main>

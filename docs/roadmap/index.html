@@ -20,20 +20,20 @@
           <header id="docs-header" class="docs-page-header"></header>
           <main id="main" class="docs-main">
 <h1>Implementation Phases</h1>
-      <p class="lead">Build incrementally — one phase at a time. Do not implement Phase 2+ when working on Phase 1.</p>
+      <p class="lead">Phase 1 track complete. Implement <strong>Phase 2 — Academic Core</strong> next — one phase folder at a time.</p>
 
       <div class="callout callout-warning">
-        <p><strong>Working rule:</strong> Use this as the master specification, then give Cursor smaller implementation prompts such as: <em>"Implement Phase 1 only. Do not implement any Phase 2+ functionality."</em> Then move phase-by-phase.</p>
+        <p><strong>Working rule:</strong> Use this as the master specification, then give Cursor focused prompts such as: <em>"Implement Phase 2 only. Do not implement Phase 3+ functionality."</em> Phase 1 (Foundation + 1b–1e bootstrap) is complete.</p>
       </div>
 
       <h2>Phase Map</h2>
       <div class="card-grid">
-        <a href="01-foundation/index.html" class="card"><h3>Phase 1 — Foundation</h3><p>Monorepo, Docker, CI/CD, auth, RBAC, i18n, dark mode</p></a>
-        <a href="01b-marketing-site/index.html" class="card"><h3>Phase 1b — Marketing Site</h3><p>Public website — home, features, contact/demo</p></a>
-        <a href="01c-system-admin/index.html" class="card"><h3>Phase 1c — System Admin</h3><p>Platform operator console — schools, health, ops</p></a>
-        <a href="01d-mobile-student/index.html" class="card"><h3>Phase 1d — Mobile Student</h3><p>Expo student app — auth shell, EN/AR, Nabta theme</p></a>
-        <a href="01e-mobile-staff/index.html" class="card"><h3>Phase 1e — Mobile Staff</h3><p>Expo staff app — teacher + admin roles, shared shell</p></a>
-        <a href="02-academic-core/index.html" class="card"><h3>Phase 2 — Academic Core</h3><p>Schools, years, grades, classes, enrollments</p></a>
+        <a href="01-foundation/index.html" class="card"><h3>Phase 1 — Foundation <span class="badge badge-complete">Complete</span></h3><p>Monorepo, Docker, CI/CD, auth, RBAC, i18n, dark mode</p></a>
+        <a href="01b-marketing-site/index.html" class="card"><h3>Phase 1b — Marketing Site <span class="badge badge-complete">Bootstrap</span></h3><p>Public website — home, features, contact/demo</p></a>
+        <a href="01c-system-admin/index.html" class="card"><h3>Phase 1c — System Admin <span class="badge badge-complete">Bootstrap</span></h3><p>Platform operator console — schools, health, ops</p></a>
+        <a href="01d-mobile-student/index.html" class="card"><h3>Phase 1d — Mobile Student <span class="badge badge-complete">Bootstrap</span></h3><p>Expo student app — auth shell, EN/AR, Nabta theme</p></a>
+        <a href="01e-mobile-staff/index.html" class="card"><h3>Phase 1e — Mobile Staff <span class="badge badge-complete">Bootstrap</span></h3><p>Expo staff app — teacher + admin roles, shared shell</p></a>
+        <a href="02-academic-core/index.html" class="card"><h3>Phase 2 — Academic Core <span class="badge badge-current">Current</span></h3><p>Schools, years, grades, classes, enrollments</p></a>
         <a href="03-student-experience/index.html" class="card"><h3>Phase 3 — Student Experience</h3><p>Dashboard, lessons, assignments, progress</p></a>
         <a href="04-teacher-experience/index.html" class="card"><h3>Phase 4 — Teacher Experience</h3><p>Class mgmt, lesson builder, gradebook</p></a>
         <a href="05-assessments/index.html" class="card"><h3>Phase 5 — Assessments</h3><p>Quiz builder, attempts, scoring, results</p></a>
@@ -44,14 +44,11 @@
 
       <h2>Dependency Order</h2>
       <pre class="mermaid">flowchart LR
-  P1[Phase 1 Foundation] --> P1b[Phase 1b Marketing]
-  P1 --> P1c[Phase 1c System Admin]
-  P1 --> P1d[Phase 1d Mobile Student]
-  P1 --> P1e[Phase 1e Mobile Staff]
-  P1b --> P2[Phase 2 Academic Core]
-  P1c --> P2
-  P1d --> P2
-  P1e --> P2
+  P1["Phase 1 Foundation ✓"] --> P2[Phase 2 Academic Core]
+  P1b["Phase 1b Marketing ✓"] --> P2
+  P1c["Phase 1c System Admin ✓"] --> P2
+  P1d["Phase 1d Mobile Student ✓"] --> P2
+  P1e["Phase 1e Mobile Staff ✓"] --> P2
   P2 --> P3[Phase 3 Student]
   P2 --> P4[Phase 4 Teacher]
   P3 --> P5[Phase 5 Assessments]

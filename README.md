@@ -17,5 +17,5 @@ pnpm start
 
 ## Docs
 
-Authoritative product spec: [`docs/roadmap/01-foundation/`](docs/roadmap/01-foundation/).  
+Authoritative product spec: [`docs/roadmap/02-academic-core/`](docs/roadmap/02-academic-core/) (Phase 1 track complete).  
 AI tooling guide: [`AGENTS.md`](AGENTS.md).

@@ -24,7 +24,17 @@
           <header id="docs-header" class="docs-page-header"></header>
           <main id="main" class="docs-main">
 <h1>Phase 1e — Mobile Staff</h1>
-      <p class="lead"><span class="badge badge-phase">Phase 1e</span> Implement this phase only. Depends on Phase 1. Do not implement Phase 2+ functionality.</p>
+      <p class="lead"><span class="badge badge-phase">Phase 1e</span> <span class="badge badge-complete">Bootstrap complete</span> Scaffold shipped — see <strong>Remaining</strong> for full-phase items.</p>
+
+      <div class="callout">
+        <p><strong>Status:</strong> Bootstrap complete — <code>apps/mobile-staff</code> with Expo 54 + HeroUI Native + Uniwind, teacher/admin tab shell, school brand mark, EN/AR scaffolding, Nabta theme tokens, Metro workspace config.</p>
+      </div>
+
+      <h2>Remaining</h2>
+      <ul>
+        <li>API auth integration (login currently placeholder)</li>
+        <li>Role-specific navigation wired to TEACHER vs ADMIN after login</li>
+      </ul>
 
       <h2>Goal</h2>
       <p>Scaffold the native staff app at <code>apps/mobile-staff</code> for teachers and school admins — role-aware navigation, auth, EN/AR, and Nabta theme.</p>
@@ -65,7 +75,7 @@
       </ul>
 
       <h2>Implementation slices</h2>
-      <p>Complete in order. Do not implement Phase 2+.</p>
+      <p>Bootstrap slices shipped — historical reference. For active work, see <a href="../02-academic-core/">Phase 2 — Academic Core</a>.</p>
       <ol>
         <li><strong>Expo scaffold</strong> — <code>apps/mobile-staff</code> with Expo Router, HeroUI Native, Uniwind. Verify: <code>pnpm dev:mobile-staff</code> starts.</li>
         <li><strong>Auth + roles</strong> — login for TEACHER and ADMIN; reject others. Verify: role-appropriate access.</li>
@@ -78,7 +88,7 @@
         <h2>Related</h2>
         <p><strong>Requirements:</strong> <a href="../../requirements/mobile-staff.html">Mobile Staff</a>, <a href="../../requirements/teacher.html">Teacher Portal</a>, <a href="../../requirements/admin.html">Admin Portal</a>, <a href="../../requirements/roles-and-permissions.html">Roles &amp; Permissions</a></p>
         <p><strong>Architecture:</strong> <a href="../../technical/tech-stack.html">Tech Stack</a>, <a href="../../technical/frontend-architecture.html">Frontend Architecture</a></p>
-        <p><strong>Previous:</strong> <a href="../01d-mobile-student/">Phase 1d</a> · <strong>Next:</strong> <a href="../02-academic-core/">Phase 2 — Academic Core</a></p>
+        <p><strong>Previous:</strong> <a href="../01d-mobile-student/">Phase 1d</a> · <strong>Next:</strong> <a href="../02-academic-core/">Phase 2 — Academic Core</a> (current phase)</p>
       </div>
       <p class="source-footnote">Source: bootstrap plan — mobile staff</p>
           </main>

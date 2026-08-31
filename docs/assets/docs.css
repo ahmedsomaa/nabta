@@ -685,6 +685,9 @@ pre code {
 }
 
 .badge-phase { background: var(--docs-interactive-subtle); color: var(--docs-interactive); }
+.badge-complete { background: #d1fae5; color: #047857; }
+[data-theme="dark"] .badge-complete { background: #064e3b; color: #6ee7b7; }
+.badge-current { background: var(--docs-interactive-subtle); color: var(--docs-interactive); border: 1px solid var(--docs-interactive); }
 .badge-arch { background: #fcf4d6; color: #8e6a00; }
 [data-theme="dark"] .badge-arch { background: #493700; color: #f1c21b; }
 

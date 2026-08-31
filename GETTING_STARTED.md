@@ -2,6 +2,24 @@
 
 How to run the Nabta monorepo locally.
 
+## Current phase
+
+**Phase 2 — Academic Core** is the active implementation target. The Phase 1 track is complete:
+
+| Phase | Status |
+|-------|--------|
+| Phase 1 — Foundation | Complete |
+| Phase 1b — Marketing | Bootstrap complete |
+| Phase 1c — System Admin | Bootstrap complete |
+| Phase 1d — Mobile Student | Bootstrap complete |
+| Phase 1e — Mobile Staff | Bootstrap complete |
+
+Read [`docs/roadmap/02-academic-core/`](docs/roadmap/02-academic-core/index.html) before implementing new features.
+
+Example Cursor prompt:
+
+> Implement Phase 2 only. Do not implement Phase 3+ functionality.
+
 ## Prerequisites
 
 - **Node.js** 22+
@@ -148,6 +166,6 @@ Dockerfiles live under `nabta-docker/` (`Dockerfile.api`, `Dockerfile.web`, `Doc
 
 ## Docs & agents
 
-- Product / phase spec: [`docs/roadmap/01-foundation/`](docs/roadmap/01-foundation/)
+- Product / phase spec: [`docs/roadmap/02-academic-core/`](docs/roadmap/02-academic-core/) (Phase 1 track complete)
 - Full documentation site: [`docs/`](docs/)
 - AI implementation guide: [`AGENTS.md`](AGENTS.md)

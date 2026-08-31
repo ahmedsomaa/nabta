@@ -24,10 +24,10 @@
           <header id="docs-header" class="docs-page-header"></header>
           <main id="main" class="docs-main">
 <h1>Phase 1 — Foundation</h1>
-      <p class="lead"><span class="badge badge-phase">Phase 1</span> Implement this phase only. Do not implement Phase 1b–1e or Phase 2+ functionality.</p>
+      <p class="lead"><span class="badge badge-phase">Phase 1</span> <span class="badge badge-complete">Complete</span> Historical specification — do not re-implement unless fixing regressions.</p>
 
       <div class="callout">
-        <p><strong>Status:</strong> Portal shell shipped — inset sidebar, school brand mark, role breadcrumbs, stone/zinc design tokens, HeroUI v3 accent. Bootstrap phases 1b–1e add the remaining client surfaces.</p>
+        <p><strong>Status:</strong> Complete — monorepo, auth/RBAC (STUDENT, TEACHER, ADMIN, SYSTEM_ADMIN), portal shell (inset sidebar, school brand mark, role breadcrumbs, stone/zinc tokens), Prisma 7, CI/Docker, and wiring for all six client surfaces. <strong>Next:</strong> <a href="../02-academic-core/">Phase 2 — Academic Core</a>.</p>
       </div>
 
       <h2>Goal</h2>
@@ -87,6 +87,7 @@
 └── turbo.json</code></pre>
 
       <h2>Acceptance Criteria</h2>
+      <p>All criteria met.</p>
       <ul class="checklist">
         <li>Monorepo builds and runs with <code>pnpm start</code> / <code>pnpm start:app</code> (or <code>pnpm dev</code>)</li>
         <li><code>pnpm docker:up</code> starts PostgreSQL, Redis, and MinIO</li>
@@ -107,7 +108,7 @@
 
 
       <h2>Implementation slices</h2>
-      <p>Complete these in order. Each slice is independently verifiable. Implement this phase folder only — do not start Phase 1b or Phase 2 until every slice below passes.</p>
+      <p>Complete. Each slice was verified during Phase 1 delivery. Do not re-implement unless fixing regressions.</p>
       <ol>
         <li><strong>Monorepo skeleton</strong> — pnpm workspace + Turbo; <code>apps/web</code>, <code>apps/api</code>; packages <code>database</code>, <code>types</code>, <code>validation</code>, <code>config</code>, <code>i18n</code>. Verify: <code>pnpm dev</code> builds and runs.</li>
         <li><strong>HeroUI agent tooling</strong> — <code>.cursor/mcp.json</code> with <code>@heroui/react-mcp</code>; install <code>heroui-react</code> (and related) Agent Skills; run <code>npx heroui-cli@latest agents-md --react --output docs/technical/heroui-agents.md</code>; link from Nabta <code>AGENTS.md</code> without overwriting it. Verify: MCP config present; skills under <code>.agents/skills/</code>; <code>heroui-agents.md</code> exists; root <code>AGENTS.md</code> remains Nabta-first.</li>
@@ -127,7 +128,7 @@
         <h2>Related</h2>
         <p><strong>Requirements:</strong> <a href="../../business/product-vision.html">Product Vision</a>, <a href="../../requirements/roles-and-permissions.html">Roles &amp; Permissions</a>, <a href="../../design/philosophy.html">UX &amp; Design</a>, <a href="../../requirements/internationalization.html">Internationalization</a>, <a href="../../requirements/security.html">Security</a></p>
         <p><strong>Architecture:</strong> <a href="../../technical/tech-stack.html">Tech Stack</a>, <a href="../../technical/system-architecture.html">System Architecture</a>, <a href="../../technical/email.html">Email (Resend)</a>, <a href="../../technical/docker-and-deployment.html">Docker &amp; Deployment</a>, <a href="../../technical/testing-and-cicd.html">Testing &amp; CI/CD</a></p>
-        <p><strong>Next:</strong> <a href="../01b-marketing-site/">Phase 1b — Marketing Site</a>, <a href="../01c-system-admin/">Phase 1c — System Admin</a>, <a href="../01d-mobile-student/">Phase 1d — Mobile Student</a>, <a href="../01e-mobile-staff/">Phase 1e — Mobile Staff</a></p>
+        <p><strong>Next:</strong> <a href="../02-academic-core/">Phase 2 — Academic Core</a> (current phase)</p>
       </div>
       <p class="source-footnote">Source: requirements.md §51 Phase 1, §55; expanded requirements</p>
           </main>
