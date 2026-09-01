@@ -4,7 +4,7 @@ How to run the Nabta monorepo locally.
 
 ## Current phase
 
-**Phase 7 — Notifications** is the active implementation target. Phase 1 track, Phase 2 Academic Core, Phase 3 Student Experience, Phase 4 Teacher Experience, Phase 5 Assessments, and Phase 6 Administration are complete:
+**Phase 7 — Portal UI** is the active implementation target. Phase 1 track, Phase 2 Academic Core, Phase 3 Student Experience, Phase 4 Teacher Experience, Phase 5 Assessments, and Phase 6 Administration are complete:
 
 | Phase | Status |
 |-------|--------|
@@ -18,8 +18,9 @@ How to run the Nabta monorepo locally.
 | Phase 4 — Teacher Experience | Complete |
 | Phase 5 — Assessments | Complete |
 | Phase 6 — Administration | Complete |
+| Phase 7 — Portal UI | Current |
 
-Read [`docs/roadmap/07-notifications/`](docs/roadmap/07-notifications/index.html) before implementing new features.
+Read [`docs/roadmap/07-portal-ui/`](docs/roadmap/07-portal-ui/index.html) before implementing new features.
 
 Example Cursor prompt:
 
@@ -171,6 +172,6 @@ Dockerfiles live under `nabta-docker/` (`Dockerfile.api`, `Dockerfile.web`, `Doc
 
 ## Docs & agents
 
-- Product / phase spec: [`docs/roadmap/07-notifications/`](docs/roadmap/07-notifications/) (Phases 1–6 complete)
+- Product / phase spec: [`docs/roadmap/07-portal-ui/`](docs/roadmap/07-portal-ui/) (Phases 1–6 complete)
 - Full documentation site: [`docs/`](docs/)
 - AI implementation guide: [`AGENTS.md`](AGENTS.md)

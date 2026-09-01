@@ -51,8 +51,8 @@
 /api/v1/platform/overview    # SYSTEM_ADMIN — tenant counts + health snapshot
 /api/v1/platform/schools     # SYSTEM_ADMIN — list/create; PATCH /:id (no delete)
 /api/v1/health               # public — API + Postgres + Redis (ok/down)
-/api/v1/announcements # announcements (Phase 7)
-/api/v1/notifications # user notifications (Phase 7)</code></pre>
+/api/v1/announcements # announcements (Phase 8)
+/api/v1/notifications # user notifications (Phase 8)</code></pre>
       <p>School-scoped routes use JWT <code>schoolId</code> and <code>TenantGuard</code>. Platform routes require <code>SYSTEM_ADMIN</code> and skip the tenant guard. <code>GET /health</code> is public and returns HTTP 200 even when a dependency is down.</p>
 
       <h2>Response Format</h2>

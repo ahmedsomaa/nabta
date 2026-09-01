@@ -82,8 +82,9 @@ window.NABTA_NAV = {
         { href: 'roadmap/04-teacher-experience/index.html', label: '4 — Teacher Experience' },
         { href: 'roadmap/05-assessments/index.html', label: '5 — Assessments' },
         { href: 'roadmap/06-administration/index.html', label: '6 — Administration' },
-        { href: 'roadmap/07-notifications/index.html', label: '7 — Notifications' },
-        { href: 'roadmap/08-production-hardening/index.html', label: '8 — Production Hardening' },
+        { href: 'roadmap/07-portal-ui/index.html', label: '7 — Portal UI' },
+        { href: 'roadmap/08-notifications/index.html', label: '8 — Notifications' },
+        { href: 'roadmap/09-production-hardening/index.html', label: '9 — Production Hardening' },
         { href: 'roadmap/future.html', label: 'Future' }
       ]
     }

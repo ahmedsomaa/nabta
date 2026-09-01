@@ -31,7 +31,7 @@
       </div>
 
       <h2>Operator console (Phase 6)</h2>
-      <p>School tenant list/create/edit and platform health (DB/Redis) shipped in <a href="../06-administration/plan.html">Phase 6 — Slices 8–9</a>. Do not re-implement those screens from this folder. Active work is <a href="../07-notifications/">Phase 7 — Notifications</a>.</p>
+      <p>School tenant list/create/edit and platform health (DB/Redis) shipped in <a href="../06-administration/plan.html">Phase 6 — Slices 8–9</a>. Do not re-implement those screens from this folder. Active work is <a href="../07-portal-ui/">Phase 7 — Portal UI</a>.</p>
 
       <h2>Goal</h2>
       <p>Build the platform operator console at <code>apps/system-admin</code> for SYSTEM_ADMIN users — school tenant management and platform health. Not school academic features.</p>
@@ -72,7 +72,7 @@
       </ul>
 
       <h2>Implementation slices</h2>
-      <p>Bootstrap slices shipped — historical reference. Phases 2–6 are <span class="badge badge-complete">Complete</span>. For active work, see <a href="../07-notifications/">Phase 7 — Notifications</a>.</p>
+      <p>Bootstrap slices shipped — historical reference. Phases 2–6 are <span class="badge badge-complete">Complete</span>. For active work, see <a href="../07-portal-ui/">Phase 7 — Portal UI</a>.</p>
       <ol>
         <li><strong>System-admin scaffold</strong> — <code>apps/system-admin</code> with Vite + HeroUI v3; <code>Dockerfile.system-admin</code> and Compose profile. Verify: runs on port <code>5175</code> via <code>pnpm dev:system-admin</code> and Docker <code>--profile full</code>.</li>
         <li><strong>SYSTEM_ADMIN auth</strong> — login flow; role guard on routes and API. Verify: only SYSTEM_ADMIN can access.</li>

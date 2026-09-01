@@ -24,13 +24,13 @@
           <header id="docs-header" class="docs-page-header"></header>
           <main id="main" class="docs-main">
 <h1>Email (Resend)</h1>
-      <p class="lead">Backend transactional email via Resend — auth emails in Phase 1, notification emails in Phase 7.</p>
+      <p class="lead">Backend transactional email via Resend — auth emails in Phase 1, notification emails in Phase 8.</p>
 
       <h2>Architecture</h2>
       <pre><code>EmailService (interface)
   └── ResendEmailService (default)
         ├── auth emails (Phase 1)
-        └── notification emails (Phase 7)</code></pre>
+        └── notification emails (Phase 8)</code></pre>
 
       <h2>EmailService Interface</h2>
       <pre><code>interface EmailService {
@@ -62,7 +62,7 @@
       </ul>
       <p>Templates support EN and AR based on user locale preference.</p>
 
-      <h2>Phase 7 — Notification Emails (Implement)</h2>
+      <h2>Phase 8 — Notification Emails (Implement)</h2>
       <ul>
         <li>Assignment created / due soon / graded</li>
         <li>New announcement</li>
@@ -104,13 +104,13 @@
         <li><code>EmailService</code> interface with <code>ResendEmailService</code> implementation</li>
         <li><code>RESEND_API_KEY</code> and <code>RESEND_FROM_EMAIL</code> in <code>.env.example</code></li>
         <li>Password reset email sends successfully in Phase 1</li>
-        <li>Notification emails send via Resend in Phase 7</li>
+        <li>Notification emails send via Resend in Phase 8</li>
         <li>Templates available in EN and AR</li>
       </ul>
 
       <div class="related-links">
         <h2>Related</h2>
-        <p><span class="badge badge-phase">Phases</span> <a href="../roadmap/01-foundation/">Phase 1 — Foundation</a>, <a href="../roadmap/07-notifications/">Phase 7 — Notifications</a></p>
+        <p><span class="badge badge-phase">Phases</span> <a href="../roadmap/01-foundation/">Phase 1 — Foundation</a>, <a href="../roadmap/08-notifications/">Phase 8 — Notifications</a></p>
         <p><span class="badge badge-arch">Architecture</span> <a href="system-design.html">System Design</a>, <a href="backend-architecture.html">Backend Architecture</a>, <a href="docker-and-deployment.html">Docker &amp; Deployment</a></p>
         <p><strong>Requirements:</strong> <a href="../requirements/security.html">Security</a>, <a href="../requirements/notifications-and-announcements.html">Notifications</a></p>
       </div>

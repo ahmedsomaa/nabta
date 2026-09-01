@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Phase 7 — Portal UI — Nabta</title>
+  <link rel="stylesheet" href="../../assets/docs.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500&family=Quicksand:wght@400;500;600;700&family=Zain:wght@400;700&display=swap" rel="stylesheet">
+</head>
+<body data-section="roadmap" data-title="Phase 7 — Portal UI">
+  <a href="#main" class="skip-link">Skip to content</a>
+  <header id="docs-topnav" class="docs-topnav" aria-label="Top navigation"></header>
+  <div class="docs-mobile-bar">
+    <button type="button" id="sidebar-toggle" class="sidebar-toggle" aria-expanded="false" aria-label="Open menu">&#9776;</button>
+    <a href="../../index.html" class="docs-mobile-brand">Nabta</a>
+  </div>
+  <div id="sidebar-overlay" class="sidebar-overlay"></div>
+  <div class="docs-layout">
+    <aside id="docs-sidebar" class="docs-sidebar" aria-label="Sidebar"></aside>
+    <div class="docs-content">
+      <div class="docs-body">
+        <div class="docs-article">
+          <header id="docs-header" class="docs-page-header"></header>
+          <main id="main" class="docs-main">
+<h1>Phase 7 — Portal UI</h1>
+      <p class="lead"><span class="badge badge-phase">Phase 7</span> <span class="badge badge-current">Current</span> Implement this phase only. Do not implement Phase 8+ functionality.</p>
+
+      <div class="callout">
+        <p><strong>Current phase.</strong> Phase 6 Administration is complete. Polish the shipped web portals in order — student, teacher, school admin, system admin. Student execution plan: <a href="plan.html">student portal polish plan</a>. Teacher and later portals wait.</p>
+      </div>
+
+      <h2>Goal</h2>
+      <p>Raise the visual and interaction quality of existing web portals so they feel consistent, calm, and production-ready — HeroUI v3, <a href="../../design/ux-states.html">UX States</a>, EN/AR and RTL — without adding product features.</p>
+
+      <h2>In Scope</h2>
+      <ul>
+        <li>Student portal UI polish</li>
+        <li>Teacher portal UI polish</li>
+        <li>School admin portal UI polish</li>
+        <li>System admin console UI polish</li>
+      </ul>
+
+      <h2>Out of Scope</h2>
+      <ul>
+        <li>New product features</li>
+        <li>Notifications, BullMQ, announcements (<a href="../08-notifications/">Phase 8</a>)</li>
+        <li>Marketing site</li>
+        <li>Mobile apps (<code>apps/mobile-student</code>, <code>apps/mobile-staff</code>)</li>
+      </ul>
+
+      <h2>Acceptance Criteria</h2>
+      <ul class="checklist">
+        <li>Each portal is polished in order; later portals are not started until the prior plan is done</li>
+        <li>Screens keep loading, empty, error, and success states</li>
+        <li>EN/AR and RTL remain correct after layout changes</li>
+        <li>No new domain APIs or schema for this phase</li>
+      </ul>
+
+      <h2>Implementation slices</h2>
+      <p>Complete in order. Each slice is independently verifiable. A detailed execution plan is added per portal when that slice starts — do not invent parallel polish work. Do not implement Phase 8+.</p>
+      <ol>
+        <li><strong>Student</strong> — <code>apps/web</code> student routes. Execution: <a href="plan.html">student portal polish plan</a>. Verify: student flows look and behave consistently with the design system.</li>
+        <li><strong>Teacher</strong> — teacher routes. Plan after student ships.</li>
+        <li><strong>School admin</strong> — admin routes. Plan after teacher ships.</li>
+        <li><strong>System admin</strong> — <code>apps/system-admin</code>. Plan after school admin ships.</li>
+      </ol>
+
+      <div class="related-links">
+        <h2>Related</h2>
+        <p><strong>Detailed plan:</strong> <a href="plan.html">Student portal polish plan</a></p>
+        <p><strong>Requirements:</strong> <a href="../../requirements/student.html">Student Portal</a>, <a href="../../requirements/teacher.html">Teacher Portal</a>, <a href="../../requirements/admin.html">Admin Portal</a>, <a href="../../requirements/system-admin.html">System Admin</a></p>
+        <p><strong>Design:</strong> <a href="../../design/philosophy.html">Philosophy</a>, <a href="../../design/theming.html">Theming</a>, <a href="../../design/ux-states.html">UX States</a></p>
+        <p><strong>Previous:</strong> <a href="../06-administration/">Phase 6</a> (complete) · <strong>Next:</strong> <a href="../08-notifications/">Phase 8 — Notifications</a></p>
+      </div>
+      <p class="source-footnote">Source: Phase 7 portal UI insertion after Phase 6</p>
+          </main>
+          <footer id="docs-pager" class="docs-pager-wrap"></footer>
+        </div>
+        <aside id="docs-toc" class="docs-toc" aria-label="Table of contents"></aside>
+      </div>
+    </div>
+  </div>
+  <script src="../../assets/nav-config.js"></script>
+  <script src="../../assets/layout.js"></script>
+  <script src="../../assets/docs.js"></script>
+</body>
+</html>

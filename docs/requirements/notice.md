@@ -43,7 +43,7 @@ Use the HTML documentation under docs/ as the working spec (authoritative — no
 - `docs/requirements/` — what the product must do (portals, platform capabilities)
 - `docs/design/` — philosophy, colors, typography, logos, UX states
 - `docs/technical/` — stack, architecture, deployment, diagrams
-- `docs/roadmap/` — implementation phases (Phases 1–6 complete; start with `07-notifications/`)
+- `docs/roadmap/` — implementation phases (Phases 1–6 complete; start with `07-portal-ui/`)
 - `AGENTS.md` — AI entry point at repo root
 
 Golden rule: implement **one phase folder at a time**.

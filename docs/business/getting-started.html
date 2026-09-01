@@ -23,7 +23,7 @@
       <p class="lead">How to use the Nabta documentation to build the platform incrementally.</p>
 
       <div class="callout">
-        <p><strong>Golden rule:</strong> Implement <strong>one phase folder at a time</strong>. Phases 1–6 are <span class="badge badge-complete">Complete</span>. Start with <a href="../roadmap/07-notifications/index.html">Phase 7 — Notifications</a>. Do not implement Phase 8+ while working on Phase 7.</p>
+        <p><strong>Golden rule:</strong> Implement <strong>one phase folder at a time</strong>. Phases 1–6 are <span class="badge badge-complete">Complete</span>. Start with <a href="../roadmap/07-portal-ui/index.html">Phase 7 — Portal UI</a>. Do not implement Phase 8+ while working on Phase 7.</p>
       </div>
 
       <h2>Documentation Structure</h2>
@@ -40,7 +40,7 @@
 
       <h2>Recommended Workflow</h2>
       <ol>
-        <li>Read the current phase folder — <a href="../roadmap/07-notifications/index.html">Phase 7 — Notifications</a></li>
+        <li>Read the current phase folder — <a href="../roadmap/07-portal-ui/index.html">Phase 7 — Portal UI</a></li>
         <li>Review linked requirement, design, and technical pages</li>
         <li>Give Cursor a focused prompt: <em>"Implement Phase 7 only. Do not implement Phase 8+ functionality."</em></li>
         <li>Verify acceptance criteria on the phase page</li>
@@ -59,12 +59,13 @@
   P3 --> P5["Phase 5 Assessments ✓"]
   P4 --> P5
   P2 --> P6["Phase 6 Admin ✓"]
-  P3 --> P7[Phase 7 Notifications]
+  P3 --> P7[Phase 7 Portal UI]
   P4 --> P7
   P5 --> P7
   P6 --> P7
-  P7 --> P8[Phase 8 Hardening]
-  P8 -.-> Future[Future Roadmap]</pre>
+  P7 --> P8[Phase 8 Notifications]
+  P8 --> P9[Phase 9 Hardening]
+  P9 -.-> Future[Future Roadmap]</pre>
 
       <h2>Local Development</h2>
       <p>Prerequisites: Node.js 22+, pnpm 10+, Docker Desktop (Postgres, Redis, MinIO).</p>
@@ -142,7 +143,7 @@ pnpm db:seed</code></pre>
 
       <h2>Start Here</h2>
       <div class="docs-hero-actions">
-        <a href="../roadmap/07-notifications/index.html" class="btn btn-primary">Phase 7 — Notifications</a>
+        <a href="../roadmap/07-portal-ui/index.html" class="btn btn-primary">Phase 7 — Portal UI</a>
         <a href="../roadmap/06-administration/index.html" class="btn btn-secondary">Phase 6 (complete)</a>
         <a href="../technical/system-architecture.html" class="btn btn-secondary">System Architecture</a>
       </div>
