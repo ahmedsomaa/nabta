@@ -49,3 +49,10 @@ body {
   background: var(--background);
   color: var(--foreground);
 }
+
+/* UA stylesheet centers <th>; inherit so table text-start / text-end apply. */
+@layer base {
+  th {
+    text-align: inherit;
+  }
+}

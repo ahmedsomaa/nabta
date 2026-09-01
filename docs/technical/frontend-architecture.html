@@ -114,11 +114,11 @@
         <thead><tr><th>Role</th><th>Desktop</th><th>Mobile</th></tr></thead>
         <tbody>
           <tr><td>Student</td><td>Sidebar: Home, My Classes, Assignments, Quizzes, Grades</td><td>Same items in bottom nav</td></tr>
-          <tr><td>Teacher</td><td>Sidebar: Home, Classes, Assignments, Gradebook, More</td><td>Bottom nav + drawer</td></tr>
+          <tr><td>Teacher</td><td>Sidebar: Home, Classes, Assignments, Quizzes, Gradebook</td><td>Same items in bottom nav</td></tr>
           <tr><td>Admin</td><td>Sidebar: Overview, Users, Academics, Reports, Settings</td><td>Bottom nav + drawer</td></tr>
         </tbody>
       </table></div>
-      <p>Student chrome: <code>StudentPanel</code>, <code>StudentList</code>, <code>StudentPageHeader</code> in <code>apps/web/src/features/student/StudentChrome.tsx</code>; breadcrumbs via <code>PageTrail</code> in <code>apps/web/src/layouts/PageTrail.tsx</code>. Teacher and admin should copy the class recipes, not import student feature files — <a href="../design/portal-patterns.html">Portal Patterns</a>.</p>
+      <p>Shared chrome: <code>PortalPanel</code>, <code>PortalList</code>, <code>PortalPageHeader</code> in <code>apps/web/src/components/portal/PortalChrome.tsx</code>. Student pages keep <code>Student*</code> re-exports. Teacher imports portal helpers, not student feature files. Breadcrumbs: <code>PageTrail</code> in <code>apps/web/src/layouts/PageTrail.tsx</code> — <a href="../design/portal-patterns.html">Portal Patterns</a>.</p>
 
       <h2>Route Sketch</h2>
       <pre><code>/login
@@ -137,10 +137,21 @@
 # later: /student/attendance
 
 /teacher/dashboard
-/teacher/classes/:classId
-/teacher/classes/:classId/assignments
-/teacher/classes/:classId/gradebook
-/teacher/classes/:classId/attendance
+/teacher/classes
+/teacher/classes/:classId/:subjectId
+/teacher/classes/:classId/:subjectId/builder
+/teacher/classes/:classId/:subjectId/attendance
+/teacher/classes/:classId/:subjectId/students/:studentId
+/teacher/assignments
+/teacher/assignments/new
+/teacher/assignments/:id
+/teacher/assignments/:id/submissions
+/teacher/assessments
+/teacher/assessments/new
+/teacher/assessments/:id
+/teacher/assessments/:id/results
+/teacher/gradebook
+/teacher/gradebook/:classId/:subjectId
 
 /admin/dashboard
 /admin/users

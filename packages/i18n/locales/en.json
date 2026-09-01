@@ -295,7 +295,10 @@
     "notStarted": "Not started",
     "backToClass": "Back to class",
     "selectClass": "Choose a class to open the gradebook.",
-    "pickLesson": "Select a lesson to edit."
+    "pickLesson": "Select a lesson to edit.",
+    "emptyLessons": "No lessons in this subject yet.",
+    "attemptsLabel": "Attempts",
+    "passRateLabel": "Pass rate"
   },
   "assessment": {
     "overview": "Quiz",

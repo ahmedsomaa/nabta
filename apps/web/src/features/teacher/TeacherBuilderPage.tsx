@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
-import { Link, useNavigate, useParams } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useTranslation } from 'react-i18next';
 import {
@@ -17,6 +17,8 @@ import { GripVertical } from 'lucide-react';
 import type { FilePresignResult, LessonType, TeacherClassDetail, TeacherLessonDetail } from '@nabta/types';
 import { apiFetch } from '@/lib/api';
 import { QueryError, QueryLoading } from './QueryState';
+import { PortalPageHeader } from '@/components/portal/PortalChrome';
+import { usePageTrail } from '@/layouts/PageTrail';
 
 const TYPES: LessonType[] = ['RICH_TEXT', 'VIDEO', 'PDF', 'IMAGE', 'EXTERNAL'];
 const MAX_BYTES = 10 * 1024 * 1024;
@@ -141,7 +143,19 @@ export function TeacherBuilderPage() {
     onSuccess: () => void invalidate(),
   });
 
-  if (detail.isLoading) return <QueryLoading />;
+  usePageTrail(
+    detail.data
+      ? [
+          {
+            label: `${detail.data.className} · ${detail.data.subjectName}`,
+            to: `/teacher/classes/${classId}/${subjectId}`,
+          },
+          { label: t('teacher.builder') },
+        ]
+      : [],
+  );
+
+  if (detail.isLoading) return <QueryLoading variant="subject" />;
   if (detail.isError || !detail.data) return <QueryError onRetry={() => void detail.refetch()} />;
 
   const units = detail.data.units;
@@ -158,15 +172,9 @@ export function TeacherBuilderPage() {
 
   return (
     <div className="space-y-6">
-      <Link
-        to={`/teacher/classes/${classId}/${subjectId}`}
-        className="text-sm text-muted no-underline hover:text-accent"
-      >
-        {t('teacher.backToClass')}
-      </Link>
-      <h1 className="text-2xl font-semibold tracking-tight">
-        {t('teacher.builder')} · {detail.data.className} {detail.data.subjectName}
-      </h1>
+      <PortalPageHeader
+        title={`${t('teacher.builder')} · ${detail.data.className} ${detail.data.subjectName}`}
+      />
 
       <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_minmax(0,1fr)]">
         <div className="space-y-4">

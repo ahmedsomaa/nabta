@@ -27,7 +27,7 @@
       <p class="lead"><span class="badge badge-phase">Phase 7</span> <span class="badge badge-current">Current</span> Implement this phase only. Do not implement Phase 8+ functionality.</p>
 
       <div class="callout">
-        <p><strong>Student slice shipped.</strong> The student web portal is the reference implementation. Teacher polish is next, then school admin, then system admin. Recipes: <a href="../../design/portal-patterns.html">Portal Patterns</a>. Student execution history: <a href="plan.html">student portal polish plan</a>. Do not implement Phase 8+.</p>
+        <p><strong>Teacher slice is current.</strong> Student web polish is shipped (reference: <a href="../../design/portal-patterns.html">Portal Patterns</a>). Teacher execution: <a href="teacher.html">teacher portal polish plan</a>. School admin and system admin wait. Do not implement Phase 8+.</p>
       </div>
 
       <h2>Goal</h2>
@@ -58,17 +58,17 @@
       </ul>
 
       <h2>Implementation slices</h2>
-      <p>Complete in order. Each slice is independently verifiable. Student is done; write a teacher plan before starting teacher polish. Do not implement Phase 8+.</p>
+      <p>Complete in order. Each slice is independently verifiable. Teacher is in progress. Do not implement Phase 8+.</p>
       <ol>
         <li><strong>Student</strong> <span class="badge badge-complete">Complete</span> — <code>apps/web</code> student routes. Reference: <a href="../../design/portal-patterns.html">Portal Patterns</a>. History: <a href="plan.html">student portal polish plan</a>.</li>
-        <li><strong>Teacher</strong> — teacher routes. Next. Write a teacher plan before starting; copy student recipes, not <code>Student*</code> feature files.</li>
+        <li><strong>Teacher</strong> <span class="badge badge-current">Current</span> — teacher routes. Execution: <a href="teacher.html">teacher portal polish plan</a>. Copy portal recipes, not <code>Student*</code> feature files.</li>
         <li><strong>School admin</strong> — admin routes. Plan after teacher ships.</li>
         <li><strong>System admin</strong> — <code>apps/system-admin</code>. Plan after school admin ships.</li>
       </ol>
 
       <div class="related-links">
         <h2>Related</h2>
-        <p><strong>Detailed plan:</strong> <a href="plan.html">Student portal polish plan</a></p>
+        <p><strong>Detailed plans:</strong> <a href="teacher.html">Teacher portal polish plan</a> (current) · <a href="plan.html">Student portal polish plan</a> (complete)</p>
         <p><strong>Requirements:</strong> <a href="../../requirements/student.html">Student Portal</a>, <a href="../../requirements/teacher.html">Teacher Portal</a>, <a href="../../requirements/admin.html">Admin Portal</a>, <a href="../../requirements/system-admin.html">System Admin</a></p>
         <p><strong>Design:</strong> <a href="../../design/portal-patterns.html">Portal Patterns</a>, <a href="../../design/philosophy.html">Philosophy</a>, <a href="../../design/theming.html">Theming</a>, <a href="../../design/ux-states.html">UX States</a></p>
         <p><strong>Previous:</strong> <a href="../06-administration/">Phase 6</a> (complete) · <strong>Next:</strong> <a href="../08-notifications/">Phase 8 — Notifications</a></p>

@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
-import { Link, useNavigate, useParams, useSearchParams } from 'react-router-dom';
+import { useNavigate, useParams, useSearchParams } from 'react-router-dom';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useTranslation } from 'react-i18next';
 import { Alert, Button, Input, Label, TextArea, TextField, toast } from '@heroui/react';
@@ -12,6 +12,8 @@ import type {
 } from '@nabta/types';
 import { apiFetch } from '@/lib/api';
 import { QueryError, QueryLoading } from './QueryState';
+import { PortalPageHeader, PortalPanel } from '@/components/portal/PortalChrome';
+import { usePageTrail } from '@/layouts/PageTrail';
 
 const TYPES: QuestionType[] = ['MULTIPLE_CHOICE', 'MULTIPLE_ANSWER', 'TRUE_FALSE', 'SHORT_ANSWER'];
 
@@ -140,7 +142,9 @@ export function TeacherAssessmentFormPage() {
     onSuccess: () => void queryClient.invalidateQueries({ queryKey: ['teacher-assessment', id] }),
   });
 
-  if (classes.isLoading || (!isNew && existing.isLoading)) return <QueryLoading />;
+  usePageTrail([{ label: isNew ? t('teacher.newQuiz') : (existing.data?.title ?? t('nav.quizzes')) }]);
+
+  if (classes.isLoading || (!isNew && existing.isLoading)) return <QueryLoading variant="assignment" />;
   if (classes.isError || !classes.data) return <QueryError onRetry={() => void classes.refetch()} />;
   if (!isNew && (existing.isError || !existing.data)) {
     return <QueryError onRetry={() => void existing.refetch()} />;
@@ -150,12 +154,7 @@ export function TeacherAssessmentFormPage() {
 
   return (
     <div className="space-y-6">
-      <Link to="/teacher/assessments" className="text-sm text-muted no-underline hover:text-accent">
-        {t('nav.quizzes')}
-      </Link>
-      <h1 className="text-2xl font-semibold tracking-tight">
-        {isNew ? t('teacher.newQuiz') : quiz?.title}
-      </h1>
+      <PortalPageHeader title={isNew ? t('teacher.newQuiz') : (quiz?.title ?? '')} />
       {error ? (
         <Alert status="danger">
           <Alert.Indicator />
@@ -165,6 +164,7 @@ export function TeacherAssessmentFormPage() {
         </Alert>
       ) : null}
 
+      <PortalPanel>
       <div className="grid gap-4 sm:grid-cols-2">
         <TextField name="title" isRequired value={title} onChange={setTitle} className="sm:col-span-2">
           <Label>{t('teacher.title')}</Label>
@@ -206,6 +206,7 @@ export function TeacherAssessmentFormPage() {
           {t('teacher.randomize')}
         </label>
       </div>
+      </PortalPanel>
 
       <div className="flex flex-wrap gap-2">
         <Button variant="secondary" onPress={() => save.mutate(false)} isPending={save.isPending}>

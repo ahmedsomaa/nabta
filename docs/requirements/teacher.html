@@ -36,11 +36,11 @@
       <h3>Student Alerts</h3>
       <p>Students falling behind, missing assignments, low assessment performance, attendance concerns.</p>
       <h3>Quick Actions</h3>
-      <p>Create Assignment, Create Quiz, Upload Material, Take Attendance, Post Announcement.</p>
+      <p>Current: Create Assignment, Create Quiz, Upload Material, Take Attendance. <strong>Post Announcement</strong> is later product (<a href="../roadmap/08-notifications/">Phase 8</a>).</p>
 
       <h2>Class Management</h2>
-      <p>Teachers open a class and see: students, lessons, assignments, assessments, attendance, grades, announcements.</p>
-      <p>Student table columns: Student, Progress, Attendance, Average, Missing Work. Clicking a student opens their academic overview.</p>
+      <p>Teachers open a class and see the roster, then jump to builder, attendance, gradebook, or create assignment/quiz via action buttons. Lessons, assignments, and quizzes live on their own routes — not extra sections invented on this page.</p>
+      <p>Roster row opens a student academic overview. Announcements on the class page are later product.</p>
 
       <h2>Course / Subject Builder</h2>
       <p>Content creation must be extremely simple. Structure:</p>
@@ -58,10 +58,10 @@
       <p>Teachers own the assignment lifecycle:</p>
       <ol>
         <li>Create assignment (title, description, due date, attachments)</li>
-        <li>Publish → students receive notification</li>
+        <li>Publish → students see the work (notifications are Phase 8)</li>
         <li>Students submit</li>
         <li>Teacher opens submissions, grades, adds feedback</li>
-        <li>Publishes grades → students notified</li>
+        <li>Publishes grades → students see scores (notifications are Phase 8)</li>
       </ol>
       <p><strong>Statuses:</strong> Not Started, Draft, Submitted, Late, Graded, Returned</p>
 
@@ -69,7 +69,9 @@
       <p>Record attendance per class/session: Present, Absent, Late, Excused.</p>
 
       <h2>Navigation</h2>
-      <pre><code>Home | Classes | Assignments | Gradebook | More</code></pre>
+      <p>Current web portal:</p>
+      <pre><code>Home | Classes | Assignments | Quizzes | Gradebook</code></pre>
+      <p>Announcements, More, and Post Announcement are later — not implied as shipped. Composition recipes: <a href="../design/portal-patterns.html">Portal Patterns</a>.</p>
 
       <h2>Acceptance Criteria</h2>
       <ul class="checklist">
@@ -83,8 +85,9 @@
 
       <div class="related-links">
         <h2>Related</h2>
-        <p><span class="badge badge-phase">Phases</span> <a href="../roadmap/04-teacher-experience/">Phase 4 — Teacher Experience</a>, <a href="../roadmap/05-assessments/">Phase 5 — Assessments</a></p>
-        <p><span class="badge badge-arch">Architecture</span> <a href="../technical/sequences.html">Sequence Diagrams</a></p>
+        <p><span class="badge badge-phase">Phases</span> <a href="../roadmap/04-teacher-experience/">Phase 4 — Teacher Experience</a>, <a href="../roadmap/05-assessments/">Phase 5 — Assessments</a>, <a href="../roadmap/07-portal-ui/teacher.html">Phase 7 — Teacher polish</a></p>
+        <p><span class="badge badge-arch">Architecture</span> <a href="../technical/frontend-architecture.html">Frontend Architecture</a>, <a href="../technical/sequences.html">Sequence Diagrams</a></p>
+        <p><strong>Design:</strong> <a href="../design/portal-patterns.html">Portal Patterns</a></p>
         <p>Also see: <a href="student.html">Student Portal</a> (assignment consumer view)</p>
       </div>
       <p class="source-footnote">Source: requirements.md §§20–22, 47</p>

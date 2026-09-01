@@ -1,10 +1,13 @@
-import { Link, useNavigate, useParams } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import { useTranslation } from 'react-i18next';
 import { Button } from '@heroui/react';
+import { Users } from 'lucide-react';
 import type { TeacherClassDetail, TeacherRosterRow } from '@nabta/types';
 import { apiFetch } from '@/lib/api';
-import { EmptyCard, QueryError, QueryLoading } from './QueryState';
+import { QueryError, QueryLoading } from './QueryState';
+import { PortalEmptyState, PortalPageHeader } from '@/components/portal/PortalChrome';
+import { usePageTrail } from '@/layouts/PageTrail';
 
 export function TeacherClassPage() {
   const { t } = useTranslation();
@@ -22,7 +25,11 @@ export function TeacherClassPage() {
     enabled: Boolean(classId && subjectId),
   });
 
-  if (detail.isLoading || roster.isLoading) return <QueryLoading />;
+  usePageTrail(
+    detail.data ? [{ label: `${detail.data.className} · ${detail.data.subjectName}` }] : [],
+  );
+
+  if (detail.isLoading || roster.isLoading) return <QueryLoading variant="table" />;
   if (detail.isError || roster.isError || !detail.data || !roster.data) {
     return (
       <QueryError
@@ -39,52 +46,53 @@ export function TeacherClassPage() {
 
   return (
     <div className="space-y-6">
-      <Link to="/teacher/classes" className="text-sm text-muted no-underline hover:text-accent">
-        {t('nav.classes')}
-      </Link>
-      <div className="flex flex-wrap items-start justify-between gap-3">
-        <h1 className="text-2xl font-semibold tracking-tight">
-          {cls.className} · {cls.subjectName}
-        </h1>
-        <div className="flex flex-wrap gap-2">
-          <Button size="sm" variant="primary" onPress={() => navigate(`${base}/builder`)}>
-            {t('teacher.builder')}
-          </Button>
-          <Button size="sm" variant="secondary" onPress={() => navigate(`${base}/attendance`)}>
-            {t('teacher.attendance')}
-          </Button>
-          <Button size="sm" variant="secondary" onPress={() => navigate(`/teacher/gradebook/${classId}/${subjectId}`)}>
-            {t('teacher.gradebook')}
-          </Button>
-          <Button size="sm" variant="secondary" onPress={() => navigate('/teacher/assignments/new')}>
-            {t('teacher.createAssignment')}
-          </Button>
-          <Button
-            size="sm"
-            variant="secondary"
-            onPress={() =>
-              navigate(`/teacher/assessments/new?classId=${classId}&subjectId=${subjectId}`)
-            }
-          >
-            {t('teacher.createQuiz')}
-          </Button>
-        </div>
-      </div>
+      <PortalPageHeader
+        title={`${cls.className} · ${cls.subjectName}`}
+        trailing={
+          <div className="flex flex-wrap gap-2">
+            <Button size="sm" variant="primary" onPress={() => navigate(`${base}/builder`)}>
+              {t('teacher.builder')}
+            </Button>
+            <Button size="sm" variant="secondary" onPress={() => navigate(`${base}/attendance`)}>
+              {t('teacher.attendance')}
+            </Button>
+            <Button
+              size="sm"
+              variant="secondary"
+              onPress={() => navigate(`/teacher/gradebook/${classId}/${subjectId}`)}
+            >
+              {t('teacher.gradebook')}
+            </Button>
+            <Button size="sm" variant="secondary" onPress={() => navigate('/teacher/assignments/new')}>
+              {t('teacher.createAssignment')}
+            </Button>
+            <Button
+              size="sm"
+              variant="secondary"
+              onPress={() =>
+                navigate(`/teacher/assessments/new?classId=${classId}&subjectId=${subjectId}`)
+              }
+            >
+              {t('teacher.createQuiz')}
+            </Button>
+          </div>
+        }
+      />
 
       <section className="space-y-3">
         <h2 className="text-lg font-semibold">{t('teacher.roster')}</h2>
         {roster.data.length === 0 ? (
-          <EmptyCard>{t('teacher.emptyRoster')}</EmptyCard>
+          <PortalEmptyState icon={Users}>{t('teacher.emptyRoster')}</PortalEmptyState>
         ) : (
           <div className="overflow-x-auto rounded-xl border border-border">
-            <table className="w-full min-w-[36rem] text-start text-sm">
+            <table className="w-full min-w-[36rem] text-start text-sm [&_td]:text-start [&_th]:text-start">
               <thead className="bg-surface text-muted">
                 <tr>
-                  <th className="px-4 py-2 font-medium">{t('teacher.student')}</th>
-                  <th className="px-4 py-2 font-medium">{t('teacher.progress')}</th>
-                  <th className="px-4 py-2 font-medium">{t('teacher.attendance')}</th>
-                  <th className="px-4 py-2 font-medium">{t('teacher.average')}</th>
-                  <th className="px-4 py-2 font-medium">{t('teacher.missingWork')}</th>
+                  <th className="px-4 py-2 text-start font-medium">{t('teacher.student')}</th>
+                  <th className="px-4 py-2 text-start font-medium">{t('teacher.progress')}</th>
+                  <th className="px-4 py-2 text-start font-medium">{t('teacher.attendance')}</th>
+                  <th className="px-4 py-2 text-start font-medium">{t('teacher.average')}</th>
+                  <th className="px-4 py-2 text-start font-medium">{t('teacher.missingWork')}</th>
                 </tr>
               </thead>
               <tbody>
@@ -94,12 +102,14 @@ export function TeacherClassPage() {
                     className="cursor-pointer border-t border-border hover:bg-overlay"
                     onClick={() => navigate(`${base}/students/${row.studentId}`)}
                   >
-                    <td className="px-4 py-3">
+                    <td className="px-4 py-3 [overflow-wrap:anywhere]">
                       {row.givenName} {row.familyName}
                     </td>
                     <td className="px-4 py-3">{row.progressPercent}%</td>
                     <td className="px-4 py-3">
-                      {row.attendancePercent == null ? t('teacher.noGrade') : `${row.attendancePercent}%`}
+                      {row.attendancePercent == null
+                        ? t('teacher.noGrade')
+                        : `${row.attendancePercent}%`}
                     </td>
                     <td className="px-4 py-3">
                       {row.average == null ? t('teacher.noGrade') : `${row.average}%`}

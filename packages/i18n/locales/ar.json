@@ -295,7 +295,10 @@
     "notStarted": "لم يبدأ",
     "backToClass": "العودة إلى الصف",
     "selectClass": "اختر صفاً لفتح سجل الدرجات.",
-    "pickLesson": "اختر درساً للتعديل."
+    "pickLesson": "اختر درساً للتعديل.",
+    "emptyLessons": "لا دروس في هذه المادة بعد.",
+    "attemptsLabel": "المحاولات",
+    "passRateLabel": "نسبة النجاح"
   },
   "assessment": {
     "overview": "اختبار",

@@ -1,12 +1,21 @@
 import { useState } from 'react';
-import { Link, useParams } from 'react-router-dom';
+import { useParams } from 'react-router-dom';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useTranslation } from 'react-i18next';
-import { Button, Card, Chip, Input, Label, TextArea, TextField, toast } from '@heroui/react';
+import { Button, Chip, Input, Label, TextArea, TextField, toast } from '@heroui/react';
+import { ClipboardList } from 'lucide-react';
 import type { TeacherSubmissionDetail, TeacherSubmissionListItem } from '@nabta/types';
 import { apiFetch } from '@/lib/api';
 import { StatusChip } from '@/features/student/StatusChip';
-import { EmptyCard, QueryError, QueryLoading } from './QueryState';
+import { QueryError, QueryLoading } from './QueryState';
+import {
+  PortalEmptyState,
+  PortalList,
+  PortalPageHeader,
+  PortalPanel,
+  portalListRowClass,
+} from '@/components/portal/PortalChrome';
+import { usePageTrail } from '@/layouts/PageTrail';
 
 export function TeacherSubmissionsPage() {
   const { t } = useTranslation();
@@ -24,6 +33,8 @@ export function TeacherSubmissionsPage() {
     enabled: Boolean(openId),
   });
 
+  usePageTrail([{ label: t('teacher.submissions') }]);
+
   const publish = useMutation({
     mutationFn: () => apiFetch(`/teacher/assignments/${id}/publish-grades`, { method: 'POST' }),
     onSuccess: () => {
@@ -32,47 +43,44 @@ export function TeacherSubmissionsPage() {
     },
   });
 
-  if (list.isLoading) return <QueryLoading />;
+  if (list.isLoading) return <QueryLoading variant="grid" />;
   if (list.isError || !list.data) return <QueryError onRetry={() => void list.refetch()} />;
 
   return (
     <div className="space-y-4">
-      <Link to="/teacher/assignments" className="text-sm text-muted no-underline hover:text-accent">
-        {t('nav.assignments')}
-      </Link>
-      <div className="flex flex-wrap items-center justify-between gap-3">
-        <h1 className="text-2xl font-semibold tracking-tight">{t('teacher.submissions')}</h1>
-        <Button variant="primary" onPress={() => publish.mutate()} isPending={publish.isPending}>
-          {t('teacher.publishGrades')}
-        </Button>
-      </div>
+      <PortalPageHeader
+        title={t('teacher.submissions')}
+        trailing={
+          <Button variant="primary" onPress={() => publish.mutate()} isPending={publish.isPending}>
+            {t('teacher.publishGrades')}
+          </Button>
+        }
+      />
       {list.data.length === 0 ? (
-        <EmptyCard>{t('teacher.emptySubmissions')}</EmptyCard>
+        <PortalEmptyState icon={ClipboardList}>{t('teacher.emptySubmissions')}</PortalEmptyState>
       ) : (
-        <div className="grid gap-3">
+        <PortalList>
           {list.data.map((row) => (
-            <Card key={row.studentId} className="p-4">
-              <Card.Header>
-                <div className="flex flex-wrap items-center justify-between gap-2">
-                  <Card.Title>
+            <li key={row.studentId} className="border-b border-border last:border-b-0">
+              <button
+                type="button"
+                className={portalListRowClass}
+                disabled={!row.id}
+                onClick={() => row.id && setOpenId(row.id)}
+              >
+                <div className="min-w-0 flex-1">
+                  <p className="truncate font-medium">
                     {row.givenName} {row.familyName}
-                  </Card.Title>
-                  <StatusChip status={row.status} />
+                  </p>
+                  <p className="mt-0.5 truncate text-xs text-muted">
+                    {row.score != null ? `${row.score}` : t('teacher.noGrade')}
+                  </p>
                 </div>
-                <Card.Description>
-                  {row.score != null ? `${row.score}` : t('teacher.noGrade')}
-                </Card.Description>
-              </Card.Header>
-              {row.id ? (
-                <div className="mt-3">
-                  <Button size="sm" variant="secondary" onPress={() => setOpenId(row.id)}>
-                    {t('teacher.grade')}
-                  </Button>
-                </div>
-              ) : null}
-            </Card>
+                <StatusChip status={row.status} />
+              </button>
+            </li>
           ))}
-        </div>
+        </PortalList>
       )}
 
       {openId && detail.data ? (
@@ -114,9 +122,9 @@ function GradePanel({
   });
 
   return (
-    <div className="space-y-3 rounded-xl border border-border p-4">
+    <PortalPanel>
       <div className="flex items-center justify-between gap-2">
-        <h2 className="text-lg font-semibold">
+        <h2 className="text-lg font-semibold [overflow-wrap:anywhere]">
           {submission.givenName} {submission.familyName}
         </h2>
         <Chip size="sm" variant="soft">
@@ -124,19 +132,27 @@ function GradePanel({
         </Chip>
       </div>
       {submission.files.map((file) => (
-        <a key={file.id} href={file.downloadUrl} className="text-sm text-accent" target="_blank" rel="noreferrer">
+        <a
+          key={file.id}
+          href={file.downloadUrl}
+          className="mt-3 block text-sm text-accent"
+          target="_blank"
+          rel="noreferrer"
+        >
           {t('teacher.viewFile')}: {file.fileName}
         </a>
       ))}
-      <TextField name="score" value={score} onChange={setScore}>
-        <Label>{t('teacher.score')}</Label>
-        <Input type="number" min={0} max={submission.maxScore} />
-      </TextField>
-      <TextField name="feedback" value={feedback} onChange={setFeedback}>
-        <Label>{t('teacher.feedback')}</Label>
-        <TextArea rows={4} />
-      </TextField>
-      <div className="flex gap-2">
+      <div className="mt-4 space-y-3">
+        <TextField name="score" value={score} onChange={setScore}>
+          <Label>{t('teacher.score')}</Label>
+          <Input type="number" min={0} max={submission.maxScore} />
+        </TextField>
+        <TextField name="feedback" value={feedback} onChange={setFeedback}>
+          <Label>{t('teacher.feedback')}</Label>
+          <TextArea rows={4} />
+        </TextField>
+      </div>
+      <div className="mt-4 flex gap-2">
         <Button variant="primary" isPending={save.isPending} onPress={() => save.mutate()}>
           {t('teacher.save')}
         </Button>
@@ -144,6 +160,6 @@ function GradePanel({
           {t('teacher.cancel')}
         </Button>
       </div>
-    </div>
+    </PortalPanel>
   );
 }

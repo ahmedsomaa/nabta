@@ -4,7 +4,7 @@ import { useTranslation } from 'react-i18next';
 export function QueryLoading({
   variant = 'default',
 }: {
-  variant?: 'default' | 'dashboard' | 'grid' | 'table' | 'subject' | 'assignment' | 'squares';
+  variant?: 'default' | 'dashboard' | 'teacherDashboard' | 'grid' | 'table' | 'subject' | 'assignment' | 'squares';
 }) {
   const { t } = useTranslation();
   if (variant === 'dashboard') {
@@ -16,6 +16,26 @@ export function QueryLoading({
         <div className="grid gap-8 lg:grid-cols-2">
           <Skeleton className="h-40 rounded-xl" />
           <Skeleton className="h-40 rounded-xl" />
+        </div>
+      </div>
+    );
+  }
+  if (variant === 'teacherDashboard') {
+    return (
+      <div className="space-y-6" aria-busy="true" aria-label={t('student.loading')}>
+        <Skeleton className="h-8 w-2/3 rounded-lg sm:w-1/3" />
+        <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
+          <Skeleton className="h-28 rounded-xl" />
+          <Skeleton className="h-28 rounded-xl" />
+          <Skeleton className="h-28 rounded-xl" />
+          <Skeleton className="h-28 rounded-xl" />
+        </div>
+        <div className="grid gap-8 lg:grid-cols-2">
+          <div className="space-y-8">
+            <Skeleton className="h-40 rounded-xl" />
+            <Skeleton className="h-40 rounded-xl" />
+          </div>
+          <Skeleton className="h-56 rounded-xl" />
         </div>
       </div>
     );

@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Phase 7 — Teacher portal polish plan — Nabta</title>
+  <link rel="stylesheet" href="../../assets/docs.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500&family=Quicksand:wght@400;500;600;700&family=Zain:wght@400;700&display=swap" rel="stylesheet">
+</head>
+<body data-section="roadmap" data-title="Phase 7 — Teacher polish plan">
+  <a href="#main" class="skip-link">Skip to content</a>
+  <header id="docs-topnav" class="docs-topnav" aria-label="Top navigation"></header>
+  <div class="docs-mobile-bar">
+    <button type="button" id="sidebar-toggle" class="sidebar-toggle" aria-expanded="false" aria-label="Open menu">&#9776;</button>
+    <a href="../../index.html" class="docs-mobile-brand">Nabta</a>
+  </div>
+  <div id="sidebar-overlay" class="sidebar-overlay"></div>
+  <div class="docs-layout">
+    <aside id="docs-sidebar" class="docs-sidebar" aria-label="Sidebar"></aside>
+    <div class="docs-content">
+      <div class="docs-body">
+        <div class="docs-article">
+          <header id="docs-header" class="docs-page-header"></header>
+          <main id="main" class="docs-main">
+      <h1>Phase 7 — Teacher portal polish plan</h1>
+      <p class="lead"><span class="badge badge-phase">Phase 7</span> <span class="badge badge-current">Current</span> Execution plan for the teacher web portal. Copy <a href="../../design/portal-patterns.html">Portal Patterns</a> — do not invent a second card language.</p>
+
+      <div class="callout">
+        <p><strong>Companion to</strong> <a href="index.html">Phase 7 — Portal UI</a>. Student polish is shipped (<a href="plan.html">student plan</a>). School admin and system admin wait. Do not implement Phase 8+.</p>
+      </div>
+
+      <div class="callout">
+        <p><strong>Web teacher portal only.</strong> No Post Announcement, no new nav items, no GPA. Demo: <code>teacher@nabta.local</code> / <code>Password123!</code> at <code>http://localhost:5173/teacher/dashboard</code>.</p>
+      </div>
+
+      <h2>Slice order</h2>
+      <p>Shared chrome first, then screens in teacher-nav order. Sequential; each slice is independently verifiable.</p>
+
+      <pre class="mermaid">flowchart TB
+  S0[This plan]
+  S1[Portal chrome]
+  S2[Dashboard]
+  S3[Classes and class]
+  S4[Assignments]
+  S5[Quizzes]
+  S6[Gradebook attendance builder]
+  S7[PageTrail RTL mobile]
+  S0 --> S1 --> S2 --> S3 --> S4 --> S5 --> S6 --> S7</pre>
+
+      <h2>Visual direction</h2>
+      <ul>
+        <li>Same 1px <code>rounded-xl border border-border</code> shells as student — no HeroUI <code>Card</code> as list/tile wrapper</li>
+        <li>HeroUI for controls: Button, Chip, Alert, ProgressBar, Radio, Toast, Skeleton, Modal</li>
+        <li>Import from <code>apps/web/src/components/portal/PortalChrome.tsx</code>, not from <code>features/student/</code></li>
+        <li>Class tiles: accent hero + lucide-animated book + subject + class name. No fake progress (payload has none)</li>
+        <li>Token colors only. Logical CSS. Check ~375px</li>
+      </ul>
+
+      <h2>Original agent prompt</h2>
+      <pre><code>Implement Phase 7 teacher portal polish only per docs/roadmap/07-portal-ui/teacher.html.
+Do not implement school-admin or system-admin polish or Phase 8+ functionality.</code></pre>
+
+      <h2>In scope</h2>
+      <ul>
+        <li><code>apps/web</code> teacher routes already shipped in Phases 4–5</li>
+        <li>Shared portal chrome lift; <code>PageTrail</code> on nested teacher routes</li>
+        <li>EN/AR + RTL; loading / empty / error / success per <a href="../../design/ux-states.html">UX States</a></li>
+      </ul>
+
+      <h2>Out of scope</h2>
+      <ul>
+        <li>School admin, system admin polish</li>
+        <li>Notifications, BullMQ, announcements</li>
+        <li>New product domains or schema</li>
+        <li>Marketing site, mobile apps</li>
+        <li>Post Announcement, More nav, GPA, class-page lesson/assignment sections that are not already routes</li>
+      </ul>
+
+      <h2>Slice 0 — This plan</h2>
+      <p><strong>Goal:</strong> lock teacher polish execution.</p>
+      <p><strong>Verify:</strong> this page is linked from the Phase 7 index.</p>
+
+      <h2>Slice 1 — Portal chrome</h2>
+      <p><strong>Goal:</strong> lift student recipes to <code>PortalPanel</code>, <code>PortalList</code>, <code>PortalPageHeader</code>, <code>PortalEmptyState</code>, <code>IconWell</code>, <code>PortalProgress</code>, <code>PortalMetric</code>. StudentChrome re-exports so student pages do not churn.</p>
+      <p><strong>Verify:</strong> teacher pages import from <code>@/components/portal</code>; student still compiles.</p>
+
+      <h2>Slice 2 — Dashboard</h2>
+      <p><strong>Goal:</strong> greeting header; quick-action Buttons (no announcement); today’s classes, to-grade, and alerts as bordered list rows.</p>
+      <p><strong>Route:</strong> <code>/teacher/dashboard</code>.</p>
+      <p><strong>Verify:</strong> <code>teacher@nabta.local</code> sees greeting, schedule rows with <code>dir="ltr"</code> times, to-grade counts, alert rows. Create assignment / quiz still navigate.</p>
+
+      <h2>Slice 3 — Classes and class</h2>
+      <p><strong>Goal:</strong> class tiles with accent hero (no progress bar). Class page: header, action buttons, bordered roster. Student detail: panels + lists.</p>
+      <p><strong>Routes:</strong> <code>/teacher/classes</code>, class, student.</p>
+      <p><strong>Verify:</strong> tile opens class; roster row opens student; builder/attendance/gradebook buttons still work.</p>
+
+      <h2>Slice 4 — Assignments</h2>
+      <p><strong>Goal:</strong> grouped list (draft / published); form settings in a panel; submissions as list rows; keep grade panel bordered.</p>
+      <p><strong>Routes:</strong> list, new/edit, submissions.</p>
+      <p><strong>Verify:</strong> empty state CTA creates an assignment; publish/grade/lock behavior unchanged.</p>
+
+      <h2>Slice 5 — Quizzes</h2>
+      <p><strong>Goal:</strong> same list pattern as assignments; form settings in a panel; results use metric tiles + table + review rows (Correct / Your answer / Incorrect chips).</p>
+      <p><strong>Routes:</strong> list, new/edit, results.</p>
+      <p><strong>Verify:</strong> autosave and results APIs unchanged.</p>
+
+      <h2>Slice 6 — Gradebook, attendance, builder</h2>
+      <p><strong>Goal:</strong> page headers and empty states; keep overflow tables; HeroUI Radio on attendance if save behavior stays the same; builder light pass only.</p>
+      <p><strong>Verify:</strong> gradebook matrix still links; attendance save still posts; DnD builder still works.</p>
+
+      <h2>Slice 7 — PageTrail, RTL, dark, mobile</h2>
+      <p><strong>Goal:</strong> nested crumbs <code>Teacher › section › page</code>; pass EN/AR, light/dark, ~375px.</p>
+      <p><strong>Verify:</strong> last crumb inert; no page-level horizontal overflow; student portal unchanged.</p>
+
+      <h2>Acceptance (phase index)</h2>
+      <ul class="checklist">
+        <li>Teacher portal is polished; school-admin/system-admin not started from this plan</li>
+        <li>Screens keep loading, empty, error, and success states</li>
+        <li>EN/AR and RTL remain correct</li>
+        <li>No new product domains or schema</li>
+      </ul>
+
+      <div class="related-links">
+        <h2>Related</h2>
+        <p><strong>Phase index:</strong> <a href="index.html">Phase 7 — Portal UI</a></p>
+        <p><strong>Requirements:</strong> <a href="../../requirements/teacher.html">Teacher Portal</a></p>
+        <p><strong>Design:</strong> <a href="../../design/portal-patterns.html">Portal Patterns</a>, <a href="../../design/philosophy.html">Philosophy</a>, <a href="../../design/ux-states.html">UX States</a></p>
+        <p><strong>Previous:</strong> <a href="plan.html">Student polish plan</a> (complete) · <strong>Next:</strong> school admin polish plan (not yet written) · <a href="../08-notifications/">Phase 8 — Notifications</a></p>
+      </div>
+      <p class="source-footnote">Source: Phase 7 teacher portal polish</p>
+          </main>
+          <footer id="docs-pager" class="docs-pager-wrap"></footer>
+        </div>
+        <aside id="docs-toc" class="docs-toc" aria-label="Table of contents"></aside>
+      </div>
+    </div>
+  </div>
+  <script src="../../assets/nav-config.js"></script>
+  <script src="../../assets/layout.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.min.js"></script>
+  <script src="../../assets/docs.js"></script>
+</body>
+</html>

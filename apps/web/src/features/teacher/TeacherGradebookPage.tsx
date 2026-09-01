@@ -1,9 +1,12 @@
 import { Link, useNavigate, useParams } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import { useTranslation } from 'react-i18next';
+import { BookOpen, ClipboardList } from 'lucide-react';
 import type { TeacherClassItem, TeacherGradebook } from '@nabta/types';
 import { apiFetch } from '@/lib/api';
-import { EmptyCard, QueryError, QueryLoading } from './QueryState';
+import { QueryError, QueryLoading } from './QueryState';
+import { PortalEmptyState, PortalPageHeader } from '@/components/portal/PortalChrome';
+import { usePageTrail } from '@/layouts/PageTrail';
 
 export function TeacherGradebookPage() {
   const { t } = useTranslation();
@@ -24,13 +27,27 @@ export function TeacherGradebookPage() {
     enabled: Boolean(selected?.classId && selected?.subjectId),
   });
 
-  if (classes.isLoading) return <QueryLoading />;
+  const selectedClass = classes.data?.find(
+    (item) => item.classId === selected?.classId && item.subjectId === selected?.subjectId,
+  );
+  usePageTrail(
+    selectedClass ? [{ label: `${selectedClass.className} · ${selectedClass.subjectName}` }] : [],
+  );
+
+  if (classes.isLoading) return <QueryLoading variant="table" />;
   if (classes.isError || !classes.data) return <QueryError onRetry={() => void classes.refetch()} />;
-  if (classes.data.length === 0) return <EmptyCard>{t('teacher.emptyClasses')}</EmptyCard>;
+  if (classes.data.length === 0) {
+    return (
+      <div className="space-y-4">
+        <PortalPageHeader title={t('nav.gradebook')} />
+        <PortalEmptyState icon={BookOpen}>{t('teacher.emptyClasses')}</PortalEmptyState>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-4">
-      <h1 className="text-2xl font-semibold tracking-tight">{t('nav.gradebook')}</h1>
+      <PortalPageHeader title={t('nav.gradebook')} />
       <div className="flex flex-wrap gap-2">
         {classes.data.map((item) => (
           <button
@@ -48,19 +65,19 @@ export function TeacherGradebookPage() {
         ))}
       </div>
       {book.isLoading ? (
-        <QueryLoading />
+        <QueryLoading variant="table" />
       ) : book.isError || !book.data ? (
         <QueryError onRetry={() => void book.refetch()} />
       ) : book.data.assignments.length === 0 && book.data.assessments.length === 0 ? (
-        <EmptyCard>{t('teacher.emptyAssignments')}</EmptyCard>
+        <PortalEmptyState icon={ClipboardList}>{t('teacher.emptyAssignments')}</PortalEmptyState>
       ) : (
         <div className="overflow-x-auto rounded-xl border border-border">
-          <table className="w-full min-w-[40rem] text-start text-sm">
+          <table className="w-full min-w-[40rem] text-start text-sm [&_td]:text-start [&_th]:text-start">
             <thead className="bg-surface text-muted">
               <tr>
-                <th className="px-4 py-2 font-medium">{t('teacher.student')}</th>
+                <th className="px-4 py-2 text-start font-medium">{t('teacher.student')}</th>
                 {book.data.assignments.map((assignment) => (
-                  <th key={assignment.id} className="px-4 py-2 font-medium">
+                  <th key={assignment.id} className="px-4 py-2 text-start font-medium">
                     <Link
                       to={`/teacher/assignments/${assignment.id}/submissions`}
                       className="text-accent no-underline"
@@ -70,7 +87,7 @@ export function TeacherGradebookPage() {
                   </th>
                 ))}
                 {book.data.assessments.map((assessment) => (
-                  <th key={assessment.id} className="px-4 py-2 font-medium">
+                  <th key={assessment.id} className="px-4 py-2 text-start font-medium">
                     <Link
                       to={`/teacher/assessments/${assessment.id}/results`}
                       className="text-accent no-underline"

@@ -103,21 +103,23 @@
       </table></div>
 
       <h2>Reuse in other portals</h2>
-      <p>Copy the class recipes above into teacher, school admin, and system-admin screens. You may keep <code>Student*</code> names in student code; other portals should not import student feature files. Lift a shared helper under <code>apps/web/src/components/</code> only when duplication starts to hurt.</p>
+      <p>Shared helpers live in <code>apps/web/src/components/portal/PortalChrome.tsx</code> (<code>PortalPanel</code>, <code>PortalList</code>, <code>PortalPageHeader</code>, <code>PortalEmptyState</code>, <code>IconWell</code>, <code>PortalProgress</code>, <code>PortalMetric</code>). Student pages keep <code>Student*</code> re-exports. Teacher and later portals import portal helpers — do not import student feature files. Do not invent a second visual system.</p>
       <p>System admin (<code>apps/system-admin</code>) uses the same HeroUI + Nabta tokens — apply the same shells there.</p>
 
-      <h2>Student file map</h2>
+      <h2>File map</h2>
       <ul>
-        <li><code>apps/web/src/features/student/StudentChrome.tsx</code> — panel, list, header, empty, progress, icon well</li>
+        <li><code>apps/web/src/components/portal/PortalChrome.tsx</code> — shared panel, list, header, empty, progress, metric, icon well</li>
+        <li><code>apps/web/src/features/student/StudentChrome.tsx</code> — <code>Student*</code> re-exports</li>
         <li><code>apps/web/src/layouts/PageTrail.tsx</code> — breadcrumbs</li>
         <li><code>apps/web/src/layouts/StudentLayout.tsx</code> — nav: Home, My Classes, Assignments, Quizzes, Grades</li>
-        <li><code>apps/web/src/features/student/QuizAnswerReview.tsx</code> — quiz Q&amp;A review</li>
+        <li><code>apps/web/src/layouts/TeacherLayout.tsx</code> — nav: Home, Classes, Assignments, Quizzes, Gradebook</li>
+        <li><code>apps/web/src/features/student/QuizAnswerReview.tsx</code> — quiz Q&amp;A review (student)</li>
       </ul>
 
       <div class="related-links">
         <h2>Related</h2>
         <p><strong>Design:</strong> <a href="philosophy.html">Philosophy</a>, <a href="theming.html">Theming</a>, <a href="ux-states.html">UX States</a>, <a href="spacing.html">Spacing</a></p>
-        <p><strong>Phase:</strong> <a href="../roadmap/07-portal-ui/">Phase 7 — Portal UI</a>, <a href="../roadmap/07-portal-ui/plan.html">Student polish plan</a></p>
+        <p><strong>Phase:</strong> <a href="../roadmap/07-portal-ui/">Phase 7 — Portal UI</a>, <a href="../roadmap/07-portal-ui/teacher.html">Teacher polish plan</a>, <a href="../roadmap/07-portal-ui/plan.html">Student polish plan</a></p>
         <p><strong>Code:</strong> <a href="../technical/frontend-architecture.html">Frontend Architecture</a></p>
       </div>
           </main>

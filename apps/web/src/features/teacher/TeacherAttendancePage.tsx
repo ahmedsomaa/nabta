@@ -1,11 +1,14 @@
 import { useMemo, useState } from 'react';
-import { Link, useParams } from 'react-router-dom';
+import { useParams } from 'react-router-dom';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useTranslation } from 'react-i18next';
-import { Button, toast } from '@heroui/react';
+import { Button, Label, Radio, RadioGroup, toast } from '@heroui/react';
+import { Users } from 'lucide-react';
 import type { AttendanceStatus, TeacherAttendance } from '@nabta/types';
 import { apiFetch } from '@/lib/api';
-import { EmptyCard, QueryError, QueryLoading } from './QueryState';
+import { QueryError, QueryLoading } from './QueryState';
+import { PortalEmptyState, PortalPageHeader } from '@/components/portal/PortalChrome';
+import { usePageTrail } from '@/layouts/PageTrail';
 
 const STATUSES: AttendanceStatus[] = ['PRESENT', 'ABSENT', 'LATE', 'EXCUSED'];
 
@@ -29,6 +32,11 @@ export function TeacherAttendancePage() {
     enabled: Boolean(classId && subjectId && date),
   });
   const [draft, setDraft] = useState<Record<string, AttendanceStatus>>({});
+
+  usePageTrail([
+    { label: t('nav.classes'), to: `/teacher/classes/${classId}/${subjectId}` },
+    { label: t('teacher.attendance') },
+  ]);
 
   const records = useMemo(() => {
     const base: Record<string, AttendanceStatus> = {};
@@ -56,61 +64,70 @@ export function TeacherAttendancePage() {
     },
   });
 
-  if (query.isLoading) return <QueryLoading />;
+  if (query.isLoading) return <QueryLoading variant="table" />;
   if (query.isError || !query.data) return <QueryError onRetry={() => void query.refetch()} />;
 
   return (
     <div className="space-y-4">
-      <Link
-        to={`/teacher/classes/${classId}/${subjectId}`}
-        className="text-sm text-muted no-underline hover:text-accent"
-      >
-        {t('teacher.backToClass')}
-      </Link>
-      <h1 className="text-2xl font-semibold tracking-tight">{t('teacher.attendance')}</h1>
-      <label className="grid max-w-xs gap-1 text-sm">
-        <span>{t('teacher.date')}</span>
-        <input
-          type="date"
-          className="rounded-lg border border-border bg-background px-3 py-2"
-          value={date}
-          onChange={(event) => {
-            setDate(event.target.value);
-            setDraft({});
-          }}
-        />
-      </label>
+      <PortalPageHeader
+        title={t('teacher.attendance')}
+        trailing={
+          <label className="grid max-w-xs gap-1 text-sm">
+            <span className="text-muted">{t('teacher.date')}</span>
+            <input
+              type="date"
+              className="rounded-lg border border-border bg-background px-3 py-2"
+              value={date}
+              onChange={(event) => {
+                setDate(event.target.value);
+                setDraft({});
+              }}
+            />
+          </label>
+        }
+      />
       {query.data.records.length === 0 ? (
-        <EmptyCard>{t('teacher.emptyRoster')}</EmptyCard>
+        <PortalEmptyState icon={Users}>{t('teacher.emptyRoster')}</PortalEmptyState>
       ) : (
         <div className="overflow-x-auto rounded-xl border border-border">
-          <table className="w-full min-w-[32rem] text-start text-sm">
+          <table className="w-full min-w-[28rem] text-start text-sm [&_td]:text-start [&_th]:text-start">
             <thead className="bg-surface text-muted">
               <tr>
-                <th className="px-4 py-2 font-medium">{t('teacher.student')}</th>
-                {STATUSES.map((status) => (
-                  <th key={status} className="px-4 py-2 font-medium">
-                    {t(`teacher.mark${status.charAt(0)}${status.slice(1).toLowerCase()}`)}
-                  </th>
-                ))}
+                <th className="px-4 py-2 text-start font-medium">{t('teacher.student')}</th>
+                <th className="px-4 py-2 text-start font-medium">{t('teacher.attendance')}</th>
               </tr>
             </thead>
             <tbody>
               {query.data.records.map((row) => (
                 <tr key={row.studentId} className="border-t border-border">
-                  <td className="px-4 py-3">
+                  <td className="px-4 py-3 [overflow-wrap:anywhere]">
                     {row.givenName} {row.familyName}
                   </td>
-                  {STATUSES.map((status) => (
-                    <td key={status} className="px-4 py-3">
-                      <input
-                        type="radio"
-                        name={`att-${row.studentId}`}
-                        checked={records[row.studentId] === status}
-                        onChange={() => setDraft((current) => ({ ...current, [row.studentId]: status }))}
-                      />
-                    </td>
-                  ))}
+                  <td className="px-4 py-3">
+                    <RadioGroup
+                      name={`att-${row.studentId}`}
+                      value={records[row.studentId] ?? 'PRESENT'}
+                      onChange={(value) =>
+                        setDraft((current) => ({
+                          ...current,
+                          [row.studentId]: value as AttendanceStatus,
+                        }))
+                      }
+                      className="flex flex-wrap gap-3"
+                    >
+                      <Label className="sr-only">{t('teacher.attendance')}</Label>
+                      {STATUSES.map((status) => (
+                        <Radio key={status} value={status}>
+                          <Radio.Content>
+                            <Radio.Control>
+                              <Radio.Indicator />
+                            </Radio.Control>
+                            {t(`teacher.mark${status.charAt(0)}${status.slice(1).toLowerCase()}`)}
+                          </Radio.Content>
+                        </Radio>
+                      ))}
+                    </RadioGroup>
+                  </td>
                 </tr>
               ))}
             </tbody>

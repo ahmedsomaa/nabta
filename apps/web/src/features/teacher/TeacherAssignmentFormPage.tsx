@@ -1,5 +1,5 @@
 import { FormEvent, useEffect, useRef, useState } from 'react';
-import { Link, useNavigate, useParams } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useTranslation } from 'react-i18next';
 import { Alert, Button, Input, Label, TextArea, TextField, toast } from '@heroui/react';
@@ -10,6 +10,8 @@ import type {
 } from '@nabta/types';
 import { apiFetch } from '@/lib/api';
 import { QueryError, QueryLoading } from './QueryState';
+import { PortalPageHeader, PortalPanel } from '@/components/portal/PortalChrome';
+import { usePageTrail } from '@/layouts/PageTrail';
 
 function toLocalInput(iso: string) {
   const date = new Date(iso);
@@ -56,6 +58,8 @@ export function TeacherAssignmentFormPage() {
       setPair(`${classes.data[0].classId}:${classes.data[0].subjectId}`);
     }
   }, [isNew, classes.data, pair]);
+
+  usePageTrail([{ label: isNew ? t('teacher.newAssignment') : (existing.data?.title ?? t('nav.assignments')) }]);
 
   const save = useMutation({
     mutationFn: async (publish: boolean) => {
@@ -128,7 +132,7 @@ export function TeacherAssignmentFormPage() {
     },
   });
 
-  if (classes.isLoading || (!isNew && existing.isLoading)) return <QueryLoading />;
+  if (classes.isLoading || (!isNew && existing.isLoading)) return <QueryLoading variant="assignment" />;
   if (classes.isError || !classes.data) return <QueryError onRetry={() => void classes.refetch()} />;
   if (!isNew && (existing.isError || !existing.data)) {
     return <QueryError onRetry={() => void existing.refetch()} />;
@@ -142,12 +146,7 @@ export function TeacherAssignmentFormPage() {
 
   return (
     <form className="space-y-4" onSubmit={(event) => onSubmit(event, false)}>
-      <Link to="/teacher/assignments" className="text-sm text-muted no-underline hover:text-accent">
-        {t('nav.assignments')}
-      </Link>
-      <h1 className="text-2xl font-semibold tracking-tight">
-        {isNew ? t('teacher.newAssignment') : existing.data?.title}
-      </h1>
+      <PortalPageHeader title={isNew ? t('teacher.newAssignment') : (existing.data?.title ?? '')} />
       {error ? (
         <Alert status="danger">
           <Alert.Indicator />
@@ -156,6 +155,7 @@ export function TeacherAssignmentFormPage() {
           </Alert.Content>
         </Alert>
       ) : null}
+      <PortalPanel className="space-y-4">
       <label className="grid gap-1 text-sm">
         <span>{t('teacher.classSubject')}</span>
         <select
@@ -236,6 +236,7 @@ export function TeacherAssignmentFormPage() {
           </Button>
         ) : null}
       </div>
+      </PortalPanel>
     </form>
   );
 }
