@@ -1,11 +1,24 @@
 import { useEffect, useRef, useState } from 'react';
-import { Link, useNavigate, useParams } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
 import { useMutation, useQuery } from '@tanstack/react-query';
 import { useTranslation } from 'react-i18next';
-import { Alert, Button, Input, Label, TextField } from '@heroui/react';
-import type { StudentAttemptResult, StudentAttemptView } from '@nabta/types';
+import {
+  Alert,
+  Button,
+  Checkbox,
+  CheckboxGroup,
+  Input,
+  Label,
+  Radio,
+  RadioGroup,
+  TextField,
+} from '@heroui/react';
+import type { StudentAssessmentOverview, StudentAttemptResult, StudentAttemptView } from '@nabta/types';
 import { apiFetch } from '@/lib/api';
 import { QueryError, QueryLoading } from './QueryState';
+import { StudentPageHeader, StudentProgress } from './StudentChrome';
+import { cn } from '@/lib/cn';
+import { usePageTrail } from '@/layouts/PageTrail';
 
 function formatRemaining(expiresAt: string | null) {
   if (!expiresAt) return null;
@@ -14,6 +27,11 @@ function formatRemaining(expiresAt: string | null) {
   const minutes = Math.floor(ms / 60_000);
   const seconds = Math.floor((ms % 60_000) / 1000);
   return `${minutes}:${String(seconds).padStart(2, '0')}`;
+}
+
+function remainingMs(expiresAt: string | null) {
+  if (!expiresAt) return null;
+  return new Date(expiresAt).getTime() - Date.now();
 }
 
 type Draft = { optionIds: string[]; textAnswer: string };
@@ -33,6 +51,20 @@ export function StudentAttemptPage() {
     enabled: Boolean(attemptId),
     refetchInterval: 15_000,
   });
+  const overview = useQuery({
+    queryKey: ['student-assessment', id],
+    queryFn: () => apiFetch<StudentAssessmentOverview>(`/me/assessments/${id}`),
+    enabled: Boolean(id),
+  });
+  usePageTrail(
+    overview.data
+      ? [
+          { label: t('nav.quizzes'), to: '/student/quizzes' },
+          { label: overview.data.title, to: `/student/assessments/${id}` },
+          { label: t('assessment.statusInProgress') },
+        ]
+      : [],
+  );
 
   useEffect(() => {
     if (!query.data || seeded.current) return;
@@ -83,16 +115,50 @@ export function StudentAttemptPage() {
   if (query.isError || !query.data) return <QueryError onRetry={() => void query.refetch()} />;
 
   const attempt = query.data;
+  const total = attempt.questions.length;
+  const answered = attempt.questions.filter((question) => {
+    const draft = drafts[question.id] ?? {
+      optionIds: question.selectedOptionIds,
+      textAnswer: question.textAnswer ?? '',
+    };
+    return draft.optionIds.length > 0 || draft.textAnswer.trim().length > 0;
+  }).length;
+  const msLeft = remainingMs(attempt.expiresAt);
+  const timerLow = msLeft != null && msLeft > 0 && msLeft <= 2 * 60 * 1000;
+
+  const persistOptions = (questionId: string, optionIds: string[]) => {
+    setDrafts((current) => ({
+      ...current,
+      [questionId]: { optionIds, textAnswer: '' },
+    }));
+    save.mutate({ questionId, optionIds, textAnswer: null });
+  };
 
   return (
     <div className="space-y-6">
-      <Link
-        to={`/student/assessments/${id}`}
-        className="text-sm text-muted no-underline hover:text-accent"
-      >
-        {t('assessment.overview')}
-      </Link>
-      {clock ? <p className="text-sm font-medium">{t('assessment.timeLeft', { time: clock })}</p> : null}
+      <StudentPageHeader title={overview.data?.title ?? t('assessment.overview')} />
+
+      <div className="sticky top-0 z-10 -mx-4 space-y-2 border-b border-border bg-background/95 px-4 py-3 backdrop-blur md:-mx-6 md:px-6">
+        <div className="flex flex-wrap items-center justify-between gap-2">
+          {clock ? (
+            <p className={cn('text-sm font-medium', timerLow && 'text-warning')}>
+              {t('assessment.timeLeft', { time: clock })}
+            </p>
+          ) : (
+            <span />
+          )}
+          <p className="text-sm text-muted">
+            {t('student.answeredOf', { answered, total })}
+          </p>
+        </div>
+        {total > 0 ? (
+          <StudentProgress
+            value={Math.round((answered / total) * 100)}
+            label={t('student.answeredOf', { answered, total })}
+          />
+        ) : null}
+      </div>
+
       {submit.isError ? (
         <Alert status="danger">
           <Alert.Indicator />
@@ -108,10 +174,11 @@ export function StudentAttemptPage() {
             textAnswer: question.textAnswer ?? '',
           };
           return (
-            <div key={question.id} className="space-y-2 rounded-xl border border-border bg-surface p-4">
-              <p className="font-medium">
-                {index + 1}. {question.prompt}
+            <div key={question.id} className="space-y-3 rounded-xl border border-border bg-surface p-4">
+              <p className="text-xs font-medium text-muted">
+                {t('student.questionOf', { current: index + 1, total })}
               </p>
+              <p className="font-medium">{question.prompt}</p>
               {question.type === 'SHORT_ANSWER' ? (
                 <TextField
                   name={`q-${question.id}`}
@@ -130,37 +197,42 @@ export function StudentAttemptPage() {
                   <Label>{t('assessment.yourAnswer')}</Label>
                   <Input />
                 </TextField>
+              ) : question.type === 'MULTIPLE_ANSWER' ? (
+                <CheckboxGroup
+                  name={`q-${question.id}`}
+                  value={draft.optionIds}
+                  onChange={(value) => persistOptions(question.id, value)}
+                >
+                  <Label className="sr-only">{question.prompt}</Label>
+                  {question.options.map((option) => (
+                    <Checkbox key={option.id} value={option.id}>
+                      <Checkbox.Content>
+                        <Checkbox.Control>
+                          <Checkbox.Indicator />
+                        </Checkbox.Control>
+                        {option.text}
+                      </Checkbox.Content>
+                    </Checkbox>
+                  ))}
+                </CheckboxGroup>
               ) : (
-                <ul className="space-y-2">
-                  {question.options.map((option) => {
-                    const checked = draft.optionIds.includes(option.id);
-                    const multi = question.type === 'MULTIPLE_ANSWER';
-                    return (
-                      <li key={option.id}>
-                        <label className="flex items-center gap-2 text-sm">
-                          <input
-                            type={multi ? 'checkbox' : 'radio'}
-                            name={`q-${question.id}`}
-                            checked={checked}
-                            onChange={() => {
-                              const next = multi
-                                ? checked
-                                  ? draft.optionIds.filter((item) => item !== option.id)
-                                  : [...draft.optionIds, option.id]
-                                : [option.id];
-                              setDrafts((current) => ({
-                                ...current,
-                                [question.id]: { optionIds: next, textAnswer: '' },
-                              }));
-                              save.mutate({ questionId: question.id, optionIds: next, textAnswer: null });
-                            }}
-                          />
-                          {option.text}
-                        </label>
-                      </li>
-                    );
-                  })}
-                </ul>
+                <RadioGroup
+                  name={`q-${question.id}`}
+                  value={draft.optionIds[0] ?? ''}
+                  onChange={(value) => persistOptions(question.id, value ? [value] : [])}
+                >
+                  <Label className="sr-only">{question.prompt}</Label>
+                  {question.options.map((option) => (
+                    <Radio key={option.id} value={option.id}>
+                      <Radio.Content>
+                        <Radio.Control>
+                          <Radio.Indicator />
+                        </Radio.Control>
+                        {option.text}
+                      </Radio.Content>
+                    </Radio>
+                  ))}
+                </RadioGroup>
               )}
             </div>
           );

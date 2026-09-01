@@ -1,147 +1,311 @@
-import { Link, useNavigate, useParams } from 'react-router-dom';
+import type { ReactNode } from 'react';
+import { Link, useParams } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import { useTranslation } from 'react-i18next';
-import { Button, Card, Chip } from '@heroui/react';
-import { Check } from 'lucide-react';
-import type { StudentAssignmentStatus, StudentSubjectDetail } from '@nabta/types';
+import { Card, Chip } from '@heroui/react';
+import type {
+  StudentAssessmentListItem,
+  StudentSubjectDetail,
+  StudentUnit,
+  TimetableSlotView,
+  UpcomingAssignment,
+} from '@nabta/types';
 import { apiFetch } from '@/lib/api';
 import { EmptyCard, QueryError, QueryLoading } from './QueryState';
-import { QuizStatusChip, StatusChip, formatDue } from './StatusChip';
+import { dueUrgency, formatDue, QuizStatusChip, StatusChip } from './StatusChip';
+import { StudentPageHeader, StudentProgress } from './StudentChrome';
+import { usePageTrail } from '@/layouts/PageTrail';
+import { lessonTypeKey } from './lessonType';
+import { cn } from '@/lib/cn';
+
+function consecutiveDays(days: number[]) {
+  const sorted = [...days].sort((a, b) => a - b);
+  return sorted.every((day, index) => index === 0 || day === sorted[index - 1]! + 1);
+}
+
+function formatDaySpan(days: number[], weekdayLabel: (day: number) => string, everyDay: string) {
+  const unique = [...new Set(days)].sort((a, b) => a - b);
+  if (unique.length === 7) return everyDay;
+  if (unique.length >= 2 && consecutiveDays(unique)) {
+    return `${weekdayLabel(unique[0]!)}–${weekdayLabel(unique[unique.length - 1]!)}`;
+  }
+  return unique.map(weekdayLabel).join(', ');
+}
+
+function scheduleGroups(
+  slots: TimetableSlotView[],
+  weekdayLabel: (day: number) => string,
+  everyDay: string,
+  roomLabel: (room: string) => string,
+) {
+  const groups = new Map<string, { startsAt: string; endsAt: string; room: string | null; days: number[] }>();
+  for (const slot of slots) {
+    const key = `${slot.startsAt}|${slot.endsAt}|${slot.room ?? ''}`;
+    const existing = groups.get(key);
+    if (existing) {
+      existing.days.push(slot.weekday);
+    } else {
+      groups.set(key, {
+        startsAt: slot.startsAt,
+        endsAt: slot.endsAt,
+        room: slot.room,
+        days: [slot.weekday],
+      });
+    }
+  }
+  return [...groups.values()].map((group) => ({
+    days: formatDaySpan(group.days, weekdayLabel, everyDay),
+    time: `${group.startsAt}–${group.endsAt}`,
+    room: group.room ? roomLabel(group.room) : null,
+  }));
+}
+
+function Detail({ label, children }: { label: string; children: React.ReactNode }) {
+  if (!children) return null;
+  return (
+    <div className="min-w-0">
+      <dt className="text-xs font-medium text-muted">{label}</dt>
+      <dd className="mt-0.5 text-sm">{children}</dd>
+    </div>
+  );
+}
+
+function nextIncomplete(units: StudentUnit[]) {
+  for (const unit of units) {
+    const lesson = unit.lessons.find((item) => !item.completed);
+    if (lesson) return { unit, lesson };
+  }
+  return null;
+}
+
+function ListRow({
+  href,
+  title,
+  subtitle,
+  trailing,
+  highlight,
+  danger,
+}: {
+  href: string;
+  title: string;
+  subtitle: string;
+  trailing?: ReactNode;
+  highlight?: boolean;
+  danger?: boolean;
+}) {
+  return (
+    <Link
+      to={href}
+      className={cn(
+        'flex w-full items-start gap-3 px-3 py-2.5 text-start text-inherit no-underline hover:bg-overlay focus-visible:outline-2 focus-visible:outline-offset-[-2px] focus-visible:outline-accent',
+        highlight && 'bg-accent/5',
+      )}
+    >
+      <div className="min-w-0 flex-1">
+        <p className="truncate font-medium">{title}</p>
+        <p className={cn('mt-0.5 truncate text-xs text-muted', danger && 'text-danger')}>{subtitle}</p>
+      </div>
+      {trailing}
+    </Link>
+  );
+}
 
 export function StudentSubjectPage() {
   const { t, i18n } = useTranslation();
-  const navigate = useNavigate();
   const { subjectId = '' } = useParams();
   const query = useQuery({
     queryKey: ['student-subject', subjectId],
     queryFn: () => apiFetch<StudentSubjectDetail>(`/me/subjects/${subjectId}`),
     enabled: Boolean(subjectId),
   });
+  usePageTrail(query.data ? [{ label: query.data.name }] : []);
 
-  if (query.isLoading) return <QueryLoading />;
+  if (query.isLoading) return <QueryLoading variant="subject" />;
   if (query.isError || !query.data) return <QueryError onRetry={() => void query.refetch()} />;
 
   const subject = query.data;
-  const lessonCount = subject.units.reduce((sum, unit) => sum + unit.lessons.length, 0);
+  const lessons = subject.units.flatMap((unit) => unit.lessons);
+  const doneCount = lessons.filter((lesson) => lesson.completed).length;
+  const next = nextIncomplete(subject.units);
+  const currentUnitId = next?.unit.id ?? null;
+  const groups = scheduleGroups(
+    subject.schedule ?? [],
+    (day) => t(`student.weekdayShort.${day}`),
+    t('student.everyDay'),
+    (room) => t('student.room', { room }),
+  );
+
+  const assignmentRows = subject.assignments.map((item: UpcomingAssignment) => ({
+    id: item.id,
+    kind: 'assignment' as const,
+    title: item.title,
+    subtitle: t('student.due', { date: formatDue(item.dueAt, i18n.language) }),
+    status: item.status,
+    href: `/student/assignments/${item.id}`,
+    dueAt: item.dueAt,
+  }));
+  const quizRows = subject.assessments.map((item: StudentAssessmentListItem) => ({
+    id: item.id,
+    kind: 'assessment' as const,
+    title: item.title,
+    subtitle: [
+      t('assessment.attempts', { used: item.attemptsUsed, max: item.maxAttempts }),
+      item.timeLimitMinutes ? t('assessment.timeLimit', { minutes: item.timeLimitMinutes }) : null,
+    ]
+      .filter(Boolean)
+      .join(' · '),
+    status: item.status,
+    href: `/student/assessments/${item.id}`,
+    dueAt: null as string | null,
+  }));
+  const work = [...assignmentRows, ...quizRows].sort((a, b) => {
+    if (a.dueAt && b.dueAt) return a.dueAt.localeCompare(b.dueAt);
+    if (a.dueAt) return -1;
+    if (b.dueAt) return 1;
+    return 0;
+  });
 
   return (
-    <div className="space-y-6">
-      <div>
-        <Link to="/student/classes" className="text-sm text-muted no-underline hover:text-accent">
-          {t('student.backToClasses')}
-        </Link>
-        <h1 className="mt-2 text-2xl font-semibold tracking-tight">{subject.name}</h1>
-        <p className="mt-1 text-sm text-muted">
-          {subject.className}
-          {subject.teacherName ? ` · ${t('student.teacher')}: ${subject.teacherName}` : ''}
-        </p>
-        <p className="mt-2 text-sm">{t('student.progress', { percent: subject.progressPercent })}</p>
-      </div>
+    <div className="space-y-8">
+      <StudentPageHeader title={subject.name} />
 
-      <section className="space-y-3">
-        <h2 className="text-lg font-semibold">{t('student.units')}</h2>
-        {lessonCount === 0 ? (
-          <EmptyCard>{t('student.emptyLessons')}</EmptyCard>
-        ) : (
-          subject.units.map((unit) => (
-            <Card key={unit.id} className="p-4">
-              <Card.Header>
-                <Card.Title>{unit.title}</Card.Title>
-              </Card.Header>
-              <ul className="mt-3 space-y-1">
-                {unit.lessons.map((lesson) => (
-                  <li key={lesson.id}>
-                    <button
-                      type="button"
-                      className="flex w-full items-center justify-between gap-2 rounded-lg px-2 py-2 text-start text-sm hover:bg-overlay"
-                      onClick={() => navigate(`/student/classes/${subject.id}/lessons/${lesson.id}`)}
-                    >
-                      <span>{lesson.title}</span>
-                      {lesson.completed ? (
-                        <Chip size="sm" color="success" variant="soft">
-                          <Check className="size-3" aria-hidden />
-                          {t('student.completed')}
-                        </Chip>
-                      ) : null}
-                    </button>
+      <div className="overflow-hidden rounded-xl border border-border p-5">
+        <dl className="grid grid-cols-2 gap-4">
+          <Detail label={t('student.teacher')}>{subject.teacherName}</Detail>
+          <Detail label={t('student.classLabel')}>{subject.className}</Detail>
+          <Detail label={t('student.subjectCode')}>{subject.code}</Detail>
+          <Detail label={t('student.schedule')}>
+            {groups.length === 0 ? (
+              <span className="text-muted">{t('student.emptyClassSchedule')}</span>
+            ) : (
+              <ul className="space-y-1">
+                {groups.map((group) => (
+                  <li key={`${group.days}-${group.time}`}>
+                    {group.days}
+                    <span aria-hidden> · </span>
+                    <span dir="ltr">{group.time}</span>
+                    {group.room ? (
+                      <>
+                        <span aria-hidden> · </span>
+                        {group.room}
+                      </>
+                    ) : null}
                   </li>
                 ))}
               </ul>
-            </Card>
-          ))
-        )}
-      </section>
-
-      <section className="space-y-3">
-        <h2 className="text-lg font-semibold">{t('student.upcoming')}</h2>
-        {subject.assignments.length === 0 ? (
-          <EmptyCard>{t('student.emptyAssignments')}</EmptyCard>
-        ) : (
-          <div className="grid gap-3">
-            {subject.assignments.map((item) => (
-              <Card key={item.id} className="p-4">
-                <Card.Header>
-                  <div className="flex flex-wrap items-start justify-between gap-2">
-                    <div>
-                      <Card.Title>{item.title}</Card.Title>
-                      <Card.Description>
-                        {t('student.due', { date: formatDue(item.dueAt, i18n.language) })}
-                      </Card.Description>
-                    </div>
-                    <StatusChip status={item.status as StudentAssignmentStatus} />
-                  </div>
-                </Card.Header>
-                <div className="mt-3">
-                  <Button
-                    size="sm"
-                    variant="secondary"
-                    onPress={() => navigate(`/student/assignments/${item.id}`)}
-                  >
-                    {t('student.viewAssignment')}
-                  </Button>
-                </div>
-              </Card>
-            ))}
+            )}
+          </Detail>
+        </dl>
+        {lessons.length > 0 ? (
+          <div className="mt-5 flex items-center gap-3 border-t border-border pt-4">
+            <StudentProgress
+              value={subject.progressPercent}
+              label={t('student.progress', { percent: subject.progressPercent })}
+            />
+            <span
+              className={cn(
+                'shrink-0 text-xs tabular-nums text-muted',
+                subject.progressPercent >= 100 && 'text-accent',
+              )}
+            >
+              {t('student.lessonsComplete', { done: doneCount, total: lessons.length })}
+            </span>
           </div>
-        )}
-      </section>
+        ) : null}
+      </div>
 
-      <section className="space-y-3">
-        <h2 className="text-lg font-semibold">{t('grades.quizzes')}</h2>
-        {subject.assessments.length === 0 ? (
-          <EmptyCard>{t('assessment.empty')}</EmptyCard>
-        ) : (
-          <div className="grid gap-3">
-            {subject.assessments.map((item) => (
-              <Card key={item.id} className="p-4">
-                <Card.Header>
-                  <div className="flex flex-wrap items-start justify-between gap-2">
-                    <div>
-                      <Card.Title>{item.title}</Card.Title>
-                      <Card.Description>
-                        {t('assessment.attempts', { used: item.attemptsUsed, max: item.maxAttempts })}
-                        {item.timeLimitMinutes
-                          ? ` · ${t('assessment.timeLimit', { minutes: item.timeLimitMinutes })}`
-                          : ''}
-                      </Card.Description>
+      {next ? (
+        <Link
+          to={`/student/classes/${subject.id}/lessons/${next.lesson.id}`}
+          className="block rounded-xl text-inherit no-underline"
+        >
+          <Card className="border-accent/20 bg-accent/10 p-5 transition-colors hover:border-accent/40">
+            <p className="text-xs font-medium text-accent">{t('student.continueLearning')}</p>
+            <Card.Title className="mt-0.5">{next.lesson.title}</Card.Title>
+            <Card.Description>{next.unit.title}</Card.Description>
+          </Card>
+        </Link>
+      ) : null}
+
+      <div className="grid gap-8 lg:grid-cols-2">
+        <section className="min-w-0 space-y-3">
+          <h2 className="text-lg font-semibold">{t('student.lessons')}</h2>
+          {lessons.length === 0 ? (
+            <EmptyCard>{t('student.emptyLessons')}</EmptyCard>
+          ) : (
+            <div className="space-y-5">
+              {subject.units.map((unit) => {
+                const unitDone = unit.lessons.filter((lesson) => lesson.completed).length;
+                return (
+                  <div key={unit.id} className="space-y-2">
+                    <div className="flex items-baseline justify-between gap-3">
+                      <h3 className="min-w-0 truncate text-sm font-medium">{unit.title}</h3>
+                      <div className="flex shrink-0 items-center gap-2">
+                        {unit.id === currentUnitId ? (
+                          <Chip size="sm" color="accent" variant="soft">
+                            {t('student.currentUnit')}
+                          </Chip>
+                        ) : null}
+                        <span className="text-xs tabular-nums text-muted">
+                          {unitDone}/{unit.lessons.length}
+                        </span>
+                      </div>
                     </div>
-                    <QuizStatusChip status={item.status} />
+                    <ul className="overflow-hidden rounded-xl border border-border">
+                      {unit.lessons.map((lesson) => (
+                        <li key={lesson.id} className="border-b border-border last:border-b-0">
+                          <ListRow
+                            href={`/student/classes/${subject.id}/lessons/${lesson.id}`}
+                            title={lesson.title}
+                            subtitle={t(lessonTypeKey(lesson.type))}
+                            highlight={next?.lesson.id === lesson.id}
+                            trailing={
+                              lesson.completed ? (
+                                <Chip size="sm" color="success" variant="soft">
+                                  {t('student.completed')}
+                                </Chip>
+                              ) : null
+                            }
+                          />
+                        </li>
+                      ))}
+                    </ul>
                   </div>
-                </Card.Header>
-                <div className="mt-3">
-                  <Button
-                    size="sm"
-                    variant="secondary"
-                    onPress={() => navigate(`/student/assessments/${item.id}`)}
-                  >
-                    {t('assessment.viewQuiz')}
-                  </Button>
-                </div>
-              </Card>
-            ))}
-          </div>
-        )}
-      </section>
+                );
+              })}
+            </div>
+          )}
+        </section>
+
+        <section className="min-w-0 space-y-3">
+          <h2 className="text-lg font-semibold">{t('student.work')}</h2>
+          {work.length === 0 ? (
+            <EmptyCard>{t('student.emptyAssignments')}</EmptyCard>
+          ) : (
+            <ul className="overflow-hidden rounded-xl border border-border">
+              {work.map((item) => (
+                <li key={`${item.kind}-${item.id}`} className="border-b border-border last:border-b-0">
+                  <ListRow
+                    href={item.href}
+                    title={item.title}
+                    subtitle={item.subtitle}
+                    danger={item.kind === 'assignment' && dueUrgency(item.dueAt, item.status) === 'overdue'}
+                    trailing={
+                      item.kind === 'assessment' ? (
+                        <QuizStatusChip
+                          status={item.status as 'NOT_STARTED' | 'IN_PROGRESS' | 'SUBMITTED' | 'EXPIRED'}
+                        />
+                      ) : (
+                        <StatusChip status={item.status} />
+                      )
+                    }
+                  />
+                </li>
+              ))}
+            </ul>
+          )}
+        </section>
+      </div>
     </div>
   );
 }

@@ -15,12 +15,12 @@ export function StatusChip({ status }: { status: StudentAssignmentStatus | strin
   const { t } = useTranslation();
   const typed = status as StudentAssignmentStatus;
   const color =
-    typed === 'SUBMITTED' || typed === 'GRADED' || typed === 'RETURNED'
+    typed === 'SUBMITTED' || typed === 'GRADED'
       ? 'success'
-      : typed === 'LATE'
-        ? 'danger'
-        : typed === 'DRAFT'
-          ? 'warning'
+      : typed === 'RETURNED' || typed === 'DRAFT'
+        ? 'warning'
+        : typed === 'LATE'
+          ? 'danger'
           : 'default';
   return (
     <Chip size="sm" color={color} variant="soft">
@@ -61,4 +61,33 @@ export function formatDue(iso: string | null, locale: string) {
     hour: '2-digit',
     minute: '2-digit',
   }).format(new Date(iso));
+}
+
+const DONE_STATUSES = new Set(['SUBMITTED', 'GRADED', 'EXPIRED']);
+
+export type DueUrgency = 'overdue' | 'soon' | 'none';
+
+export function dueUrgency(dueAt: string | null, status: string): DueUrgency {
+  if (!dueAt || DONE_STATUSES.has(status)) return 'none';
+  const due = new Date(dueAt).getTime();
+  const now = Date.now();
+  if (Number.isNaN(due)) return 'none';
+  if (due < now) return 'overdue';
+  if (due - now <= 48 * 60 * 60 * 1000) return 'soon';
+  return 'none';
+}
+
+export function urgencyClass(urgency: DueUrgency) {
+  if (urgency === 'overdue') return 'border-s-4 border-s-danger';
+  if (urgency === 'soon') return 'border-s-4 border-s-warning';
+  return '';
+}
+
+export function letterChipColor(letter: string | null): 'success' | 'warning' | 'danger' | 'default' {
+  if (!letter) return 'default';
+  const first = letter.trim().charAt(0).toUpperCase();
+  if (first === 'A' || first === 'B') return 'success';
+  if (first === 'C') return 'warning';
+  if (first === 'D' || first === 'F') return 'danger';
+  return 'default';
 }

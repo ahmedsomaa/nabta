@@ -211,6 +211,7 @@ export interface StudentSubjectDetail {
   teacherName: string | null;
   className: string;
   progressPercent: number;
+  schedule: TimetableSlotView[];
   units: StudentUnit[];
   assignments: UpcomingAssignment[];
   assessments: StudentAssessmentListItem[];

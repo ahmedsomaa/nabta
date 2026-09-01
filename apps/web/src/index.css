@@ -27,6 +27,16 @@ html.dark {
   --overlay: oklch(0.32 0.007 286); /* menus / hovers above the stage */
 }
 
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
 html,
 body,
 #root {

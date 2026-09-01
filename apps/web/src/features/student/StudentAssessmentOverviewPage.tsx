@@ -1,10 +1,13 @@
-import { Link, useNavigate, useParams } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
 import { useMutation, useQuery } from '@tanstack/react-query';
 import { useTranslation } from 'react-i18next';
-import { Alert, Button, Card } from '@heroui/react';
+import { Alert, Button, Card, Chip } from '@heroui/react';
+import { Clock, Hash, Target } from 'lucide-react';
 import type { StudentAssessmentOverview, StudentAttemptView } from '@nabta/types';
 import { apiFetch } from '@/lib/api';
 import { QueryError, QueryLoading } from './QueryState';
+import { StudentPageHeader } from './StudentChrome';
+import { usePageTrail } from '@/layouts/PageTrail';
 
 export function StudentAssessmentOverviewPage() {
   const { t } = useTranslation();
@@ -15,6 +18,14 @@ export function StudentAssessmentOverviewPage() {
     queryFn: () => apiFetch<StudentAssessmentOverview>(`/me/assessments/${id}`),
     enabled: Boolean(id),
   });
+  usePageTrail(
+    query.data
+      ? [
+          { label: t('nav.quizzes'), to: '/student/quizzes' },
+          { label: query.data.title },
+        ]
+      : [],
+  );
   const start = useMutation({
     mutationFn: () =>
       apiFetch<StudentAttemptView>(`/me/assessments/${id}/start`, { method: 'POST' }),
@@ -30,36 +41,50 @@ export function StudentAssessmentOverviewPage() {
 
   return (
     <div className="space-y-6">
-      <Link to="/student/classes" className="text-sm text-muted no-underline hover:text-accent">
-        {t('student.backToClasses')}
-      </Link>
-      <h1 className="text-2xl font-semibold tracking-tight">{quiz.title}</h1>
-      <p className="text-sm text-muted">{quiz.subjectName}</p>
-      <Card>
+      <StudentPageHeader title={quiz.title} subtitle={quiz.subjectName} />
+      <Card className="p-5">
         <Card.Header>
-          <Card.Title>{quiz.title}</Card.Title>
+          <Card.Title>{t('assessment.overview')}</Card.Title>
           <Card.Description className="whitespace-pre-wrap">{quiz.instructions}</Card.Description>
         </Card.Header>
-        <ul className="space-y-1 p-4 pt-0 text-sm text-muted">
-          <li>{t('assessment.questions', { count: quiz.questionCount })}</li>
+        <div className="mt-4 flex flex-wrap gap-2">
+          <Chip size="sm" variant="soft">
+            <Hash className="size-3" aria-hidden />
+            {t('assessment.questions', { count: quiz.questionCount })}
+          </Chip>
           {quiz.timeLimitMinutes ? (
-            <li>{t('assessment.timeLimit', { minutes: quiz.timeLimitMinutes })}</li>
+            <Chip size="sm" variant="soft">
+              <Clock className="size-3" aria-hidden />
+              {t('assessment.timeLimit', { minutes: quiz.timeLimitMinutes })}
+            </Chip>
           ) : null}
-          <li>{t('assessment.passing', { score: quiz.passingScore })}</li>
-          <li>{t('assessment.attempts', { used: quiz.attemptsUsed, max: quiz.maxAttempts })}</li>
+          <Chip size="sm" variant="soft">
+            <Target className="size-3" aria-hidden />
+            {t('assessment.passing', { score: quiz.passingScore })}
+          </Chip>
+          <Chip size="sm" variant="soft">
+            {t('assessment.attempts', { used: quiz.attemptsUsed, max: quiz.maxAttempts })}
+          </Chip>
           {quiz.bestScore != null ? (
-            <li>{t('assessment.score', { score: quiz.bestScore, max: quiz.maxScore })}</li>
+            <Chip size="sm" color="accent" variant="soft">
+              {t('assessment.score', { score: quiz.bestScore, max: quiz.maxScore })}
+            </Chip>
           ) : null}
-        </ul>
+          {quiz.passed != null ? (
+            <Chip size="sm" color={quiz.passed ? 'success' : 'danger'} variant="soft">
+              {quiz.passed ? t('assessment.passed') : t('assessment.failed')}
+            </Chip>
+          ) : null}
+        </div>
         {start.isError ? (
-          <Alert status="danger">
+          <Alert className="mt-4" status="danger">
             <Alert.Indicator />
             <Alert.Content>
               <Alert.Title>{(start.error as Error).message}</Alert.Title>
             </Alert.Content>
           </Alert>
         ) : null}
-        <div className="flex flex-wrap gap-2 px-4 pb-4">
+        <div className="mt-4 flex flex-wrap gap-2">
           {quiz.inProgressAttemptId ? (
             <Button
               variant="primary"

@@ -19,6 +19,7 @@ import { StudentSubjectPage } from '@/features/student/StudentSubjectPage';
 import { StudentLessonPage } from '@/features/student/StudentLessonPage';
 import { StudentAssignmentsPage } from '@/features/student/StudentAssignmentsPage';
 import { StudentAssignmentPage } from '@/features/student/StudentAssignmentPage';
+import { StudentQuizzesPage } from '@/features/student/StudentQuizzesPage';
 import { TeacherDashboardPage } from '@/features/teacher/TeacherDashboardPage';
 import { TeacherClassesPage } from '@/features/teacher/TeacherClassesPage';
 import { TeacherClassPage } from '@/features/teacher/TeacherClassPage';
@@ -77,6 +78,7 @@ export function App() {
                   <Route path="classes/:subjectId/lessons/:lessonId" element={<StudentLessonPage />} />
                   <Route path="assignments" element={<StudentAssignmentsPage />} />
                   <Route path="assignments/:id" element={<StudentAssignmentPage />} />
+                  <Route path="quizzes" element={<StudentQuizzesPage />} />
                   <Route path="assessments/:id" element={<StudentAssessmentOverviewPage />} />
                   <Route path="assessments/:id/attempts/:attemptId" element={<StudentAttemptPage />} />
                   <Route

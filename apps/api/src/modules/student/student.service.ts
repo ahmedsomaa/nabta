@@ -87,7 +87,8 @@ export class StudentService {
   ): 'NOT_STARTED' | 'DRAFT' | 'SUBMITTED' | 'LATE' | 'GRADED' | 'RETURNED' {
     if (!submission) return 'NOT_STARTED';
     if (submission.status === 'DRAFT') return 'DRAFT';
-    if (submission.gradesPublishedAt) return 'RETURNED';
+    if (submission.status === 'RETURNED' && !submission.gradesPublishedAt) return 'RETURNED';
+    if (submission.gradesPublishedAt) return 'GRADED';
     if (submission.status === 'LATE') return 'LATE';
     if (submission.status === 'SUBMITTED' || submission.status === 'GRADED' || submission.status === 'RETURNED') {
       if (submission.submittedAt && submission.submittedAt > dueAt) return 'LATE';
@@ -175,14 +176,16 @@ export class StudentService {
         subjectName: slot.subject.name,
       })),
       upcoming: [
-        ...assignments.map((row) => ({
-          id: row.id,
-          kind: 'assignment' as const,
-          title: row.title,
-          dueAt: row.dueAt.toISOString(),
-          subjectName: row.subject.name,
-          status: this.displayStatus(row.dueAt, row.submissions[0] ?? null),
-        })),
+        ...assignments
+          .map((row) => ({
+            id: row.id,
+            kind: 'assignment' as const,
+            title: row.title,
+            dueAt: row.dueAt.toISOString(),
+            subjectName: row.subject.name,
+            status: this.displayStatus(row.dueAt, row.submissions[0] ?? null),
+          }))
+          .filter((item) => ['NOT_STARTED', 'DRAFT', 'LATE', 'RETURNED'].includes(item.status)),
         ...quizzes
           .filter((row) => {
             const finished = row.attempts.filter((attempt) => attempt.status !== 'IN_PROGRESS');
@@ -275,12 +278,23 @@ export class StudentService {
     });
     if (!subject) throw new NotFoundException('Subject not found.');
 
-    const teacher = await this.prisma.teacher.findUnique({ where: { id: teaching.teacherId } });
-    const klass = await this.prisma.schoolClass.findUnique({ where: { id: teaching.classId } });
-    const completed = await this.prisma.lessonProgress.findMany({
-      where: { studentId: student.id, completedAt: { not: null } },
-      select: { lessonId: true },
-    });
+    const [teacher, klass, completed, slots] = await Promise.all([
+      this.prisma.teacher.findUnique({ where: { id: teaching.teacherId } }),
+      this.prisma.schoolClass.findUnique({ where: { id: teaching.classId } }),
+      this.prisma.lessonProgress.findMany({
+        where: { studentId: student.id, completedAt: { not: null } },
+        select: { lessonId: true },
+      }),
+      this.prisma.timetableSlot.findMany({
+        where: {
+          schoolId: student.schoolId,
+          classId: teaching.classId,
+          subjectId,
+        },
+        include: { subject: true },
+        orderBy: [{ weekday: 'asc' }, { startsAt: 'asc' }],
+      }),
+    ]);
     const done = new Set(completed.map((row) => row.lessonId));
     const lessons = subject.units.flatMap((unit) => unit.lessons);
     const percent =
@@ -293,6 +307,15 @@ export class StudentService {
       teacherName: teacher ? teacherName(teacher.givenName, teacher.familyName) : null,
       className: klass?.name ?? '',
       progressPercent: percent,
+      schedule: slots.map((slot) => ({
+        id: slot.id,
+        weekday: slot.weekday,
+        startsAt: slot.startsAt,
+        endsAt: slot.endsAt,
+        room: slot.room,
+        subjectId: slot.subjectId,
+        subjectName: slot.subject.name,
+      })),
       units: subject.units.map((unit) => ({
         id: unit.id,
         title: unit.title,
@@ -473,7 +496,7 @@ export class StudentService {
     }
     const submission = row.submissions[0] ?? null;
     const status = this.displayStatus(row.dueAt, submission);
-    const locked = status === 'SUBMITTED' || status === 'LATE' || status === 'GRADED' || status === 'RETURNED';
+    const locked = status === 'SUBMITTED' || status === 'LATE' || status === 'GRADED';
     const published = Boolean(submission?.gradesPublishedAt);
     return {
       id: row.id,

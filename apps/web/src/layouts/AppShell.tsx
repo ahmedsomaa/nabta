@@ -1,9 +1,10 @@
 import type { ReactNode } from 'react';
 import type { LucideIcon } from 'lucide-react';
-import { NavLink, Outlet, useLocation } from 'react-router-dom';
+import { Link, NavLink, Outlet, useLocation } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { Avatar, Breadcrumbs, Button, Dropdown, Label, Separator } from '@heroui/react';
 import {
+  ChevronRight,
   ChevronsUpDown,
   Languages,
   LogOut,
@@ -15,6 +16,8 @@ import { LocaleThemeControls } from '@/components/shared/LocaleThemeControls';
 import { useAuth } from '@/features/auth/AuthProvider';
 import { useTheme } from '@/features/theme/ThemeProvider';
 import { initialsFromName } from '@/lib/initials';
+import { cn } from '@/lib/cn';
+import { PageTrailProvider, usePageTrailItems, type TrailItem } from './PageTrail';
 
 export interface NavItem {
   to: string;
@@ -70,9 +73,10 @@ export function AppShell({
   const location = useLocation();
   const allItems = [...items, ...moreItems];
   const current =
-    [...allItems].sort((a, b) => b.to.length - a.to.length).find(
-      (item) => location.pathname === item.to || location.pathname.startsWith(`${item.to}/`),
-    ) ?? allItems[0];
+    [...allItems]
+      .sort((a, b) => b.to.length - a.to.length)
+      .find((item) => location.pathname === item.to || location.pathname.startsWith(`${item.to}/`)) ??
+    null;
   const isSystemAdmin = isSystemAdminRole(user?.role);
   const schoolName = user?.schoolName || t('app.name');
   const orgLabel = isSystemAdmin ? t('app.name') : schoolName;
@@ -81,6 +85,7 @@ export function AppShell({
   const schoolLogoUrl = user?.schoolLogoUrl ?? null;
 
   return (
+    <PageTrailProvider>
     <div className="flex min-h-svh bg-surface text-foreground">
       <aside className="sticky top-0 hidden h-svh w-64 shrink-0 flex-col md:flex">
         <div className="flex h-16 items-center px-3">
@@ -120,8 +125,8 @@ export function AppShell({
         </div>
       </aside>
 
-      <div className="flex min-h-svh flex-1 flex-col md:p-1">
-        <div className="flex min-h-svh flex-1 flex-col bg-background md:min-h-0 md:rounded-xl md:border md:border-border md:shadow-sm">
+      <div className="flex min-h-svh min-w-0 flex-1 flex-col md:p-1">
+        <div className="flex min-h-svh min-w-0 flex-1 flex-col bg-background md:min-h-0 md:rounded-xl md:border md:border-border md:shadow-sm">
           <header className="flex h-14 shrink-0 items-center gap-2 px-4 md:h-16 md:px-6">
             <div className="flex min-w-0 flex-1 items-center gap-2">
               <NavLink to={homeTo} className="md:hidden">
@@ -132,12 +137,10 @@ export function AppShell({
                 />
               </NavLink>
               <Separator orientation="vertical" className="hidden h-4 md:block" />
-              {current ? (
-                <Breadcrumbs className="min-w-0">
-                  <Breadcrumbs.Item>{roleLabel}</Breadcrumbs.Item>
-                  <Breadcrumbs.Item>{t(current.labelKey)}</Breadcrumbs.Item>
-                </Breadcrumbs>
-              ) : null}
+              <ShellTrail
+                roleLabel={roleLabel}
+                section={current ? { label: t(current.labelKey), to: current.to } : null}
+              />
             </div>
             <div className="flex items-center gap-2">
               {toolbar}
@@ -147,14 +150,14 @@ export function AppShell({
             </div>
           </header>
 
-          <main className="flex-1 p-4 pb-24 md:p-6 md:pb-6">
+          <main className="min-w-0 flex-1 overflow-x-hidden p-4 pb-24 md:p-6 md:pb-6">
             <Outlet />
           </main>
         </div>
       </div>
 
       <nav className="fixed inset-x-0 bottom-0 z-20 flex border-t border-border bg-background md:hidden">
-        {items.slice(0, 4).map((item) => {
+        {items.map((item) => {
           const Icon = item.icon;
           return (
             <NavLink
@@ -175,6 +178,66 @@ export function AppShell({
         })}
       </nav>
     </div>
+    </PageTrailProvider>
+  );
+}
+
+function ShellTrail({
+  roleLabel,
+  section,
+}: {
+  roleLabel: string;
+  section: { label: string; to: string } | null;
+}) {
+  const trail = usePageTrailItems();
+  const crumbs: TrailItem[] = [
+    { label: roleLabel },
+    ...(section ? [section] : []),
+    ...trail,
+  ];
+  if (crumbs.length === 0) return null;
+  const visibleFrom = Math.max(0, crumbs.length - 2);
+
+  return (
+    <Breadcrumbs className="min-w-0 max-w-full overflow-hidden">
+      {crumbs.map((crumb, index) => {
+        const isLast = index === crumbs.length - 1;
+        const hideOnMobile = index < visibleFrom;
+        const href = isLast ? undefined : crumb.to;
+        return (
+          <Breadcrumbs.Item
+            key={`${crumb.label}-${index}`}
+            className={cn(
+              'min-w-0 items-center',
+              hideOnMobile ? 'hidden md:inline-flex' : 'inline-flex',
+            )}
+          >
+            {() => (
+              <>
+                {href ? (
+                  <Link
+                    to={href}
+                    className="block max-w-24 truncate text-sm text-muted no-underline hover:text-accent sm:max-w-40 md:max-w-56"
+                  >
+                    {crumb.label}
+                  </Link>
+                ) : (
+                  <span className="block max-w-24 truncate text-sm font-medium text-foreground sm:max-w-40 md:max-w-56">
+                    {crumb.label}
+                  </span>
+                )}
+                {!isLast ? (
+                  <ChevronRight
+                    className="mx-1 size-3.5 shrink-0 text-muted rtl:rotate-180"
+                    aria-hidden
+                  />
+                ) : null}
+              </>
+            )}
+          </Breadcrumbs.Item>
+        );
+      })}
+    </Breadcrumbs>
   );
 }
 
