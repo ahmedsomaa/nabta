@@ -20,10 +20,10 @@
           <header id="docs-header" class="docs-page-header"></header>
           <main id="main" class="docs-main">
 <h1>Implementation Phases</h1>
-      <p class="lead">Phase 5 Assessments complete. Implement <strong>Phase 6 — Administration</strong> next — one phase folder at a time.</p>
+      <p class="lead">Phase 6 Administration complete. Implement <strong>Phase 7 — Notifications</strong> next — one phase folder at a time.</p>
 
       <div class="callout callout-warning">
-        <p><strong>Working rule:</strong> Use this as the master specification, then give Cursor focused prompts such as: <em>"Implement Phase 6 only. Do not implement Phase 7+ functionality."</em> Phases 1–5 are complete.</p>
+        <p><strong>Working rule:</strong> Use this as the master specification, then give Cursor focused prompts such as: <em>"Implement Phase 7 only. Do not implement Phase 8+ functionality."</em> Phases 1–6 are complete.</p>
       </div>
 
       <h2>Phase Map</h2>
@@ -37,8 +37,8 @@
         <a href="03-student-experience/index.html" class="card"><h3>Phase 3 — Student Experience <span class="badge badge-complete">Complete</span></h3><p>Dashboard, lessons, assignments, progress</p></a>
         <a href="04-teacher-experience/index.html" class="card"><h3>Phase 4 — Teacher Experience <span class="badge badge-complete">Complete</span></h3><p>Class mgmt, lesson builder, gradebook</p></a>
         <a href="05-assessments/index.html" class="card"><h3>Phase 5 — Assessments <span class="badge badge-complete">Complete</span></h3><p>Quiz builder, attempts, scoring, results</p></a>
-        <a href="06-administration/index.html" class="card"><h3>Phase 6 — Administration <span class="badge badge-current">Current</span></h3><p>Admin dashboard, users, analytics</p></a>
-        <a href="07-notifications/index.html" class="card"><h3>Phase 7 — Notifications</h3><p>Notification center, BullMQ, reminders</p></a>
+        <a href="06-administration/index.html" class="card"><h3>Phase 6 — Administration <span class="badge badge-complete">Complete</span></h3><p>Admin dashboard, users, analytics</p></a>
+        <a href="07-notifications/index.html" class="card"><h3>Phase 7 — Notifications <span class="badge badge-current">Current</span></h3><p>Notification center, BullMQ, reminders</p></a>
         <a href="08-production-hardening/index.html" class="card"><h3>Phase 8 — Production Hardening</h3><p>Audit, security, tests, a11y, polish</p></a>
       </div>
 
@@ -53,7 +53,7 @@
   P2 --> P4["Phase 4 Teacher ✓"]
   P3 --> P5["Phase 5 Assessments ✓"]
   P4 --> P5
-  P2 --> P6[Phase 6 Admin]
+  P2 --> P6["Phase 6 Admin ✓"]
   P3 --> P7[Phase 7 Notifications]
   P4 --> P7
   P5 --> P7

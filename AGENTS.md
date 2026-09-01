@@ -14,15 +14,15 @@ A school platform for Egyptian international schools — Moodle for the Middle E
 1. Read [docs/business/what-is-nabta.html](docs/business/what-is-nabta.html) for positioning
 2. Read [docs/business/glossary.html](docs/business/glossary.html) for domain terms
 3. Read [docs/business/getting-started.html](docs/business/getting-started.html) for the workflow
-4. Implement [docs/roadmap/06-administration/](docs/roadmap/06-administration/index.html) next (Phase 5 Assessments is complete)
+4. Implement [docs/roadmap/07-notifications/](docs/roadmap/07-notifications/index.html) next (Phase 6 Administration is complete)
 
 ## Golden rule
 
-Implement **one phase folder at a time**. Phase 1 (Foundation + 1b–1e bootstrap), Phase 2 (Academic Core), Phase 3 (Student Experience), Phase 4 (Teacher Experience), and Phase 5 (Assessments) are complete. Example prompts:
+Implement **one phase folder at a time**. Phase 1 (Foundation + 1b–1e bootstrap), Phase 2 (Academic Core), Phase 3 (Student Experience), Phase 4 (Teacher Experience), Phase 5 (Assessments), and Phase 6 (Administration) are complete. Example prompts:
 
-> Implement Phase 6 only. Do not implement Phase 7+ functionality.
+> Implement Phase 7 only. Do not implement Phase 8+ functionality.
 
-> Implement Phase 6 admin portal only. Do not implement notifications (Phase 7).
+> Implement Phase 7 notifications only. Do not implement production hardening (Phase 8).
 
 ## Stack summary
 

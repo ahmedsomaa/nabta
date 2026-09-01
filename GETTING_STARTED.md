@@ -4,25 +4,26 @@ How to run the Nabta monorepo locally.
 
 ## Current phase
 
-**Phase 6 — Administration** is the active implementation target. Phase 1 track, Phase 2 Academic Core, Phase 3 Student Experience, Phase 4 Teacher Experience, and Phase 5 Assessments are complete:
+**Phase 7 — Notifications** is the active implementation target. Phase 1 track, Phase 2 Academic Core, Phase 3 Student Experience, Phase 4 Teacher Experience, Phase 5 Assessments, and Phase 6 Administration are complete:
 
 | Phase | Status |
 |-------|--------|
 | Phase 1 — Foundation | Complete |
 | Phase 1b — Marketing | Bootstrap complete (landing polish in Phase 2) |
-| Phase 1c — System Admin | Bootstrap complete |
+| Phase 1c — System Admin | Bootstrap complete (operator console in Phase 6) |
 | Phase 1d — Mobile Student | Bootstrap complete |
 | Phase 1e — Mobile Staff | Bootstrap complete |
 | Phase 2 — Academic Core | Complete |
 | Phase 3 — Student Experience | Complete |
 | Phase 4 — Teacher Experience | Complete |
 | Phase 5 — Assessments | Complete |
+| Phase 6 — Administration | Complete |
 
-Read [`docs/roadmap/06-administration/`](docs/roadmap/06-administration/index.html) before implementing new features.
+Read [`docs/roadmap/07-notifications/`](docs/roadmap/07-notifications/index.html) before implementing new features.
 
 Example Cursor prompt:
 
-> Implement Phase 6 only. Do not implement Phase 7+ functionality.
+> Implement Phase 7 only. Do not implement Phase 8+ functionality.
 
 ## Prerequisites
 
@@ -170,6 +171,6 @@ Dockerfiles live under `nabta-docker/` (`Dockerfile.api`, `Dockerfile.web`, `Doc
 
 ## Docs & agents
 
-- Product / phase spec: [`docs/roadmap/06-administration/`](docs/roadmap/06-administration/) (Phases 1–5 complete)
+- Product / phase spec: [`docs/roadmap/07-notifications/`](docs/roadmap/07-notifications/) (Phases 1–6 complete)
 - Full documentation site: [`docs/`](docs/)
 - AI implementation guide: [`AGENTS.md`](AGENTS.md)
