@@ -31,6 +31,8 @@
       <p>Students, teachers, classes, subjects, active courses, attendance, assignment completion, academic performance.</p>
       <h3>Academic Overview</h3>
       <p>Filterable by: academic year, grade, class, subject, teacher.</p>
+      <h3>Needs attention</h3>
+      <p>Unenrolled students, classes without a teacher, teachers without an assignment.</p>
 
       <h2>Student Management</h2>
       <p>Searchable table: Student, Class, Grade, Attendance, Average, Status.</p>
@@ -45,6 +47,8 @@
       <h3>Academic Years</h3>
       <pre><code>2026/2027
 2027/2028</code></pre>
+      <h3>Terms</h3>
+      <p>Configurable periods on the year (typically 2–4). Classes stay year-long under Grade — do not nest Class under Term.</p>
       <h3>Grades</h3>
       <pre><code>Grade 7, Grade 8, … Grade 12</code></pre>
       <h3>Classes</h3>
@@ -54,10 +58,11 @@
 
       <h2>Additional Admin Capabilities</h2>
       <ul>
+        <li>Global search across students, teachers, classes, subjects, lessons, assignments</li>
+        <li>Reports — same overview metrics with academic filters</li>
+        <li>School settings — name and default locale; slug read-only</li>
         <li>Manage users, courses/content, curriculum structures</li>
-        <li>Manage announcements (school-wide)</li>
         <li>View school analytics</li>
-        <li>Manage system settings and permissions</li>
       </ul>
 
       <h2>Navigation</h2>
@@ -67,8 +72,9 @@
       <ul class="checklist">
         <li>Admin dashboard shows school overview with key metrics</li>
         <li>Admin can CRUD students and teachers</li>
-        <li>Admin can manage academic years, grades, classes, subjects</li>
+        <li>Admin can manage academic years, terms, grades, classes, subjects</li>
         <li>Admin can assign teachers to classes/subjects and students to classes</li>
+        <li>Global search returns results across entities</li>
         <li>All relationships persist to PostgreSQL</li>
         <li>Complete workflow works: login → academic mgmt → assign teacher/students/subjects</li>
       </ul>

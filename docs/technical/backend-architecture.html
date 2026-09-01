@@ -30,26 +30,19 @@
       <pre><code>apps/api/src/
 ├── modules/
 │   ├── auth/
-│   │   ├── auth.controller.ts
-│   │   ├── auth.service.ts
-│   │   ├── auth.module.ts
-│   │   ├── dto/
-│   │   └── strategies/
 │   ├── users/
-│   ├── students/
-│   ├── teachers/
-│   ├── academic/
-│   ├── classes/
-│   ├── subjects/
-│   ├── lessons/
-│   ├── assignments/
+│   ├── academic/         # years, terms, grades, classes, subjects, people, enroll
+│   ├── admin/            # overview, search, school settings
+│   ├── platform/         # SYSTEM_ADMIN overview + schools (no TenantGuard)
+│   ├── teacher/
+│   ├── student/
 │   ├── assessments/
-│   ├── attendance/
-│   ├── grades/
-│   ├── announcements/
-│   ├── notifications/
-│   ├── email/            # ResendEmailService, templates
-│   └── analytics/
+│   ├── announcements/    # Phase 7
+│   ├── notifications/    # Phase 7
+│   └── email/            # ResendEmailService, templates
+├── health.controller.ts
+├── health.service.ts
+├── health.module.ts
 ├── common/
 │   ├── guards/           # JwtAuthGuard, RolesGuard, TenantGuard
 │   ├── decorators/       # @CurrentUser, @Roles, @Permissions
@@ -77,8 +70,8 @@
         <thead><tr><th>Guard/Decorator</th><th>Purpose</th></tr></thead>
         <tbody>
           <tr><td><code>JwtAuthGuard</code></td><td>Validates JWT, attaches user to request</td></tr>
-          <tr><td><code>RolesGuard</code></td><td>Checks user role (STUDENT, TEACHER, ADMIN)</td></tr>
-          <tr><td><code>TenantGuard</code></td><td>Ensures schoolId scoping on queries</td></tr>
+          <tr><td><code>RolesGuard</code></td><td>Checks user role (STUDENT, TEACHER, ADMIN, SYSTEM_ADMIN)</td></tr>
+          <tr><td><code>TenantGuard</code></td><td>Ensures schoolId scoping on school-owned queries; skipped on platform routes</td></tr>
           <tr><td><code>@CurrentUser()</code></td><td>Extracts authenticated user from request</td></tr>
           <tr><td><code>@Roles('TEACHER')</code></td><td>Restricts endpoint to specific roles</td></tr>
         </tbody>
@@ -110,7 +103,7 @@
 
       <div class="related-links">
         <h2>Related</h2>
-        <p><span class="badge badge-phase">Phases</span> <a href="../roadmap/01-foundation/">Phase 1 — Foundation</a></p>
+        <p><span class="badge badge-phase">Phases</span> <a href="../roadmap/01-foundation/">Phase 1 — Foundation</a>, <a href="../roadmap/06-administration/">Phase 6 — Administration</a></p>
         <p><span class="badge badge-arch">Architecture</span> <a href="api-design.html">API Design</a>, <a href="system-design.html">System Design</a>, <a href="email.html">Email (Resend)</a></p>
       </div>
       <p class="source-footnote">Source: requirements.md §7</p>

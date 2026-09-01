@@ -1,10 +1,12 @@
 import { BarChart3, LayoutDashboard, School, Settings, Users } from 'lucide-react';
 import { AppShell } from './AppShell';
+import { AdminSearch } from '@/features/admin/AdminSearch';
 
 export function AdminLayout() {
   return (
     <AppShell
       homeTo="/admin/dashboard"
+      toolbar={<AdminSearch />}
       items={[
         { to: '/admin/dashboard', labelKey: 'nav.overview', icon: LayoutDashboard },
         { to: '/admin/users', labelKey: 'nav.users', icon: Users },

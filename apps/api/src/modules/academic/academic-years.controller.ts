@@ -35,6 +35,22 @@ export class AcademicYearsController {
     return this.academic.createYear(user, body);
   }
 
+  @Get(':id/terms')
+  @Roles('ADMIN', 'TEACHER', 'STUDENT')
+  listTerms(@CurrentUser() user: AuthUser, @Param('id', ParseUUIDPipe) id: string) {
+    return this.academic.listTerms(user, id);
+  }
+
+  @Post(':id/terms')
+  @Roles('ADMIN')
+  createTerm(
+    @CurrentUser() user: AuthUser,
+    @Param('id', ParseUUIDPipe) id: string,
+    @Body() body: unknown,
+  ) {
+    return this.academic.createTerm(user, id, body);
+  }
+
   @Get(':id')
   @Roles('ADMIN', 'TEACHER', 'STUDENT')
   get(@CurrentUser() user: AuthUser, @Param('id', ParseUUIDPipe) id: string) {

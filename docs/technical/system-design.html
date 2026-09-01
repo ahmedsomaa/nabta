@@ -28,11 +28,12 @@
 
       <h2>Domain Modules</h2>
       <pre><code>auth · users · students · teachers · schools
-academic-years · grades · classes · subjects
+academic-years · terms · grades · classes · subjects
 enrollments · lessons · materials
 assignments · submissions · assessments
-attendance · grades · announcements
-notifications · analytics · files</code></pre>
+attendance · grades · admin · search
+platform · health · files
+announcements · notifications · analytics</code></pre>
       <p>Each module owns: Controller, Service, DTOs, Validation, Database access, Domain logic. Avoid unnecessary coupling.</p>
 
       <h2>Multi-Tenancy</h2>
@@ -44,7 +45,7 @@ notifications · analytics · files</code></pre>
       <p>Never trust client-provided <code>schoolId</code>. Derive from authenticated user context.</p>
 
       <h2>RBAC</h2>
-      <p>Centralized authorization with NestJS guards/decorators. Roles: STUDENT, TEACHER, ADMIN. Permissions extensible (e.g. <code>assignments.grade</code>, <code>attendance.write</code>).</p>
+      <p>Centralized authorization with NestJS guards/decorators. Roles: STUDENT, TEACHER, ADMIN, SYSTEM_ADMIN. Platform routes skip <code>TenantGuard</code>. Permissions extensible (e.g. <code>assignments.grade</code>, <code>attendance.write</code>).</p>
       <ul>
         <li>Frontend: controls UI visibility</li>
         <li>Backend: enforces actual authorization</li>
@@ -85,6 +86,7 @@ notifications · analytics · files</code></pre>
 
       <div class="related-links">
         <h2>Related</h2>
+        <p><span class="badge badge-phase">Phases</span> <a href="../roadmap/06-administration/">Phase 6 — Administration</a></p>
         <p><strong>Requirements:</strong> <a href="../requirements/security.html">Security</a>, <a href="../requirements/roles-and-permissions.html">Roles &amp; Permissions</a></p>
         <p><strong>Architecture:</strong> <a href="data-model.html">Data Model</a>, <a href="backend-architecture.html">Backend Architecture</a>, <a href="email.html">Email (Resend)</a></p>
       </div>

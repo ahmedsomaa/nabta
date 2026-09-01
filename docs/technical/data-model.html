@@ -40,6 +40,7 @@
   School ||--o{ User : has
   School ||--o{ Grade : has
   School ||--o{ Subject : has
+  AcademicYear ||--o{ Term : contains
   AcademicYear ||--o{ Grade : contains
   Grade ||--o{ Class : contains
   Class ||--o{ Enrollment : has
@@ -68,8 +69,9 @@
       <table>
         <thead><tr><th>Entity</th><th>Description</th></tr></thead>
         <tbody>
-          <tr><td>School</td><td>Top-level tenant</td></tr>
+          <tr><td>School</td><td>Top-level tenant — unique kebab-case <code>slug</code>, default <code>locale</code></td></tr>
           <tr><td>AcademicYear</td><td>e.g. 2026/2027</td></tr>
+          <tr><td>Term</td><td>Calendar/reporting slice of a year (e.g. Term 1). Classes stay on Grade, not Term</td></tr>
           <tr><td>User</td><td>Auth identity (email, password hash, role)</td></tr>
           <tr><td>Role / Permission</td><td>RBAC definitions</td></tr>
           <tr><td>Student</td><td>Student profile linked to User</td></tr>
@@ -97,7 +99,7 @@
 
       <div class="related-links">
         <h2>Related</h2>
-        <p><span class="badge badge-phase">Phases</span> <a href="../roadmap/02-academic-core/">Phase 2 — Academic Core</a> (complete) · <a href="../roadmap/03-student-experience/">Phase 3 — Student Experience</a> adds Unit, Lesson, Assignment, and progress · <a href="../roadmap/04-teacher-experience/">Phase 4 — Teacher Experience</a> adds lesson publish, assignment grading, and attendance · <a href="../roadmap/05-assessments/">Phase 5 — Assessments</a> <span class="badge badge-complete">Complete</span> adds Assessment, Question, AssessmentAttempt, and GradeRecord</p>
+        <p><span class="badge badge-phase">Phases</span> <a href="../roadmap/02-academic-core/">Phase 2 — Academic Core</a> (complete) · <a href="../roadmap/03-student-experience/">Phase 3 — Student Experience</a> adds Unit, Lesson, Assignment, and progress · <a href="../roadmap/04-teacher-experience/">Phase 4 — Teacher Experience</a> adds lesson publish, assignment grading, and attendance · <a href="../roadmap/05-assessments/">Phase 5 — Assessments</a> (complete) adds Assessment, Question, AssessmentAttempt, and GradeRecord · <a href="../roadmap/06-administration/">Phase 6 — Administration</a> (complete) adds Term and school admin / platform APIs</p>
         <p><strong>Requirements:</strong> <a href="../requirements/academic-structure.html">Academic Structure</a></p>
       </div>
       <p class="source-footnote">Source: requirements.md §8</p>

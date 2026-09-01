@@ -5,7 +5,9 @@ import { AuthProvider } from '@/features/auth/AuthProvider';
 import { PlatformShell } from '@/layouts/PlatformShell';
 import { RequireSystemAdmin } from '@/routes/RequireSystemAdmin';
 import { LoginPage } from '@/pages/LoginPage';
-import { OverviewPage, SchoolsPage, SystemPage } from '@/pages/PlaceholderPages';
+import { OverviewPage } from '@/pages/OverviewPage';
+import { SchoolsPage } from '@/pages/SchoolsPage';
+import { SystemPage } from '@/pages/SystemPage';
 
 const queryClient = new QueryClient();
 

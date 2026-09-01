@@ -52,6 +52,8 @@
   Admin->>API: POST /api/v1/academic-years {name: 2026/2027}
   API->>DB: Create AcademicYear (schoolId from JWT)
   API-->>Admin: {data: academicYear}
+  Admin->>API: POST /api/v1/academic-years/:id/terms {name: Term 1, startsOn, endsOn}
+  API->>DB: Create Term
   Admin->>API: POST /api/v1/grades {name: Grade 10, yearId}
   API->>DB: Create Grade
   Admin->>API: POST /api/v1/classes {name: 10A, gradeId}
@@ -159,10 +161,13 @@
   Note over Resend: Assignment, announcement, grade emails
   Note over DB: Student sees notification on next GET /api/v1/notifications</pre>
 
+      <h2>8. Admin overview, search, and operator console</h2>
+      <p>School ADMIN: <code>GET /api/v1/admin/overview</code> (optional year/grade/class/subject/teacher filters; metrics plus attention lists), <code>GET /api/v1/search?q=</code>, <code>GET/PATCH /api/v1/school</code> (name and locale; slug read-only). SYSTEM_ADMIN (no tenant guard): <code>POST /api/v1/platform/schools</code> creates a tenant (name, unique slug, locale — no ADMIN user provisioned); <code>GET /api/v1/health</code> reports API + Postgres + Redis without requiring a JWT.</p>
+
       <div class="related-links">
         <h2>Related</h2>
         <p><strong>Requirements:</strong> <a href="../requirements/student.html">Student Portal</a>, <a href="../requirements/teacher.html">Teacher Portal</a>, <a href="../requirements/admin.html">Admin Portal</a></p>
-        <p><span class="badge badge-phase">Phases</span> <a href="../roadmap/03-student-experience/">Phase 3</a>, <a href="../roadmap/04-teacher-experience/">Phase 4</a>, <a href="../roadmap/05-assessments/">Phase 5</a>, <a href="../roadmap/07-notifications/">Phase 7</a></p>
+        <p><span class="badge badge-phase">Phases</span> <a href="../roadmap/03-student-experience/">Phase 3</a>, <a href="../roadmap/04-teacher-experience/">Phase 4</a>, <a href="../roadmap/05-assessments/">Phase 5</a>, <a href="../roadmap/06-administration/">Phase 6</a>, <a href="../roadmap/07-notifications/">Phase 7</a></p>
       </div>
       <p class="source-footnote">Source: requirements.md §§46–48, 11–12</p>
           </main>

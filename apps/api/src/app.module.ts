@@ -11,9 +11,9 @@ import { StudentModule } from './modules/student/student.module';
 import { TeacherModule } from './modules/teacher/teacher.module';
 import { AssessmentsModule } from './modules/assessments/assessments.module';
 import { MarketingModule } from './modules/marketing/marketing.module';
-import { HealthController } from './health.controller';
-import { AdminController } from './modules/admin/admin.controller';
-import { PlatformController } from './modules/platform/platform.controller';
+import { AdminModule } from './modules/admin/admin.module';
+import { HealthModule } from './health.module';
+import { PlatformModule } from './modules/platform/platform.module';
 import { PrismaModule } from './prisma/prisma.module';
 
 @Module({
@@ -30,8 +30,10 @@ import { PrismaModule } from './prisma/prisma.module';
     TeacherModule,
     AssessmentsModule,
     MarketingModule,
+    AdminModule,
+    HealthModule,
+    PlatformModule,
   ],
-  controllers: [HealthController, AdminController, PlatformController],
   providers: [{ provide: APP_GUARD, useClass: ThrottlerGuard }],
 })
 export class AppModule {}

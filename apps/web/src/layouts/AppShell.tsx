@@ -57,11 +57,14 @@ export function AppShell({
   items,
   moreItems = [],
   homeTo,
+  toolbar,
 }: {
   items: NavItem[];
   moreItems?: NavItem[];
   homeTo: string;
+  toolbar?: ReactNode;
 }) {
+
   const { t } = useTranslation();
   const { user } = useAuth();
   const location = useLocation();
@@ -136,8 +139,11 @@ export function AppShell({
                 </Breadcrumbs>
               ) : null}
             </div>
-            <div className="md:hidden">
-              <LocaleThemeControls />
+            <div className="flex items-center gap-2">
+              {toolbar}
+              <div className="md:hidden">
+                <LocaleThemeControls />
+              </div>
             </div>
           </header>
 

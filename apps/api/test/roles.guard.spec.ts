@@ -44,4 +44,12 @@ describe('RolesGuard', () => {
     const guard = new RolesGuard(reflector);
     expect(() => guard.canActivate(mockContext(student))).toThrow(ForbiddenException);
   });
+
+  it('rejects a student token from ADMIN overview', () => {
+    const reflector = {
+      getAllAndOverride: jest.fn().mockReturnValue(['ADMIN']),
+    } as unknown as Reflector;
+    const guard = new RolesGuard(reflector);
+    expect(() => guard.canActivate(mockContext(student))).toThrow(ForbiddenException);
+  });
 });

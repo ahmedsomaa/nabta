@@ -13,7 +13,6 @@ import { RequireAuth } from '@/routes/RequireAuth';
 import { StudentLayout } from '@/layouts/StudentLayout';
 import { TeacherLayout } from '@/layouts/TeacherLayout';
 import { AdminLayout } from '@/layouts/AdminLayout';
-import { PlaceholderPage } from '@/components/shared/PlaceholderPage';
 import { StudentDashboardPage } from '@/features/student/StudentDashboardPage';
 import { StudentClassesPage } from '@/features/student/StudentClassesPage';
 import { StudentSubjectPage } from '@/features/student/StudentSubjectPage';
@@ -37,6 +36,14 @@ import { StudentAssessmentOverviewPage } from '@/features/student/StudentAssessm
 import { StudentAttemptPage } from '@/features/student/StudentAttemptPage';
 import { StudentAttemptResultPage } from '@/features/student/StudentAttemptResultPage';
 import { StudentGradesPage } from '@/features/student/StudentGradesPage';
+import { AdminDashboardPage } from '@/features/admin/AdminDashboardPage';
+import { AdminUsersPage } from '@/features/admin/AdminUsersPage';
+import { AdminStudentPage } from '@/features/admin/AdminStudentPage';
+import { AdminTeacherPage } from '@/features/admin/AdminTeacherPage';
+import { AdminAcademicsPage } from '@/features/admin/AdminAcademicsPage';
+import { AdminClassPage } from '@/features/admin/AdminClassPage';
+import { AdminReportsPage } from '@/features/admin/AdminReportsPage';
+import { AdminSettingsPage } from '@/features/admin/AdminSettingsPage';
 
 const queryClient = new QueryClient();
 
@@ -108,11 +115,15 @@ export function App() {
 
               <Route element={<RequireAuth roles={['ADMIN']} />}>
                 <Route path="/admin" element={<AdminLayout />}>
-                  <Route path="dashboard" element={<PlaceholderPage titleKey="dashboard.adminTitle" />} />
-                  <Route path="users" element={<PlaceholderPage titleKey="nav.users" />} />
-                  <Route path="academics" element={<PlaceholderPage titleKey="nav.academics" />} />
-                  <Route path="reports" element={<PlaceholderPage titleKey="nav.reports" />} />
-                  <Route path="settings" element={<PlaceholderPage titleKey="nav.settings" />} />
+                  <Route index element={<Navigate to="dashboard" replace />} />
+                  <Route path="dashboard" element={<AdminDashboardPage />} />
+                  <Route path="users" element={<AdminUsersPage />} />
+                  <Route path="users/students/:id" element={<AdminStudentPage />} />
+                  <Route path="users/teachers/:id" element={<AdminTeacherPage />} />
+                  <Route path="academics" element={<AdminAcademicsPage />} />
+                  <Route path="academics/classes/:id" element={<AdminClassPage />} />
+                  <Route path="reports" element={<AdminReportsPage />} />
+                  <Route path="settings" element={<AdminSettingsPage />} />
                 </Route>
               </Route>
 

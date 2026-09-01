@@ -29,14 +29,14 @@
       <h2>Purpose</h2>
       <p><strong>SYSTEM_ADMIN</strong> users operate the Nabta platform: onboard schools, monitor API health, and run cross-tenant ops. Lives at <code>apps/system-admin</code>. Distinct from school <strong>ADMIN</strong> who manages a single tenant in <code>apps/web</code>.</p>
 
-      <h2>v1 Capabilities (Phase 1c bootstrap)</h2>
+      <h2>v1 Capabilities (Phase 1c bootstrap + Phase 6 operator console)</h2>
       <table>
         <thead><tr><th>Area</th><th>Content</th></tr></thead>
         <tbody>
           <tr><td><strong>Auth</strong></td><td>SYSTEM_ADMIN login; JWT flow shared with API</td></tr>
-          <tr><td><strong>Dashboard</strong></td><td>Platform overview — school count, health status placeholders</td></tr>
-          <tr><td><strong>Schools</strong></td><td>List schools; create/edit tenant records (name, slug, status)</td></tr>
-          <tr><td><strong>Health</strong></td><td>Surface API <code>/api/v1/health</code> status (DB, Redis)</td></tr>
+          <tr><td><strong>Dashboard</strong></td><td><code>GET /api/v1/platform/overview</code> — school / student / teacher / school-admin counts, health snapshot, school preview</td></tr>
+          <tr><td><strong>Schools</strong></td><td>List; create (name, unique kebab-case slug, locale); edit name and locale. Slug is read-only after create. No <code>School.status</code>, no delete</td></tr>
+          <tr><td><strong>Health</strong></td><td>Public <code>GET /api/v1/health</code> — API, Postgres, Redis (<code>ok</code> / <code>down</code>)</td></tr>
           <tr><td><strong>Shell</strong></td><td>App layout, EN/AR, light/dark theme — same design tokens as web</td></tr>
         </tbody>
       </table>
@@ -49,14 +49,13 @@
         <li><code>Dockerfile.system-admin</code> and Docker Compose profile</li>
       </ul>
 
-      <h2>In Scope (Phase 1c)</h2>
+      <h2>In Scope</h2>
       <ul>
-        <li><code>apps/system-admin</code> scaffold with auth shell and operator layout</li>
-        <li>SYSTEM_ADMIN role and API guards</li>
-        <li>School tenant list and basic CRUD</li>
-        <li>Platform health dashboard (read-only)</li>
-        <li>EN/AR with RTL support</li>
-        <li>Light/dark theme toggle</li>
+        <li><code>apps/system-admin</code> with auth shell and operator layout (Phase 1c)</li>
+        <li>SYSTEM_ADMIN role and API guards (Phase 1c)</li>
+        <li>School tenant list/create/edit — name, slug, locale (Phase 6)</li>
+        <li>Platform overview and health dashboard — API, DB, Redis (Phase 6)</li>
+        <li>EN/AR with RTL support; light/dark theme toggle</li>
       </ul>
 
       <h2>Out of Scope</h2>
@@ -79,7 +78,7 @@
 
       <div class="related-links">
         <h2>Related</h2>
-        <p><span class="badge badge-phase">Phases</span> <a href="../roadmap/01c-system-admin/">Phase 1c — System Admin</a></p>
+        <p><span class="badge badge-phase">Phases</span> <a href="../roadmap/01c-system-admin/">Phase 1c — System Admin</a>, <a href="../roadmap/06-administration/">Phase 6 — Administration</a></p>
         <p><span class="badge badge-arch">Architecture</span> <a href="../technical/docker-and-deployment.html">Docker &amp; Deployment</a>, <a href="../technical/frontend-architecture.html">Frontend Architecture</a></p>
         <p>Also see: <a href="roles-and-permissions.html">Roles &amp; Permissions</a>, <a href="internationalization.html">Internationalization</a></p>
       </div>

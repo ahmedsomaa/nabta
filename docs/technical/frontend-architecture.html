@@ -55,16 +55,10 @@
 │   └── shared/           # Reusable composed components
 ├── features/
 │   ├── auth/
-│   ├── dashboard/
-│   ├── students/
-│   ├── teachers/
-│   ├── classes/
-│   ├── subjects/
-│   ├── assignments/
-│   ├── assessments/
-│   ├── grades/
-│   ├── attendance/
-│   └── notifications/
+│   ├── admin/            # dashboard, users, academics, reports, settings, search
+│   ├── student/
+│   ├── teacher/
+│   └── notifications/    # Phase 7
 ├── layouts/              # Role-based layouts
 ├── hooks/                # Custom React hooks
 ├── lib/                  # Utilities, API client
@@ -142,10 +136,19 @@
 /teacher/classes/:classId/attendance
 
 /admin/dashboard
-/admin/students
-/admin/teachers
+/admin/users
+/admin/users/students/:id
+/admin/users/teachers/:id
 /admin/academics
+/admin/academics/classes/:id
+/admin/reports
 /admin/settings</code></pre>
+
+      <h3>System admin — <code>apps/system-admin</code> (port <code>5175</code>)</h3>
+      <pre><code>/
+/schools
+/system
+/login</code></pre>
 
       <h2>Rules</h2>
       <ul>
@@ -159,7 +162,7 @@
 
       <div class="related-links">
         <h2>Related</h2>
-        <p><span class="badge badge-phase">Phases</span> <a href="../roadmap/01-foundation/">Phase 1 — Foundation</a>, <a href="../roadmap/03-student-experience/">Phase 3</a></p>
+        <p><span class="badge badge-phase">Phases</span> <a href="../roadmap/01-foundation/">Phase 1 — Foundation</a>, <a href="../roadmap/03-student-experience/">Phase 3</a>, <a href="../roadmap/06-administration/">Phase 6 — Administration</a></p>
         <p><strong>Requirements:</strong> <a href="../design/philosophy.html">UX &amp; Design</a>, <a href="../requirements/internationalization.html">Internationalization</a></p>
       </div>
       <p class="source-footnote">Source: requirements.md §32, §37</p>

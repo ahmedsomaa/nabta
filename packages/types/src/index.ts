@@ -53,6 +53,18 @@ export interface AcademicYear {
   updatedAt: string;
 }
 
+export interface AcademicTerm {
+  id: string;
+  schoolId: string;
+  academicYearId: string;
+  name: string;
+  startsOn: string | null;
+  endsOn: string | null;
+  sortOrder: number;
+  createdAt: string;
+  updatedAt: string;
+}
+
 export interface Grade {
   id: string;
   schoolId: string;
@@ -68,6 +80,8 @@ export interface SchoolClass {
   schoolId: string;
   gradeId: string;
   name: string;
+  gradeName?: string;
+  academicYearId?: string;
   createdAt: string;
   updatedAt: string;
 }
@@ -599,6 +613,129 @@ export interface StudentGradeListItem {
   className: string;
   percentage: number | null;
   letter: string | null;
+}
+
+export interface AdminOverview {
+  students: number;
+  teachers: number;
+  classes: number;
+  subjects: number;
+  activeCourses: number;
+  attendancePercent: number | null;
+  assignmentCompletionPercent: number | null;
+  performancePercent: number | null;
+  attention: {
+    unenrolledStudents: AdminAttentionGroup;
+    classesWithoutTeacher: AdminAttentionGroup;
+    teachersWithoutAssignment: AdminAttentionGroup;
+  };
+}
+
+export interface AdminAttentionGroup {
+  count: number;
+  items: { id: string; title: string; href: string }[];
+}
+
+export interface SearchHit {
+  type: 'student' | 'teacher' | 'class' | 'subject' | 'lesson' | 'assignment';
+  id: string;
+  title: string;
+  subtitle: string | null;
+  href: string;
+}
+
+export interface SchoolSettings {
+  id: string;
+  name: string;
+  slug: string;
+  locale: Locale;
+}
+
+export type HealthCheckStatus = 'ok' | 'down';
+
+export interface PlatformHealth {
+  status: 'ok' | 'degraded';
+  service: string;
+  database: HealthCheckStatus;
+  redis: HealthCheckStatus;
+}
+
+export interface PlatformSchoolPreview {
+  id: string;
+  name: string;
+  slug: string;
+  locale: Locale;
+}
+
+export interface PlatformOverview {
+  schools: number;
+  students: number;
+  teachers: number;
+  schoolAdmins: number;
+  health: PlatformHealth;
+  schoolsPreview: PlatformSchoolPreview[];
+}
+
+export interface PlatformSchool {
+  id: string;
+  name: string;
+  slug: string;
+  locale: Locale;
+  studentCount: number;
+  teacherCount: number;
+}
+
+export interface AdminStudentListItem {
+  id: string;
+  givenName: string;
+  familyName: string;
+  email: string;
+  status: UserStatus;
+  classId: string | null;
+  className: string | null;
+  gradeId: string | null;
+  gradeName: string | null;
+  attendancePercent: number | null;
+  average: number | null;
+}
+
+export interface AdminStudentDetail extends AdminStudentListItem {
+  userId: string;
+  enrollments: {
+    id: string;
+    classId: string;
+    className: string;
+    gradeId: string;
+    gradeName: string;
+  }[];
+  gradeRecords: {
+    subjectId: string;
+    subjectName: string;
+    classId: string;
+    percentage: number;
+    letter: string;
+  }[];
+}
+
+export interface AdminTeacherListItem {
+  id: string;
+  givenName: string;
+  familyName: string;
+  email: string;
+  status: UserStatus;
+  classes: string[];
+  subjects: string[];
+}
+
+export interface AdminTeacherDetail extends AdminTeacherListItem {
+  userId: string;
+  assignments: {
+    id: string;
+    classId: string;
+    className: string;
+    subjectId: string;
+    subjectName: string;
+  }[];
 }
 
 export interface StudentGradeDetail {

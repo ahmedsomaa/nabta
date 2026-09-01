@@ -30,10 +30,11 @@
       <div class="table-wrap"><table>
         <thead><tr><th>Term</th><th>Definition</th></tr></thead>
         <tbody>
-          <tr><td><strong>School</strong></td><td>A tenant. All data is scoped by <code>schoolId</code>. One Nabta deployment serves many schools.</td></tr>
-          <tr><td><strong>Academic Year</strong></td><td>A school year (e.g. 2025–2026). Contains terms/semesters. Most entities are scoped to an active academic year.</td></tr>
+          <tr><td><strong>School</strong></td><td>A tenant. All data is scoped by <code>schoolId</code>. Unique URL-safe <code>slug</code> and default <code>locale</code>. One Nabta deployment serves many schools.</td></tr>
+          <tr><td><strong>Academic Year</strong></td><td>A school year (e.g. 2026/2027). Contains configurable terms (typically 2–4). Grade levels and classes belong to the year, not to a term.</td></tr>
+          <tr><td><strong>Term</strong></td><td>A calendar/reporting slice of an academic year — e.g. Term 1, Term 2, Term 3. Egyptian international schools usually have three terms; MoE national private schools have two. Classes are <em>not</em> nested under terms. Entity: <code>Term</code>.</td></tr>
           <tr><td><strong>Grade Level</strong></td><td>A year group — e.g. Year 7, Grade 10, KG2. <em>Not</em> a score. Entity: <code>Grade</code> or <code>GradeLevel</code>.</td></tr>
-          <tr><td><strong>Class</strong></td><td>A homeroom or teaching group within a grade level — e.g. "Year 7A". Students belong to classes via enrollments.</td></tr>
+          <tr><td><strong>Class</strong></td><td>A homeroom or teaching group within a grade level for the whole academic year — e.g. "Year 7A". Students belong to classes via enrollments.</td></tr>
           <tr><td><strong>Subject</strong></td><td>An academic discipline — e.g. Mathematics, Physics. Taught to a class or group of students.</td></tr>
           <tr><td><strong>Enrollment</strong></td><td>Links a student to a class (and optionally subjects) for an academic year.</td></tr>
         </tbody>

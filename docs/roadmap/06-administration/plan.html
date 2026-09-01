@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Phase 6 — Detailed implementation plan — Nabta</title>
+  <link rel="stylesheet" href="../../assets/docs.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500&family=Quicksand:wght@400;500;600;700&family=Zain:wght@400;700&display=swap" rel="stylesheet">
+</head>
+<body data-section="roadmap" data-title="Phase 6 — Detailed plan">
+  <a href="#main" class="skip-link">Skip to content</a>
+  <header id="docs-topnav" class="docs-topnav" aria-label="Top navigation"></header>
+  <div class="docs-mobile-bar">
+    <button type="button" id="sidebar-toggle" class="sidebar-toggle" aria-expanded="false" aria-label="Open menu">&#9776;</button>
+    <a href="../../index.html" class="docs-mobile-brand">Nabta</a>
+  </div>
+  <div id="sidebar-overlay" class="sidebar-overlay"></div>
+  <div class="docs-layout">
+    <aside id="docs-sidebar" class="docs-sidebar" aria-label="Sidebar"></aside>
+    <div class="docs-content">
+      <div class="docs-body">
+        <div class="docs-article">
+          <header id="docs-header" class="docs-page-header"></header>
+          <main id="main" class="docs-main">
+      <h1>Phase 6 — Detailed implementation plan</h1>
+      <p class="lead"><span class="badge badge-phase">Phase 6</span> <span class="badge badge-complete">Complete</span> Historical execution plan — school admin portal, overview analytics, global search, school settings, academic terms, and the system-admin operator console.</p>
+
+      <div class="callout">
+        <p><strong>Companion to</strong> <a href="index.html">Phase 6 — Administration</a> (scope guards and acceptance criteria). This page is the execution plan: API gaps, admin-only endpoints, <code>apps/web</code> screens, and <code>apps/system-admin</code> (Slices 8–9). Slice 1 is the API prerequisite; later slices map to the phase index.</p>
+      </div>
+
+      <div class="callout">
+        <p><strong>School admin plus operator console.</strong> Notifications and announcements are <a href="../07-notifications/">Phase 7</a>. No GPA, grading-scheme admin, audit UI, school logo, billing, impersonation, or <code>School.status</code>. Do not add <code>/api/v1/grades</code> for marks — academic <code>GET /grades</code> is the year-level resource. SYSTEM_ADMIN does not manage school academics.</p>
+      </div>
+
+      <h2>Slice order</h2>
+      <p>Slice 1 first (APIs). Then dashboard → people → academics → assign/enroll → search/reports/settings. Sequential; each slice is independently verifiable. Slice 7 completes the school dashboard. Slices 8–9 finish the Phase 1c operator console. Slice 10 adds configurable academic terms.</p>
+
+      <pre class="mermaid">flowchart TB
+  subgraph apis [APIs]
+    S0[This plan]
+    S1[Overview search school plus academic gaps]
+    S0 --> S1
+  end
+  subgraph ui [apps/web admin]
+    S2[Dashboard]
+    S3[People]
+    S4[Academics]
+    S5[Assign enroll]
+    S6[Search reports settings]
+    S7[Dashboard complete]
+    S2 --> S3 --> S4 --> S5 --> S6 --> S7
+  end
+  subgraph platform [apps/system-admin]
+    S8[Platform APIs]
+    S9[Operator UI]
+    S8 --> S9
+  end
+  subgraph terms [academic terms]
+    S10[Academic terms]
+  end
+  S1 --> S2
+  S7 --> S8
+  S9 --> S10</pre>
+
+      <h2>Shipped (Phase 6 complete)</h2>
+      <ul>
+        <li>Demo admin: <code>admin@nabta.local</code> / <code>Password123!</code> (Egyptian International School). Nadia Hassan teaches 10A Mathematics; Omar Farouk is enrolled.</li>
+        <li>School admin portal: dashboard, people, academics (years, terms, grades, classes, subjects), assign/enroll, search, reports, settings.</li>
+        <li>APIs: <code>GET /admin/overview</code>, <code>GET /search</code>, <code>GET/PATCH /school</code>, term CRUD under <code>/academic-years/:id/terms</code>.</li>
+        <li>EIS 2026/2027 seeded with Term 1–3. Classes stay year-long under Grade.</li>
+        <li>System-admin console: Overview, Schools, System — platform APIs plus API/DB/Redis health. Slug is unique and read-only after create.</li>
+      </ul>
+
+      <h2>Original agent prompt</h2>
+      <p>Historical — this phase is complete. Current work is Phase 7.</p>
+      <pre><code>Implement Phase 7 only per docs/roadmap/07-notifications/index.html.
+Do not implement Phase 8+ functionality.</code></pre>
+
+      <h2>In scope</h2>
+      <ul>
+        <li>Admin dashboard: school overview, academic overview with filters, operational attention lists</li>
+        <li>People: searchable student and teacher tables; view/edit/create/deactivate</li>
+        <li>Academic structure UI: years, terms, grades, classes, subjects (2–4 configurable terms per year; classes stay year-long)</li>
+        <li>Enroll students in classes; assign teachers to class + subject; remove both</li>
+        <li>Basic analytics on Reports (same metrics, filterable)</li>
+        <li>School settings: name and default locale; slug read-only</li>
+        <li>Global search across students, teachers, classes, subjects, lessons, assignments</li>
+        <li>EN/AR + RTL; loading / empty / error / success per <a href="../../design/ux-states.html">UX States</a></li>
+        <li>System-admin console: platform overview, school tenant list/create/edit (name, slug, locale), System health (API, DB, Redis)</li>
+      </ul>
+
+      <h2>Out of scope</h2>
+      <ul>
+        <li>Notifications, BullMQ, announcements</li>
+        <li>Audit log UI / pipeline</li>
+        <li>Billing, impersonation, <code>School.status</code>, deleting schools</li>
+        <li>GPA, grading schemes, course CMS, permissions matrix, school logo</li>
+        <li>Per-term enrollment, report cards, nesting classes under terms, holiday calendar</li>
+        <li>Per-subject student enrollment; teacher “department”</li>
+        <li>Student-facing attendance view</li>
+        <li><code>apps/mobile-staff</code>, Elasticsearch</li>
+      </ul>
+
+      <h2>Locked API shape</h2>
+      <p>Reuse Phase 2 domain routes for CRUD. Do not duplicate <code>/admin/students</code> CRUD. New admin-only resources: overview, search, school settings.</p>
+      <ul>
+        <li>Extend: <code>GET /students</code>, <code>GET /teachers</code> with <code>q</code>, <code>status</code>, class filters and richer payloads; <code>PATCH</code> status; <code>DELETE</code> enrollments and teaching assignments</li>
+        <li>Admin: <code>GET /api/v1/admin/overview</code> (optional year/grade/class/subject/teacher filters; includes <code>activeCourses</code> and attention lists)</li>
+        <li>Search: <code>GET /api/v1/search?q=</code></li>
+        <li>School: <code>GET/PATCH /api/v1/school</code> — name and locale; slug read-only</li>
+        <li>Platform (SYSTEM_ADMIN, no tenant guard): <code>GET /api/v1/platform/overview</code>, <code>GET/POST /api/v1/platform/schools</code>, <code>PATCH /api/v1/platform/schools/:id</code>; public <code>GET /api/v1/health</code> reports API + DB + Redis</li>
+        <li>Terms: <code>GET/POST /api/v1/academic-years/:id/terms</code>, <code>PATCH/DELETE /api/v1/terms/:id</code></li>
+      </ul>
+      <p>Deactivate sets <code>User.status</code> to <code>disabled</code>. Admin cannot deactivate self. Average on the student table is the mean of <code>GradeRecord.percentage</code>, or empty if none.</p>
+
+      <h2>Slice 0 — This plan</h2>
+      <p><strong>Goal:</strong> lock execution. No schema migration required.</p>
+      <p><strong>Verify:</strong> this page is linked from the Phase 6 index.</p>
+
+      <h2>Slice 1 — APIs</h2>
+      <p><strong>Modules:</strong> extend <code>apps/api/src/modules/academic/</code>; expand <code>admin/</code>; add search + school controllers. Isolation tests for tenant scope, role gates, unenroll, and deactivate.</p>
+      <p><strong>Verify:</strong> student token cannot read overview; second-school token cannot see EIS students; unenroll persists.</p>
+
+      <h2>Slice 2 — Dashboard</h2>
+      <p><strong>Route:</strong> <code>/admin/dashboard</code>. School-wide cards: students, teachers, classes, subjects, attendance %, assignment completion %, performance %. Link into Reports.</p>
+      <p><strong>Verify:</strong> <code>admin@nabta.local</code> sees Egyptian International School counts.</p>
+
+      <h2>Slice 3 — People UI</h2>
+      <p><strong>Routes:</strong> <code>/admin/users</code> (Students / Teachers tabs), <code>/admin/users/students/:id</code>, <code>/admin/users/teachers/:id</code>.</p>
+      <p>Searchable tables. Create/edit dialogs. Deactivate with confirm. Student columns: name, class, grade, attendance, average, status. Teacher columns: name, email, classes, subjects, status.</p>
+      <p><strong>Verify:</strong> admin can create, edit, search, and deactivate a student without deleting them.</p>
+
+      <h2>Slice 4 — Academic structure UI</h2>
+      <p><strong>Route:</strong> <code>/admin/academics</code>. CRUD years, terms, grades, classes, subjects (subjects stay configurable). Terms are periods on the year; classes remain year-long.</p>
+      <p><strong>Verify:</strong> admin can add a class or subject without breaking seeded 10A Mathematics.</p>
+
+      <h2>Slice 5 — Assign / enroll</h2>
+      <p>Enroll student ↔ class; teaching assignment teacher ↔ class + subject; remove both. From profile pages and <code>/admin/academics/classes/:id</code>.</p>
+      <p><strong>Verify:</strong> assign a teacher/student and see the row on the class hub.</p>
+
+      <h2>Slice 6 — Search, reports, settings</h2>
+      <p>Command search in the admin shell. Reports = overview metrics with filters. Settings save name and locale. <code>/admin</code> redirects to dashboard.</p>
+      <p><strong>Verify:</strong> login → academics → assign → search finds the person → settings save locale.</p>
+
+      <h2>Slice 7 — Dashboard complete</h2>
+      <p><strong>Route:</strong> <code>/admin/dashboard</code> (not <code>apps/system-admin</code>). School overview (unfiltered eight cards including active courses) plus in-page academic overview with the same year / grade / class / subject / teacher filters as Reports. Attention lists: unenrolled students, classes without a teacher, teachers without an assignment. Shared metric/filter UI with Reports.</p>
+      <p><code>GET /admin/overview</code> also returns <code>activeCourses</code> (teaching-assignment count) and <code>attention</code> item lists (cap 5) with web <code>href</code>s.</p>
+      <p><strong>Verify:</strong> <code>admin@nabta.local</code> on <code>http://localhost:5173/admin/dashboard</code> sees Egyptian International School name, counts, academic filters, and attention lists — never later-phases copy.</p>
+
+      <h2>Slice 8 — Platform APIs</h2>
+      <p><strong>Modules:</strong> expand <code>apps/api/src/modules/platform/</code> into a module + service. <code>JwtAuthGuard</code> + <code>SYSTEM_ADMIN</code> only — no <code>TenantGuard</code>. Keep <code>GET /platform/ping</code>.</p>
+      <ul>
+        <li><code>GET /api/v1/platform/overview</code> — school / student / teacher / school-admin counts, health snapshot, school preview (cap 5)</li>
+        <li><code>GET /api/v1/platform/schools</code> — all tenants with student and teacher counts</li>
+        <li><code>POST /api/v1/platform/schools</code> — name, unique kebab-case slug, locale. Does not provision an ADMIN user</li>
+        <li><code>PATCH /api/v1/platform/schools/:id</code> — name and locale; slug read-only. No delete</li>
+        <li><code>GET /api/v1/health</code> — API + Postgres + Redis (<code>ok</code> / <code>down</code>); HTTP 200 even if degraded</li>
+      </ul>
+      <p><strong>Verify:</strong> school ADMIN token is 403 on platform routes; unique slug persists; health reports mocked DB/Redis.</p>
+
+      <h2>Slice 9 — Operator UI</h2>
+      <p><strong>App:</strong> <code>apps/system-admin</code> on port <code>5175</code>. Replace Overview, Schools, and System placeholders. No later-phases copy. HeroUI v3 cards and modals; local loading/error/empty states.</p>
+      <ul>
+        <li>Overview: metric cards (schools → <code>/schools</code>, health → <code>/system</code>) and school preview</li>
+        <li>Schools: table, create (name, slug, locale), edit name/locale</li>
+        <li>System: API / database / Redis from <code>GET /health</code></li>
+      </ul>
+      <p><strong>Verify:</strong> <code>system@nabta.local</code> on <code>http://localhost:5175</code> sees Egyptian International School, can create/edit a tenant, and sees DB/Redis status — never later-phases copy. School admin on <code>5173</code> is unchanged.</p>
+
+      <h2>Slice 10 — Academic terms</h2>
+      <p>Prisma <code>Term</code> (<code>schoolId</code>, <code>academicYearId</code>, <code>name</code>, <code>startsOn</code>, <code>endsOn</code>, <code>sortOrder</code>). Configurable 2–4 terms per year. Do not nest Class under Term. Do not attach <code>termId</code> to assignments, attendance, or grade records in this slice.</p>
+      <ul>
+        <li><code>GET/POST /api/v1/academic-years/:id/terms</code></li>
+        <li><code>PATCH/DELETE /api/v1/terms/:id</code></li>
+        <li>Academics UI lists terms under the year; seed Term 1–3 on EIS 2026/2027</li>
+      </ul>
+      <p><strong>Verify:</strong> <code>admin@nabta.local</code> sees Term 1–3 under the year and can add/edit dates without moving 10A under a term.</p>
+
+      <h2>Index mapping</h2>
+      <div class="table-wrap"><table>
+        <thead><tr><th>Index slice</th><th>This plan</th></tr></thead>
+        <tbody>
+          <tr><td>1. Admin dashboard</td><td>Slice 7 (Slice 2 was the first metric grid)</td></tr>
+          <tr><td>2. People UI</td><td>Slice 3</td></tr>
+          <tr><td>3. Academic structure UI</td><td>Slice 4 + Slice 10</td></tr>
+          <tr><td>4. Assignments</td><td>Slice 5</td></tr>
+          <tr><td>5. Search + workflow</td><td>Slice 6 + Slice 1 search API</td></tr>
+          <tr><td>6. Operator console</td><td>Slice 8 + Slice 9</td></tr>
+        </tbody>
+      </table></div>
+
+      <h2>Acceptance (phase index)</h2>
+      <ul class="checklist">
+        <li>Admin dashboard shows school overview with key metrics</li>
+        <li>Admin can CRUD students and teachers via UI</li>
+        <li>Admin can manage academic structure via UI (including terms on an academic year)</li>
+        <li>Admin can assign teachers to classes/subjects and students to classes</li>
+        <li>Global search returns results across entities</li>
+        <li>Complete workflow: login → academic mgmt → assign teacher/students/subjects</li>
+        <li>SYSTEM_ADMIN overview shows school counts and health; can create/edit a tenant; System page shows DB/Redis</li>
+      </ul>
+
+      <div class="related-links">
+        <h2>Related</h2>
+        <p><strong>Phase spec:</strong> <a href="index.html">Phase 6 — Administration</a></p>
+        <p><strong>Requirements:</strong> <a href="../../requirements/admin.html">Admin Portal</a>, <a href="../../requirements/academic-structure.html">Academic Structure</a>, <a href="../../requirements/search-and-files.html">Search &amp; Files</a>, <a href="../../requirements/system-admin.html">System Admin</a></p>
+        <p><strong>Architecture:</strong> <a href="../../technical/data-model.html">Data Model</a>, <a href="../../technical/api-design.html">API Design</a>, <a href="../../technical/sequences.html">Sequence Diagrams</a></p>
+        <p><strong>Design:</strong> <a href="../../design/ux-states.html">UX States</a></p>
+        <p><strong>Previous:</strong> <a href="../05-assessments/">Phase 5</a> (complete) · <strong>Next:</strong> <a href="../07-notifications/">Phase 7</a></p>
+      </div>
+      <p class="source-footnote">Source: Phase 6 roadmap; admin portal and academic structure requirements</p>
+          </main>
+          <footer id="docs-pager" class="docs-pager-wrap"></footer>
+        </div>
+        <aside id="docs-toc" class="docs-toc" aria-label="Table of contents"></aside>
+      </div>
+    </div>
+  </div>
+  <script src="../../assets/nav-config.js"></script>
+  <script src="../../assets/layout.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.min.js"></script>
+  <script src="../../assets/docs.js"></script>
+</body>
+</html>

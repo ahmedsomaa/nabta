@@ -85,6 +85,30 @@ async function main() {
     },
   });
 
+  const terms = [
+    { name: 'Term 1', sortOrder: 1, startsOn: new Date('2026-09-01'), endsOn: new Date('2026-12-17') },
+    { name: 'Term 2', sortOrder: 2, startsOn: new Date('2027-01-10'), endsOn: new Date('2027-03-25') },
+    { name: 'Term 3', sortOrder: 3, startsOn: new Date('2027-04-12'), endsOn: new Date('2027-06-30') },
+  ] as const;
+  for (const term of terms) {
+    await prisma.term.upsert({
+      where: { academicYearId_name: { academicYearId: year.id, name: term.name } },
+      update: {
+        startsOn: term.startsOn,
+        endsOn: term.endsOn,
+        sortOrder: term.sortOrder,
+      },
+      create: {
+        schoolId: school.id,
+        academicYearId: year.id,
+        name: term.name,
+        startsOn: term.startsOn,
+        endsOn: term.endsOn,
+        sortOrder: term.sortOrder,
+      },
+    });
+  }
+
   const grades = [];
   for (const level of [7, 8, 9, 10, 11, 12]) {
     const grade = await prisma.grade.upsert({

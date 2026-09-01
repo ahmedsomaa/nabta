@@ -42,6 +42,17 @@ export const updateAcademicYearSchema = createAcademicYearSchema.partial();
 
 export const listAcademicYearsQuerySchema = paginationQuerySchema;
 
+const optionalTermDate = z.union([z.null(), z.coerce.date()]).optional();
+
+export const createTermSchema = z.object({
+  name: z.string().min(1).max(80),
+  startsOn: optionalTermDate,
+  endsOn: optionalTermDate,
+  sortOrder: z.number().int().min(1).max(12).optional(),
+});
+
+export const updateTermSchema = createTermSchema.partial();
+
 export const createGradeSchema = z.object({
   academicYearId: z.string().uuid(),
   name: z.string().min(1).max(80),
@@ -92,9 +103,14 @@ export const createStudentSchema = z.object({
 export const updateStudentSchema = z.object({
   givenName: z.string().min(1).max(80).optional(),
   familyName: z.string().min(1).max(80).optional(),
+  status: z.enum(['active', 'disabled']).optional(),
 });
 
-export const listStudentsQuerySchema = paginationQuerySchema;
+export const listStudentsQuerySchema = paginationQuerySchema.extend({
+  q: z.string().min(1).max(80).optional(),
+  classId: optionalUuid,
+  status: z.enum(['active', 'disabled']).optional(),
+});
 
 export const createTeacherSchema = z.object({
   email: z.string().email(),
@@ -106,9 +122,13 @@ export const createTeacherSchema = z.object({
 export const updateTeacherSchema = z.object({
   givenName: z.string().min(1).max(80).optional(),
   familyName: z.string().min(1).max(80).optional(),
+  status: z.enum(['active', 'disabled']).optional(),
 });
 
-export const listTeachersQuerySchema = paginationQuerySchema;
+export const listTeachersQuerySchema = paginationQuerySchema.extend({
+  q: z.string().min(1).max(80).optional(),
+  status: z.enum(['active', 'disabled']).optional(),
+});
 
 export const createEnrollmentSchema = z.object({
   studentId: z.string().uuid(),
@@ -133,6 +153,8 @@ export type ForgotPasswordInput = z.infer<typeof forgotPasswordSchema>;
 export type ResetPasswordInput = z.infer<typeof resetPasswordSchema>;
 export type CreateAcademicYearInput = z.infer<typeof createAcademicYearSchema>;
 export type UpdateAcademicYearInput = z.infer<typeof updateAcademicYearSchema>;
+export type CreateTermInput = z.infer<typeof createTermSchema>;
+export type UpdateTermInput = z.infer<typeof updateTermSchema>;
 export type CreateGradeInput = z.infer<typeof createGradeSchema>;
 export type UpdateGradeInput = z.infer<typeof updateGradeSchema>;
 export type CreateClassInput = z.infer<typeof createClassSchema>;
@@ -145,6 +167,49 @@ export type CreateTeacherInput = z.infer<typeof createTeacherSchema>;
 export type UpdateTeacherInput = z.infer<typeof updateTeacherSchema>;
 export type CreateEnrollmentInput = z.infer<typeof createEnrollmentSchema>;
 export type CreateTeachingAssignmentInput = z.infer<typeof createTeachingAssignmentSchema>;
+
+export const adminOverviewQuerySchema = z.object({
+  academicYearId: optionalUuid,
+  gradeId: optionalUuid,
+  classId: optionalUuid,
+  subjectId: optionalUuid,
+  teacherId: optionalUuid,
+});
+
+export const searchQuerySchema = z.object({
+  q: z.string().min(2).max(80),
+  types: z.string().max(200).optional(),
+});
+
+export const updateSchoolSchema = z.object({
+  name: z.string().min(2).max(120).optional(),
+  locale: z.enum(['en', 'ar']).optional(),
+});
+
+export const createPlatformSchoolSchema = z.object({
+  name: z.string().min(2).max(120),
+  slug: z
+    .string()
+    .min(2)
+    .max(80)
+    .regex(/^[a-z0-9]+(?:-[a-z0-9]+)*$/, 'Use a kebab-case slug (lowercase letters, numbers, hyphens).'),
+  locale: z.enum(['en', 'ar']),
+});
+
+export const updatePlatformSchoolSchema = z
+  .object({
+    name: z.string().min(2).max(120).optional(),
+    locale: z.enum(['en', 'ar']).optional(),
+  })
+  .refine((value) => value.name !== undefined || value.locale !== undefined, {
+    message: 'Provide a name or locale to update.',
+  });
+
+export type AdminOverviewQuery = z.infer<typeof adminOverviewQuerySchema>;
+export type SearchQuery = z.infer<typeof searchQuerySchema>;
+export type UpdateSchoolInput = z.infer<typeof updateSchoolSchema>;
+export type CreatePlatformSchoolInput = z.infer<typeof createPlatformSchoolSchema>;
+export type UpdatePlatformSchoolInput = z.infer<typeof updatePlatformSchoolSchema>;
 export const lessonProgressSchema = z.object({
   completed: z.boolean().optional(),
 });

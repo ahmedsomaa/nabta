@@ -1,4 +1,4 @@
-import { Body, Controller, Post, UseGuards } from '@nestjs/common';
+import { Body, Controller, Delete, Param, ParseUUIDPipe, Post, UseGuards } from '@nestjs/common';
 import { JwtAuthGuard } from '../../common/guards/jwt-auth.guard';
 import { RolesGuard } from '../../common/guards/roles.guard';
 import { Roles } from '../../common/decorators/roles.decorator';
@@ -16,5 +16,11 @@ export class TeachingAssignmentsController {
   @Roles('ADMIN')
   create(@CurrentUser() user: AuthUser, @Body() body: unknown) {
     return this.academic.createTeachingAssignment(user, body);
+  }
+
+  @Delete(':id')
+  @Roles('ADMIN')
+  remove(@CurrentUser() user: AuthUser, @Param('id', ParseUUIDPipe) id: string) {
+    return this.academic.deleteTeachingAssignment(user, id);
   }
 }

@@ -24,32 +24,34 @@
           <header id="docs-header" class="docs-page-header"></header>
           <main id="main" class="docs-main">
 <h1>Phase 6 — Administration</h1>
-      <p class="lead"><span class="badge badge-phase">Phase 6</span> <span class="badge badge-current">Current</span> Implement this phase only. Do not implement Phase 7+ functionality.</p>
+      <p class="lead"><span class="badge badge-phase">Phase 6</span> <span class="badge badge-complete">Complete</span> Historical specification — do not re-implement unless fixing regressions. School admin portal, operator console, and configurable academic terms.</p>
 
       <div class="callout">
-        <p><strong>Current phase.</strong> Phase 5 Assessments is complete. Start here for the school admin portal: users, academic structure UI, assignments of teachers/students, configuration, and analytics.</p>
+        <p><strong>Status:</strong> Complete — school admin dashboard, people, academics (including terms), assign/enroll, search, reports, settings, and the system-admin operator console (overview, tenants, health). <strong>Next:</strong> <a href="../07-notifications/">Phase 7 — Notifications</a>.</p>
       </div>
 
       <h2>Goal</h2>
-      <p>Build the admin portal: dashboard, user management, academic management UI, teacher/student assignments, school configuration, and analytics.</p>
+      <p>Build the school admin portal: dashboard, user management, academic management UI, teacher/student assignments, school configuration, and analytics. Finish the platform operator console at <code>apps/system-admin</code>: overview, school tenant list/create/edit, and DB/Redis health.</p>
 
       <h2>In Scope</h2>
       <ul>
         <li>Admin dashboard (school overview, academic overview with filters)</li>
         <li>Student management (searchable table, view/edit/assign/deactivate)</li>
         <li>Teacher management (assign subjects/classes, deactivate)</li>
-        <li>Academic structure management UI (years, grades, classes, subjects)</li>
+        <li>Academic structure management UI (years, terms, grades, classes, subjects)</li>
         <li>Teacher/student assignment workflows</li>
         <li>School configuration and settings</li>
         <li>Basic analytics (attendance, assignment completion, performance)</li>
         <li>Global search</li>
+        <li>System-admin console: platform overview, school tenants (name, slug, locale), System health (API, DB, Redis)</li>
       </ul>
 
       <h2>Out of Scope</h2>
       <ul>
         <li>Notifications</li>
         <li>Audit logging UI</li>
-        <li>Multi-school admin</li>
+        <li>Billing, impersonation, school logo, <code>School.status</code>, deleting schools</li>
+        <li>Per-term enrollment, GPA, report cards, nesting classes under terms</li>
       </ul>
 
       <h2>Acceptance Criteria</h2>
@@ -60,6 +62,7 @@
         <li>Admin can assign teachers to classes/subjects and students to classes</li>
         <li>Global search returns results across entities</li>
         <li>Complete workflow: login → academic mgmt → assign teacher/students/subjects</li>
+        <li>SYSTEM_ADMIN overview shows school counts and health; can create/edit a tenant; System page shows DB/Redis</li>
       </ul>
 
 
@@ -68,14 +71,16 @@
       <ol>
         <li><strong>Admin dashboard</strong> — school overview and academic overview with filters. Verify: dashboard shows school overview with key metrics.</li>
         <li><strong>People UI</strong> — searchable student and teacher tables; view/edit/assign/deactivate. Verify: admin can CRUD students and teachers via UI.</li>
-        <li><strong>Academic structure UI</strong> — years, grades, classes, subjects. Verify: admin can manage the hierarchy via UI.</li>
+        <li><strong>Academic structure UI</strong> — years, terms, grades, classes, subjects. Verify: admin can manage the hierarchy via UI; terms do not move 10A under a term.</li>
         <li><strong>Assignments</strong> — teachers to classes/subjects; students to classes. Verify: admin can assign teachers and students.</li>
         <li><strong>Search + workflow</strong> — global search across entities; login → academic mgmt → assign. Verify: search returns results; the complete admin workflow succeeds.</li>
+        <li><strong>Operator console</strong> — platform overview, school tenants, health. Verify: <code>system@nabta.local</code> on port <code>5175</code> sees EIS, can create/edit a school, and sees DB/Redis status.</li>
       </ol>
 
       <div class="related-links">
         <h2>Related</h2>
-        <p><strong>Requirements:</strong> <a href="../../requirements/admin.html">Admin Portal</a>, <a href="../../requirements/academic-structure.html">Academic Structure</a>, <a href="../../requirements/search-and-files.html">Search &amp; Files</a></p>
+        <p><strong>Detailed plan:</strong> <a href="plan.html">Phase 6 implementation plan</a></p>
+        <p><strong>Requirements:</strong> <a href="../../requirements/admin.html">Admin Portal</a>, <a href="../../requirements/academic-structure.html">Academic Structure</a>, <a href="../../requirements/search-and-files.html">Search &amp; Files</a>, <a href="../../requirements/system-admin.html">System Admin</a></p>
         <p><strong>Architecture:</strong> <a href="../../technical/data-model.html">Data Model</a>, <a href="../../technical/sequences.html">Sequence Diagrams</a></p>
         <p><strong>Previous:</strong> <a href="../05-assessments/">Phase 5</a> (complete) · <strong>Next:</strong> <a href="../07-notifications/">Phase 7</a></p>
       </div>

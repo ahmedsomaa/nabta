@@ -31,6 +31,9 @@
 
       <h2>Endpoints</h2>
       <pre><code>/api/v1/auth          # login, register, refresh, logout
+/api/v1/academic-years               # year CRUD
+/api/v1/academic-years/:id/terms     # list/create terms on a year
+/api/v1/terms/:id                    # PATCH/DELETE a term
 /api/v1/students      # student CRUD, enrollments
 /api/v1/teachers      # teacher CRUD, assignments
 /api/v1/classes       # class CRUD, students
@@ -42,9 +45,15 @@
 /api/v1/me/grades            # subject GradeRecord list + drill-down
 /api/v1/grades        # year-level Grade 7–12 (not marks)
 /api/v1/attendance    # attendance records
-/api/v1/announcements # announcements
-/api/v1/notifications # user notifications
-/api/v1/search        # global search</code></pre>
+/api/v1/admin/overview       # school + academic metrics, attention lists
+/api/v1/search               # global search (q=)
+/api/v1/school               # GET/PATCH school name + locale (slug read-only)
+/api/v1/platform/overview    # SYSTEM_ADMIN — tenant counts + health snapshot
+/api/v1/platform/schools     # SYSTEM_ADMIN — list/create; PATCH /:id (no delete)
+/api/v1/health               # public — API + Postgres + Redis (ok/down)
+/api/v1/announcements # announcements (Phase 7)
+/api/v1/notifications # user notifications (Phase 7)</code></pre>
+      <p>School-scoped routes use JWT <code>schoolId</code> and <code>TenantGuard</code>. Platform routes require <code>SYSTEM_ADMIN</code> and skip the tenant guard. <code>GET /health</code> is public and returns HTTP 200 even when a dependency is down.</p>
 
       <h2>Response Format</h2>
       <h3>Success (list)</h3>
@@ -95,7 +104,7 @@
 
       <div class="related-links">
         <h2>Related</h2>
-        <p><span class="badge badge-phase">Phases</span> <a href="../roadmap/01-foundation/">Phase 1 — Foundation</a></p>
+        <p><span class="badge badge-phase">Phases</span> <a href="../roadmap/01-foundation/">Phase 1 — Foundation</a>, <a href="../roadmap/06-administration/">Phase 6 — Administration</a></p>
         <p><span class="badge badge-arch">Architecture</span> <a href="backend-architecture.html">Backend Architecture</a></p>
       </div>
       <p class="source-footnote">Source: requirements.md §31</p>

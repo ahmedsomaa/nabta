@@ -73,6 +73,16 @@ export class ClassesController {
     return this.academic.enrollStudent(user, id, body);
   }
 
+  @Delete(':id/enrollments/:enrollmentId')
+  @Roles('ADMIN')
+  unenroll(
+    @CurrentUser() user: AuthUser,
+    @Param('id', ParseUUIDPipe) id: string,
+    @Param('enrollmentId', ParseUUIDPipe) enrollmentId: string,
+  ) {
+    return this.academic.unenrollStudent(user, id, enrollmentId);
+  }
+
   @Get(':id/teaching-assignments')
   @Roles('ADMIN', 'TEACHER', 'STUDENT')
   listAssignments(@CurrentUser() user: AuthUser, @Param('id', ParseUUIDPipe) id: string) {

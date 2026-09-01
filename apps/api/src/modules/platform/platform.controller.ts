@@ -1,16 +1,39 @@
-import { Controller, Get, UseGuards } from '@nestjs/common';
+import { Body, Controller, Get, Param, ParseUUIDPipe, Patch, Post, UseGuards } from '@nestjs/common';
 import { JwtAuthGuard } from '../../common/guards/jwt-auth.guard';
 import { RolesGuard } from '../../common/guards/roles.guard';
 import { Roles } from '../../common/decorators/roles.decorator';
 import { CurrentUser } from '../../common/decorators/current-user.decorator';
 import type { AuthUser } from '@nabta/types';
+import { PlatformService } from './platform.service';
 
 @Controller('platform')
 @UseGuards(JwtAuthGuard, RolesGuard)
+@Roles('SYSTEM_ADMIN')
 export class PlatformController {
+  constructor(private readonly platform: PlatformService) {}
+
   @Get('ping')
-  @Roles('SYSTEM_ADMIN')
   ping(@CurrentUser() user: AuthUser) {
     return { ok: true, role: user.role, scope: 'platform' };
+  }
+
+  @Get('overview')
+  overview() {
+    return this.platform.overview();
+  }
+
+  @Get('schools')
+  listSchools() {
+    return this.platform.listSchools();
+  }
+
+  @Post('schools')
+  createSchool(@Body() body: unknown) {
+    return this.platform.createSchool(body);
+  }
+
+  @Patch('schools/:id')
+  updateSchool(@Param('id', ParseUUIDPipe) id: string, @Body() body: unknown) {
+    return this.platform.updateSchool(id, body);
   }
 }

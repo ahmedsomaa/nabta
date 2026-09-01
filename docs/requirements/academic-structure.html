@@ -29,15 +29,18 @@
       <h2>Hierarchy</h2>
       <pre><code>School
  └── Academic Year
+      ├── Term (configurable; typically 2–4)
       └── Grade
            └── Class / Section
                 └── Subject
                      └── Teacher
                           └── Students</code></pre>
+      <p>Terms are calendar/reporting periods on the year. Homeroom classes last the whole year — do not nest Class under Term.</p>
 
       <h3>Example</h3>
       <pre><code>School: Cairo International School
 Academic Year: 2026/2027
+Terms: Term 1, Term 2, Term 3
 
 Grade: Grade 10
 Section: 10A
@@ -60,6 +63,7 @@ Subjects:
       <h2>Configurable Elements</h2>
       <ul>
         <li>Academic years (e.g. 2026/2027, 2027/2028)</li>
+        <li>Terms per year (typically 2–4; name and dates — do not hardcode two semesters)</li>
         <li>Grades (e.g. Grade 7–12)</li>
         <li>Classes/sections (e.g. 7A, 7B, 10A)</li>
         <li>Subjects — do not hardcode subject lists</li>
@@ -68,7 +72,7 @@ Subjects:
 
       <h2>In Scope</h2>
       <ul>
-        <li>CRUD for academic years, grades, classes, subjects</li>
+        <li>CRUD for academic years, terms, grades, classes, subjects</li>
         <li>Student enrollments in classes</li>
         <li>Teacher assignments to subjects/classes</li>
         <li>All relationships persist to PostgreSQL</li>
@@ -82,7 +86,7 @@ Subjects:
 
       <h2>Acceptance Criteria</h2>
       <ul class="checklist">
-        <li>Admin can create academic year → grade → class → subject hierarchy</li>
+        <li>Admin can create academic year → terms + grade → class → subject hierarchy</li>
         <li>Students can be assigned to classes</li>
         <li>Teachers can be assigned to subjects/classes</li>
         <li>All entities are scoped by schoolId</li>
