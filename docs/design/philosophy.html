@@ -26,7 +26,8 @@
       <p><strong>Portals</strong> (<code>apps/web</code>, <code>apps/marketing</code>) use React 19 + Tailwind CSS v4 + <a href="https://heroui.com/">HeroUI v3</a> (<code>@heroui/react</code> + <code>@heroui/styles</code>). Consume the library — don't reinvent primitives. Theme with Nabta tokens (<code>--accent</code> = <code>#10B981</code>).</p>
       <p><strong>Docs</strong> (<code>docs/</code>) use this pure HTML/CSS shell with the same emerald brand green — no React UI library, no Tailwind, no build step.</p>
       <h3>Portal components</h3>
-      <p>Prefer HeroUI: Button, Input, Select, Combobox, Modal, Drawer, Dropdown, Tabs, Tooltip, Popover, Calendar, Date picker, Table, Card, Badge, Progress, Toast, Alert, Skeleton, Breadcrumbs, and related compound patterns. See HeroUI MCP / <a href="../technical/heroui-agents.md">heroui-agents.md</a> for the live catalog.</p>
+      <p>Prefer HeroUI for <strong>controls</strong>: Button, Input, Select, Combobox, Modal, Drawer, Dropdown, Tabs, Tooltip, Popover, Calendar, Date picker, Table, Chip, Progress, Toast, Alert, Skeleton, and related compound patterns. See HeroUI MCP / <a href="../technical/heroui-agents.md">heroui-agents.md</a> for the live catalog.</p>
+      <p>Do <strong>not</strong> use HeroUI <code>Card</code> as the default wrapper for queues, detail facts, or tiles. Page chrome is a flat 1px bordered shell — see <a href="portal-patterns.html">Portal Patterns</a>.</p>
 
       <h2>Navigation</h2>
       <p><strong>Desktop:</strong> Persistent sidebar. <strong>Mobile:</strong> Bottom navigation for primary actions + drawer for secondary. Navigation changes by role.</p>

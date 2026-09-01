@@ -75,7 +75,8 @@
       </ul>
 
       <h2>Component Library</h2>
-      <p><a href="https://heroui.com/">HeroUI v3</a> (<code>@heroui/react</code> + <code>@heroui/styles</code>) on React Aria + Tailwind CSS v4. Import Tailwind first, then <code>@heroui/styles</code>. Prefer compound components (e.g. <code>Card.Header</code>); use <code>onPress</code> over <code>onClick</code>; use <code>className</code> (not v2 <code>classNames</code>). No HeroUI Provider required in v3. Theme Nabta via CSS variable overrides — see <a href="../design/theming.html">Theming</a>.</p>
+      <p><a href="https://heroui.com/">HeroUI v3</a> (<code>@heroui/react</code> + <code>@heroui/styles</code>) on React Aria + Tailwind CSS v4. Import Tailwind first, then <code>@heroui/styles</code>. Prefer compound components; use <code>onPress</code> over <code>onClick</code>; use <code>className</code> (not v2 <code>classNames</code>). No HeroUI Provider required in v3. Theme Nabta via CSS variable overrides — see <a href="../design/theming.html">Theming</a>.</p>
+      <p>HeroUI is for <strong>controls</strong>. Lists, detail panels, and tiles use a 1px bordered shell — see <a href="../design/portal-patterns.html">Portal Patterns</a>. Do not wrap queues in HeroUI <code>Card</code>.</p>
 
       <h2>Icons</h2>
       <ul>
@@ -109,14 +110,15 @@
       </ul>
 
       <h2>Role-Based Layouts</h2>
-      <table>
+      <div class="table-wrap"><table>
         <thead><tr><th>Role</th><th>Desktop</th><th>Mobile</th></tr></thead>
         <tbody>
-          <tr><td>Student</td><td>Sidebar: Home, My Classes, Assignments, Grades, More</td><td>Bottom nav + drawer</td></tr>
+          <tr><td>Student</td><td>Sidebar: Home, My Classes, Assignments, Quizzes, Grades</td><td>Same items in bottom nav</td></tr>
           <tr><td>Teacher</td><td>Sidebar: Home, Classes, Assignments, Gradebook, More</td><td>Bottom nav + drawer</td></tr>
           <tr><td>Admin</td><td>Sidebar: Overview, Users, Academics, Reports, Settings</td><td>Bottom nav + drawer</td></tr>
         </tbody>
-      </table>
+      </table></div>
+      <p>Student chrome: <code>StudentPanel</code>, <code>StudentList</code>, <code>StudentPageHeader</code> in <code>apps/web/src/features/student/StudentChrome.tsx</code>; breadcrumbs via <code>PageTrail</code> in <code>apps/web/src/layouts/PageTrail.tsx</code>. Teacher and admin should copy the class recipes, not import student feature files — <a href="../design/portal-patterns.html">Portal Patterns</a>.</p>
 
       <h2>Route Sketch</h2>
       <pre><code>/login
@@ -126,8 +128,13 @@
 /student/classes/:subjectId/lessons/:lessonId
 /student/assignments
 /student/assignments/:id
+/student/quizzes
+/student/assessments/:id
+/student/assessments/:id/attempts/:attemptId
+/student/assessments/:id/attempts/:attemptId/result
 /student/grades
-/student/attendance
+/student/grades/:subjectId
+# later: /student/attendance
 
 /teacher/dashboard
 /teacher/classes/:classId
@@ -162,8 +169,8 @@
 
       <div class="related-links">
         <h2>Related</h2>
-        <p><span class="badge badge-phase">Phases</span> <a href="../roadmap/01-foundation/">Phase 1 — Foundation</a>, <a href="../roadmap/03-student-experience/">Phase 3</a>, <a href="../roadmap/06-administration/">Phase 6 — Administration</a></p>
-        <p><strong>Requirements:</strong> <a href="../design/philosophy.html">UX &amp; Design</a>, <a href="../requirements/internationalization.html">Internationalization</a></p>
+        <p><span class="badge badge-phase">Phases</span> <a href="../roadmap/01-foundation/">Phase 1 — Foundation</a>, <a href="../roadmap/03-student-experience/">Phase 3</a>, <a href="../roadmap/06-administration/">Phase 6 — Administration</a>, <a href="../roadmap/07-portal-ui/">Phase 7 — Portal UI</a></p>
+        <p><strong>Requirements:</strong> <a href="../design/philosophy.html">UX &amp; Design</a>, <a href="../design/portal-patterns.html">Portal Patterns</a>, <a href="../requirements/internationalization.html">Internationalization</a></p>
       </div>
       <p class="source-footnote">Source: requirements.md §32, §37</p>
           </main>

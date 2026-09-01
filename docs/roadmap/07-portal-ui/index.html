@@ -27,11 +27,11 @@
       <p class="lead"><span class="badge badge-phase">Phase 7</span> <span class="badge badge-current">Current</span> Implement this phase only. Do not implement Phase 8+ functionality.</p>
 
       <div class="callout">
-        <p><strong>Current phase.</strong> Phase 6 Administration is complete. Polish the shipped web portals in order — student, teacher, school admin, system admin. Student execution plan: <a href="plan.html">student portal polish plan</a>. Teacher and later portals wait.</p>
+        <p><strong>Student slice shipped.</strong> The student web portal is the reference implementation. Teacher polish is next, then school admin, then system admin. Recipes: <a href="../../design/portal-patterns.html">Portal Patterns</a>. Student execution history: <a href="plan.html">student portal polish plan</a>. Do not implement Phase 8+.</p>
       </div>
 
       <h2>Goal</h2>
-      <p>Raise the visual and interaction quality of existing web portals so they feel consistent, calm, and production-ready — HeroUI v3, <a href="../../design/ux-states.html">UX States</a>, EN/AR and RTL — without adding product features.</p>
+      <p>Raise the visual and interaction quality of existing web portals so they feel consistent, calm, and production-ready — HeroUI v3, <a href="../../design/portal-patterns.html">Portal Patterns</a>, <a href="../../design/ux-states.html">UX States</a>, EN/AR and RTL — without adding product features.</p>
 
       <h2>In Scope</h2>
       <ul>
@@ -54,14 +54,14 @@
         <li>Each portal is polished in order; later portals are not started until the prior plan is done</li>
         <li>Screens keep loading, empty, error, and success states</li>
         <li>EN/AR and RTL remain correct after layout changes</li>
-        <li>No new domain APIs or schema for this phase</li>
+        <li>No new product domains or schema; small payload fields that only serve existing screens are allowed (see the student plan)</li>
       </ul>
 
       <h2>Implementation slices</h2>
-      <p>Complete in order. Each slice is independently verifiable. A detailed execution plan is added per portal when that slice starts — do not invent parallel polish work. Do not implement Phase 8+.</p>
+      <p>Complete in order. Each slice is independently verifiable. Student is done; write a teacher plan before starting teacher polish. Do not implement Phase 8+.</p>
       <ol>
-        <li><strong>Student</strong> — <code>apps/web</code> student routes. Execution: <a href="plan.html">student portal polish plan</a>. Verify: student flows look and behave consistently with the design system.</li>
-        <li><strong>Teacher</strong> — teacher routes. Plan after student ships.</li>
+        <li><strong>Student</strong> <span class="badge badge-complete">Complete</span> — <code>apps/web</code> student routes. Reference: <a href="../../design/portal-patterns.html">Portal Patterns</a>. History: <a href="plan.html">student portal polish plan</a>.</li>
+        <li><strong>Teacher</strong> — teacher routes. Next. Write a teacher plan before starting; copy student recipes, not <code>Student*</code> feature files.</li>
         <li><strong>School admin</strong> — admin routes. Plan after teacher ships.</li>
         <li><strong>System admin</strong> — <code>apps/system-admin</code>. Plan after school admin ships.</li>
       </ol>
@@ -70,7 +70,7 @@
         <h2>Related</h2>
         <p><strong>Detailed plan:</strong> <a href="plan.html">Student portal polish plan</a></p>
         <p><strong>Requirements:</strong> <a href="../../requirements/student.html">Student Portal</a>, <a href="../../requirements/teacher.html">Teacher Portal</a>, <a href="../../requirements/admin.html">Admin Portal</a>, <a href="../../requirements/system-admin.html">System Admin</a></p>
-        <p><strong>Design:</strong> <a href="../../design/philosophy.html">Philosophy</a>, <a href="../../design/theming.html">Theming</a>, <a href="../../design/ux-states.html">UX States</a></p>
+        <p><strong>Design:</strong> <a href="../../design/portal-patterns.html">Portal Patterns</a>, <a href="../../design/philosophy.html">Philosophy</a>, <a href="../../design/theming.html">Theming</a>, <a href="../../design/ux-states.html">UX States</a></p>
         <p><strong>Previous:</strong> <a href="../06-administration/">Phase 6</a> (complete) · <strong>Next:</strong> <a href="../08-notifications/">Phase 8 — Notifications</a></p>
       </div>
       <p class="source-footnote">Source: Phase 7 portal UI insertion after Phase 6</p>

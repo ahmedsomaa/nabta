@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Portal Patterns — Nabta</title>
+  <link rel="stylesheet" href="../assets/docs.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500&family=Quicksand:wght@400;500;600;700&family=Zain:wght@400;700&display=swap" rel="stylesheet">
+</head>
+<body data-section="design" data-title="Portal Patterns">
+  <a href="#main" class="skip-link">Skip to content</a>
+  <header id="docs-topnav" class="docs-topnav" aria-label="Top navigation"></header>
+  <div id="sidebar-overlay" class="sidebar-overlay"></div>
+  <div class="docs-layout">
+    <aside id="docs-sidebar" class="docs-sidebar" aria-label="Sidebar"></aside>
+    <div class="docs-content">
+      <div class="docs-body">
+        <div class="docs-article">
+          <header id="docs-header" class="docs-page-header"></header>
+          <main id="main" class="docs-main">
+<h1>Portal Patterns</h1>
+      <p class="lead">Composition recipes for school portals — flat bordered chrome, HeroUI for controls. Student is the reference; teacher, school admin, and system admin copy these patterns, not a second visual system.</p>
+
+      <div class="callout">
+        <p><strong>Reference:</strong> <code>apps/web</code> student routes. Phase 7 student polish is shipped. Next: teacher, then school admin, then <code>apps/system-admin</code>. Do not invent a parallel card language.</p>
+      </div>
+
+      <h2>Principle</h2>
+      <p>Page chrome is a 1px <code>rounded-xl border border-border</code> shell with <strong>no elevation or shadow</strong>. HeroUI v3 is for <strong>controls</strong> — Button, Chip, Alert, ProgressBar, Radio, Checkbox, Toast, Skeleton, Modal — not as the default wrapper for lists, queues, or tiles.</p>
+      <p>Color stays on tokens: <code>--accent</code> / <code>bg-accent/10</code>, <code>--warning</code>, <code>--danger</code>, <code>--success</code>. No rainbow subject palettes.</p>
+
+      <h2>Panel</h2>
+      <p>Padded facts block. Use for class details, assignment brief, quiz overview, score/feedback.</p>
+      <pre><code>&lt;div class="overflow-hidden rounded-xl border border-border p-5"&gt;
+  &lt;dl class="grid grid-cols-2 gap-4"&gt;
+    &lt;div class="min-w-0"&gt;
+      &lt;dt class="text-xs font-medium text-muted"&gt;Label&lt;/dt&gt;
+      &lt;dd class="mt-0.5 text-sm"&gt;Value&lt;/dd&gt;
+    &lt;/div&gt;
+  &lt;/dl&gt;
+  &lt;!-- optional: border-t border-border pt-4 mt-5 for instructions, files, or a primary action --&gt;
+&lt;/div&gt;</code></pre>
+      <p>Student code: <code>StudentPanel</code> in <code>apps/web/src/features/student/StudentChrome.tsx</code>. Later portals may copy the classes or lift a shared helper — do not wrap this in HeroUI <code>Card</code>.</p>
+
+      <h2>List</h2>
+      <p>Queues and grouped work (assignments, quizzes, to-do, lessons). One bordered <code>ul</code>; rows are links.</p>
+      <pre><code>&lt;ul class="overflow-hidden rounded-xl border border-border"&gt;
+  &lt;li class="border-b border-border last:border-b-0"&gt;
+    &lt;a class="flex w-full items-start gap-3 px-3 py-2.5 text-start text-inherit no-underline hover:bg-overlay …"&gt;
+      &lt;div class="min-w-0 flex-1"&gt;
+        &lt;p class="truncate font-medium"&gt;Title&lt;/p&gt;
+        &lt;p class="mt-0.5 truncate text-xs text-muted"&gt;Meta · due&lt;/p&gt;
+      &lt;/div&gt;
+      &lt;!-- HeroUI Chip: status --&gt;
+    &lt;/a&gt;
+  &lt;/li&gt;
+&lt;/ul&gt;</code></pre>
+      <ul>
+        <li>Overdue: <code>text-danger</code> on the subtitle, not a heavy left border on the whole row</li>
+        <li><code>text-start</code> so RTL stays correct</li>
+        <li>Group with an <code>h2</code> and count, then one list per group</li>
+      </ul>
+      <p>Student code: <code>StudentList</code>. Do not use <code>WorkItemCard</code> or elevated cards for queues.</p>
+
+      <h2>Tile</h2>
+      <p>Keep the content stack (icon hero, title, meta, progress) but the outer shell is the same 1px border. Class cards: accent-tinted hero with a selective lucide-animated icon on hover, then name, code/class/teacher, then <code>ProgressBar</code>.</p>
+      <pre><code>&lt;div class="overflow-hidden rounded-xl border border-border transition-colors hover:border-accent/40"&gt;
+  &lt;div class="flex h-24 items-center justify-center bg-accent/10 text-accent md:h-28"&gt;…icon…&lt;/div&gt;
+  &lt;div class="space-y-2 p-4"&gt;…title, meta, progress…&lt;/div&gt;
+&lt;/div&gt;</code></pre>
+
+      <h2>Page header and trail</h2>
+      <p>In-page header: <code>h1</code> (<code>text-2xl font-semibold</code>), optional <code>text-sm text-muted</code> subtitle, optional trailing Chip. Breadcrumbs live in the app shell: <code>Role › section › page</code>. Parent crumbs are React Router links; the last crumb is inert. Mobile may show the last two crumbs.</p>
+      <p>Student code: <code>StudentPageHeader</code>, <code>usePageTrail</code> in <code>apps/web/src/layouts/PageTrail.tsx</code>.</p>
+
+      <h2>Status</h2>
+      <p>HeroUI <code>Chip</code> <code>size="sm"</code> <code>variant="soft"</code>. Semantic colors: success for submitted/graded/correct, warning for draft/in progress/returned, danger for late/overdue/incorrect, default for not started. Do not invent a second badge system.</p>
+
+      <h2>Exceptions</h2>
+      <ul>
+        <li><strong>Continue learning</strong> — accent-tinted surface (<code>border-accent/20 bg-accent/10</code>), not a generic card</li>
+        <li><strong>File dropzone</strong> — dashed border inside a panel, not a second elevated card</li>
+        <li><strong>Quiz attempt</strong> — sticky timer/progress bar above questions; each question is a bordered panel</li>
+      </ul>
+
+      <h2>Quiz review</h2>
+      <p>Details panel first (subject, counts, time, passing, attempts, score). Then one panel per question: prompt, then divided option rows. Mark state with chips: Correct, Your answer, Incorrect. Student code: <code>QuizAnswerReview.tsx</code>.</p>
+
+      <h2>Empty, loading, error</h2>
+      <p>Follow <a href="ux-states.html">UX States</a>. Empty: bordered surface, short copy, optional lucide-animated icon. Loading: layout-shaped Skeleton. Error: HeroUI Alert plus retry. Success: Toast or navigation.</p>
+
+      <h2>Do / don’t</h2>
+      <div class="table-wrap"><table>
+        <thead><tr><th>Do</th><th>Don’t</th></tr></thead>
+        <tbody>
+          <tr><td>1px bordered shells for lists, panels, tiles</td><td>HeroUI Card as the default page chrome</td></tr>
+          <tr><td>Token colors only</td><td>A unique hue per subject</td></tr>
+          <tr><td>Static Lucide in content; lucide-animated on selected hover/empty CTAs</td><td>Animate every icon</td></tr>
+          <tr><td>Logical CSS (<code>ms-</code>, <code>ps-</code>, <code>text-start</code>)</td><td>Left/right physical properties</td></tr>
+          <tr><td>Check ~375px for overflow</td><td>Assume desktop grids survive on a phone</td></tr>
+        </tbody>
+      </table></div>
+
+      <h2>Reuse in other portals</h2>
+      <p>Copy the class recipes above into teacher, school admin, and system-admin screens. You may keep <code>Student*</code> names in student code; other portals should not import student feature files. Lift a shared helper under <code>apps/web/src/components/</code> only when duplication starts to hurt.</p>
+      <p>System admin (<code>apps/system-admin</code>) uses the same HeroUI + Nabta tokens — apply the same shells there.</p>
+
+      <h2>Student file map</h2>
+      <ul>
+        <li><code>apps/web/src/features/student/StudentChrome.tsx</code> — panel, list, header, empty, progress, icon well</li>
+        <li><code>apps/web/src/layouts/PageTrail.tsx</code> — breadcrumbs</li>
+        <li><code>apps/web/src/layouts/StudentLayout.tsx</code> — nav: Home, My Classes, Assignments, Quizzes, Grades</li>
+        <li><code>apps/web/src/features/student/QuizAnswerReview.tsx</code> — quiz Q&amp;A review</li>
+      </ul>
+
+      <div class="related-links">
+        <h2>Related</h2>
+        <p><strong>Design:</strong> <a href="philosophy.html">Philosophy</a>, <a href="theming.html">Theming</a>, <a href="ux-states.html">UX States</a>, <a href="spacing.html">Spacing</a></p>
+        <p><strong>Phase:</strong> <a href="../roadmap/07-portal-ui/">Phase 7 — Portal UI</a>, <a href="../roadmap/07-portal-ui/plan.html">Student polish plan</a></p>
+        <p><strong>Code:</strong> <a href="../technical/frontend-architecture.html">Frontend Architecture</a></p>
+      </div>
+          </main>
+          <footer id="docs-pager" class="docs-pager-wrap"></footer>
+        </div>
+        <aside id="docs-toc" class="docs-toc" aria-label="Table of contents"></aside>
+      </div>
+    </div>
+  </div>
+  <script src="../assets/nav-config.js"></script>
+  <script src="../assets/layout.js"></script>
+  <script src="../assets/docs.js"></script>
+</body>
+</html>

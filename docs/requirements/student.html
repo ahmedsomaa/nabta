@@ -37,14 +37,14 @@
       <h3>Continue Learning</h3>
       <p>Most recently accessed lesson.</p>
       <h3>Academic Overview</h3>
-      <p>Current GPA/average, attendance, assignment completion, upcoming assessments. Do not overwhelm with analytics.</p>
+      <p>Subject grades and assignment completion belong here. GPA, attendance %, and analytics-heavy dashboards are later product — do not imply they shipped with the current web portal.</p>
 
       <h2>My Classes</h2>
       <p>List enrolled subjects. Each opens a subject page with:</p>
       <ul>
-        <li>Teacher, description, current unit</li>
-        <li>Lessons, materials, assignments, assessments</li>
-        <li>Announcements, progress</li>
+        <li>Teacher, class, progress</li>
+        <li>Lessons, assignments, quizzes</li>
+        <li>Announcements — later product (Phase 8)</li>
       </ul>
 
       <h2>Learning Experience</h2>
@@ -57,7 +57,7 @@
       <pre><code>Not Started → Draft → Submitted → Late → Graded → Returned</code></pre>
 
       <h2>Assessments (Student View)</h2>
-      <p>Flow: Overview → Start → Questions → Submit → Result → Feedback</p>
+      <p>The current web nav labels this <strong>Quizzes</strong>. Flow: Overview → Start → Questions → Submit → Result → Feedback</p>
       <p>Question types: multiple choice, multiple answer, true/false, short answer.</p>
 
       <h2>Grades</h2>
@@ -65,32 +65,37 @@
       <p>Grading schemes are configurable per school (percentage, letter, GPA, IB-style, custom).</p>
 
       <h2>Attendance (Student View)</h2>
-      <p>View: Present, Absent, Late, Excused. Show percentage and counts.</p>
+      <p><strong>Later product</strong> — not in the current web nav. When built: Present, Absent, Late, Excused, with percentage and counts.</p>
 
       <h2>Also Available</h2>
+      <p>Later product (not implied as shipped):</p>
       <ul>
-        <li>Announcements and notifications</li>
-        <li>Upcoming deadlines</li>
+        <li>Announcements and notifications (<a href="../roadmap/08-notifications/">Phase 8</a>)</li>
+        <li>GPA / academic average</li>
         <li>Profile management</li>
       </ul>
+      <p>Upcoming deadlines already appear on Home and Assignments.</p>
 
       <h2>Navigation</h2>
-      <pre><code>Home | My Classes | Assignments | Grades | More</code></pre>
+      <p>Current web portal:</p>
+      <pre><code>Home | My Classes | Assignments | Quizzes | Grades</code></pre>
+      <p>Attendance, announcements, profile, and GPA are later — not a More tab today. Composition recipes: <a href="../design/portal-patterns.html">Portal Patterns</a>.</p>
 
       <h2>Acceptance Criteria</h2>
       <ul class="checklist">
         <li>Dashboard shows today's schedule, upcoming work, and continue learning</li>
         <li>Student can browse enrolled subjects and open lesson content</li>
         <li>Student can submit assignments and see status/grade/feedback</li>
-        <li>Student can take assessments and view results</li>
-        <li>Student can view grades and attendance</li>
+        <li>Student can take quizzes and view results</li>
+        <li>Student can view subject grades</li>
         <li>Complete workflow works: login → dashboard → subject → assignment → submit → see grade</li>
       </ul>
 
       <div class="related-links">
         <h2>Related</h2>
-        <p><span class="badge badge-phase">Phases</span> <a href="../roadmap/03-student-experience/">Phase 3 — Student Experience</a>, <a href="../roadmap/05-assessments/">Phase 5 — Assessments</a></p>
+        <p><span class="badge badge-phase">Phases</span> <a href="../roadmap/03-student-experience/">Phase 3 — Student Experience</a>, <a href="../roadmap/05-assessments/">Phase 5 — Assessments</a>, <a href="../roadmap/07-portal-ui/">Phase 7 — Portal UI</a></p>
         <p><span class="badge badge-arch">Architecture</span> <a href="../technical/frontend-architecture.html">Frontend Architecture</a>, <a href="../technical/sequences.html">Sequence Diagrams</a></p>
+        <p><strong>Design:</strong> <a href="../design/portal-patterns.html">Portal Patterns</a></p>
         <p>Also see: <a href="teacher.html">Teacher Portal</a> (assignment/grading workflow owner)</p>
       </div>
       <p class="source-footnote">Source: requirements.md §§13–19, 46</p>

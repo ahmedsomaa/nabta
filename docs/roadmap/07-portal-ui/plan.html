@@ -24,18 +24,28 @@
           <header id="docs-header" class="docs-page-header"></header>
           <main id="main" class="docs-main">
       <h1>Phase 7 — Student portal polish plan</h1>
-      <p class="lead"><span class="badge badge-phase">Phase 7</span> <span class="badge badge-current">Current</span> Execution plan for the student web portal only. Raise visual hierarchy with semantic color, card grids, and icons — without new features or APIs.</p>
+      <p class="lead"><span class="badge badge-phase">Phase 7</span> <span class="badge badge-complete">Student shipped</span> Historical execution plan for the student web portal. Teacher polish is next — copy <a href="../../design/portal-patterns.html">Portal Patterns</a>.</p>
 
       <div class="callout">
-        <p><strong>Companion to</strong> <a href="index.html">Phase 7 — Portal UI</a>. Teacher, school admin, and system admin polish wait until this student plan ships. Do not implement Phase 8+.</p>
+        <p><strong>Shipped (student).</strong> Student web polish is the reference implementation. Teacher, school admin, and system admin still wait. Do not re-implement this student work. Do not implement Phase 8+.</p>
       </div>
 
       <div class="callout">
-        <p><strong>Web student portal only.</strong> No new routes, GPA, attendance, announcements, profile, or notification center. No rainbow subject palettes. Reuse existing <code>/me</code> endpoints. Demo: <code>student@nabta.local</code> / <code>Password123!</code> at <code>http://localhost:5173/student/dashboard</code>.</p>
+        <p><strong>Companion to</strong> <a href="index.html">Phase 7 — Portal UI</a>. Demo login is unchanged: <code>student@nabta.local</code> / <code>Password123!</code> at <code>http://localhost:5173/student/dashboard</code>.</p>
       </div>
+
+      <h2>What shipped</h2>
+      <ul>
+        <li>Nav: Home, My Classes, Assignments, Quizzes, Grades — no More tab, no GPA/attendance/profile</li>
+        <li>Chrome: bordered lists and panels (<code>StudentList</code>, <code>StudentPanel</code>), class-card hero tiles, <code>PageTrail</code> breadcrumbs</li>
+        <li>Assignment detail: instructions and resources in one panel; real file downloads via <code>downloadUrl</code></li>
+        <li>Quiz overview: details panel; after an attempt, per-question answer review</li>
+        <li>Queues are list rows with title, muted subtitle, trailing Chip — not elevated <code>WorkItemCard</code>s</li>
+      </ul>
+      <p>Reuse these recipes in later portals. See <a href="../../design/portal-patterns.html">Portal Patterns</a>.</p>
 
       <h2>Slice order</h2>
-      <p>Shared primitives first, then screens in student-nav order. Sequential; each slice is independently verifiable.</p>
+      <p>Shared primitives first, then screens in student-nav order. All slices below are complete.</p>
 
       <pre class="mermaid">flowchart TB
   S0[This plan]
@@ -44,18 +54,18 @@
   S3[Classes and subject]
   S4[Lesson]
   S5[Assignments]
-  S6[Assessments]
+  S6[Quizzes]
   S7[Grades]
   S8[RTL dark mobile pass]
   S0 --> S1 --> S2 --> S3 --> S4 --> S5 --> S6 --> S7 --> S8</pre>
 
-      <h2>Visual direction</h2>
+      <h2>Visual direction (as shipped)</h2>
       <ul>
         <li>Calm academic richness — not neon, gamification, or a second brand color</li>
+        <li>Page chrome is a 1px <code>rounded-xl border border-border</code> shell with no shadow</li>
+        <li>HeroUI for controls (Button, Chip, Alert, ProgressBar, Radio, Checkbox, Toast, Skeleton) — not as the default list/tile wrapper</li>
         <li>Color via tokens only: <code>--accent</code> / <code>bg-accent/10</code>, <code>--warning</code>, <code>--danger</code>, <code>--success</code></li>
-        <li>Subject identity: Lucide icon well + initials avatar, not a unique hue per class</li>
-        <li>Static Lucide on content; lucide-animated only on empty states and the Continue learning hover CTA</li>
-        <li>HeroUI v3: <code>ProgressBar</code>, <code>ProgressCircle</code>, <code>Avatar</code>, <code>Chip</code>, <code>RadioGroup</code>, <code>Checkbox</code>, <code>Surface</code>, layout-shaped <code>Skeleton</code></li>
+        <li>Static Lucide on content; lucide-animated only on selected hover/empty CTAs</li>
       </ul>
 
       <h2>Original agent prompt</h2>
@@ -64,80 +74,86 @@ Do not implement teacher/admin polish or Phase 8+ functionality.</code></pre>
 
       <h2>In scope</h2>
       <ul>
-        <li><code>apps/web</code> student routes: dashboard, classes, subject, lesson, assignments, assessments, grades</li>
-        <li>Shared student primitives: page header, empty state, icon well, work item card, skeleton variants</li>
+        <li><code>apps/web</code> student routes: dashboard, classes, subject, lesson, assignments, quizzes/assessments, grades</li>
+        <li>Shared student primitives: page header, empty state, icon well, panel, list, skeletons, page trail</li>
         <li>EN/AR + RTL; loading / empty / error / success per <a href="../../design/ux-states.html">UX States</a></li>
       </ul>
 
       <h2>Out of scope</h2>
       <ul>
-        <li>Teacher, school admin, system admin polish</li>
+        <li>Teacher, school admin, system admin polish (next in this phase)</li>
         <li>Notifications, BullMQ, announcements</li>
-        <li>New domain APIs or schema</li>
+        <li>New product domains or schema</li>
         <li>Marketing site, mobile apps</li>
         <li>GPA, attendance, profile, More nav</li>
       </ul>
 
-      <h2>No API changes</h2>
-      <p>Reuse existing student endpoints only: <code>GET /me</code>, <code>GET /me/dashboard</code>, <code>GET /me/subjects</code>, subject/lesson/assignment/assessment/grades routes already shipped in Phases 3 and 5.</p>
+      <h2>UI-supporting payloads</h2>
+      <p>Existing <code>/me</code> endpoints from Phases 3 and 5. Small payload additions that only serve these screens (not Phase 8 features):</p>
+      <ul>
+        <li>Subject <code>schedule</code> — timetable slots on the class page</li>
+        <li>Assignment file <code>downloadUrl</code> — signed URL for resources and submissions</li>
+        <li>Assessment <code>latestAttemptId</code> — load review after a finished attempt</li>
+        <li>Published assignment work displays as <strong>Graded</strong> when <code>gradesPublishedAt</code> is set</li>
+      </ul>
 
       <h2>Slice 0 — This plan</h2>
-      <p><strong>Goal:</strong> lock student polish execution.</p>
+      <p><span class="badge badge-complete">Complete</span> Lock student polish execution.</p>
       <p><strong>Verify:</strong> this page is linked from the Phase 7 index.</p>
 
       <h2>Slice 1 — Shared primitives and icons</h2>
-      <p><strong>Goal:</strong> student-only building blocks and a small lucide-animated set.</p>
-      <p><strong>Files:</strong> <code>apps/web/src/features/student/</code>, <code>apps/web/src/components/icons/</code>, <code>packages/i18n/locales/</code>.</p>
-      <p><strong>UI:</strong> <code>StudentPageHeader</code>, <code>StudentEmptyState</code>, <code>IconWell</code>, <code>WorkItemCard</code>, HeroUI <code>ProgressBar</code>, layout-shaped skeletons. Keep <code>EmptyCard</code> working for teacher/admin if they still import it.</p>
-      <p><strong>Verify:</strong> components render in isolation; teacher pages that import <code>QueryState</code> still compile.</p>
+      <p><span class="badge badge-complete">Complete</span> Student-only building blocks and a small lucide-animated set.</p>
+      <p><strong>Files:</strong> <code>apps/web/src/features/student/StudentChrome.tsx</code>, <code>apps/web/src/layouts/PageTrail.tsx</code>, <code>apps/web/src/components/icons/</code>, <code>packages/i18n/locales/</code>.</p>
+      <p><strong>Shipped:</strong> <code>StudentPageHeader</code>, <code>StudentEmptyState</code>, <code>StudentPanel</code>, <code>StudentList</code>, <code>IconWell</code>, HeroUI <code>ProgressBar</code>, layout-shaped skeletons. <code>WorkItemCard</code> is unused leftover — do not revive it for queues.</p>
+      <p><strong>Verify:</strong> teacher pages that import <code>QueryState</code> still compile.</p>
 
       <h2>Slice 2 — Dashboard</h2>
-      <p><strong>Goal:</strong> “what should I do today?” with greeting strip, 2×2 metric tiles, clickable schedule, upcoming cards, continue-learning.</p>
+      <p><span class="badge badge-complete">Complete</span> “What should I do today?” — greeting, today’s schedule as a bordered list, upcoming work list, accent Continue learning. No 2×2 metric tiles.</p>
       <p><strong>Route:</strong> <code>/student/dashboard</code>.</p>
-      <p><strong>Verify:</strong> <code>student@nabta.local</code> sees greeting, metrics from existing dashboard/grades payloads, schedule links to a subject, upcoming uses status color, continue-learning shows a progress bar.</p>
+      <p><strong>Verify:</strong> <code>student@nabta.local</code> / <code>Password123!</code> sees greeting, schedule rows that link to a subject, upcoming rows with status chips (overdue subtitle in danger), continue-learning with a progress bar.</p>
 
       <h2>Slice 3 — Classes and subject</h2>
-      <p><strong>Goal:</strong> richer class tiles and a subject header with a real progress bar and lesson type icons.</p>
+      <p><span class="badge badge-complete">Complete</span> Class tiles with an accent hero (lucide-animated book on hover), name/meta, progress. Subject page: details panel, schedule, to-do list, lessons list.</p>
       <p><strong>Routes:</strong> <code>/student/classes</code>, <code>/student/classes/:subjectId</code>.</p>
-      <p><strong>Verify:</strong> class grid is 2–3 columns on desktop; subject lessons show type icons from existing lesson payload.</p>
+      <p><strong>Verify:</strong> class grid is 2–3 columns on desktop; subject lessons show type icons; to-do rows open assignments or quizzes.</p>
 
       <h2>Slice 4 — Lesson</h2>
-      <p><strong>Goal:</strong> type chip, prev/next from the unit list already loaded, completion chip.</p>
+      <p><span class="badge badge-complete">Complete</span> Type chip, prev/next from the unit list, completion chip.</p>
       <p><strong>Route:</strong> <code>/student/classes/:subjectId/lessons/:lessonId</code>.</p>
       <p><strong>Verify:</strong> media embeds still work; prev/next move within the unit when siblings exist.</p>
 
       <h2>Slice 5 — Assignments</h2>
-      <p><strong>Goal:</strong> list grouped by overdue / due soon / rest; detail upload as a dashed surface with file icons.</p>
+      <p><span class="badge badge-complete">Complete</span> List grouped by overdue / due soon / later / done. Detail: one panel with facts, instructions, and resource downloads; dashed dropzone for uploads.</p>
       <p><strong>Routes:</strong> <code>/student/assignments</code>, <code>/student/assignments/:id</code>.</p>
-      <p><strong>Verify:</strong> grouping uses existing due dates; submit/toast/lock behavior unchanged.</p>
+      <p><strong>Verify:</strong> grouping uses due dates; resource links download; submit/toast/lock behavior unchanged; published grades show as Graded.</p>
 
-      <h2>Slice 6 — Assessments</h2>
-      <p><strong>Goal:</strong> overview chips; attempt uses HeroUI radios/checkboxes, sticky timer, n of N; result uses a score visualization.</p>
-      <p><strong>Routes:</strong> assessment overview, attempt, result.</p>
-      <p><strong>Verify:</strong> start/resume/submit still hit the same APIs; MCQ selection looks like the rest of the portal.</p>
+      <h2>Slice 6 — Quizzes</h2>
+      <p><span class="badge badge-complete">Complete</span> Quizzes tab lists to-do and done. Overview is a details panel. Attempt uses HeroUI radios/checkboxes, sticky timer, n of N. Result uses a score panel plus per-question answer review — not a ProgressCircle.</p>
+      <p><strong>Routes:</strong> <code>/student/quizzes</code>, assessment overview, attempt, result.</p>
+      <p><strong>Verify:</strong> start/resume/submit still hit the same APIs; after submit, review chips mark Correct / Your answer / Incorrect.</p>
 
       <h2>Slice 7 — Grades</h2>
-      <p><strong>Goal:</strong> metric tiles + letter chips on the list; detail uses a meter/progress for current %.</p>
+      <p><span class="badge badge-complete">Complete</span> Subject list with letter chips; detail uses a progress bar for current %.</p>
       <p><strong>Routes:</strong> <code>/student/grades</code>, <code>/student/grades/:subjectId</code>.</p>
       <p><strong>Verify:</strong> table still lists subjects; letter chips use success/warning/danger; no GPA invented.</p>
 
       <h2>Slice 8 — RTL, dark, mobile</h2>
-      <p><strong>Goal:</strong> pass every student route in EN/AR, light/dark, and ~375px.</p>
-      <p><strong>Verify:</strong> logical CSS; empty/loading/error still work; teacher/admin not visually broken by shared <code>QueryState</code> changes.</p>
+      <p><span class="badge badge-complete">Complete</span> Pass every student route in EN/AR, light/dark, and ~375px.</p>
+      <p><strong>Verify:</strong> logical CSS; empty/loading/error still work; no horizontal overflow at ~375px; teacher/admin not visually broken by shared <code>QueryState</code> changes.</p>
 
       <h2>Acceptance (phase index)</h2>
       <ul class="checklist">
-        <li>Student portal is polished; teacher/admin/system-admin not started from this plan</li>
+        <li>Student portal is polished and is the reference; teacher/admin/system-admin not started from this plan</li>
         <li>Screens keep loading, empty, error, and success states</li>
         <li>EN/AR and RTL remain correct</li>
-        <li>No new domain APIs or schema</li>
+        <li>No new product domains or schema; only the UI-supporting payload fields listed above</li>
       </ul>
 
       <div class="related-links">
         <h2>Related</h2>
         <p><strong>Phase index:</strong> <a href="index.html">Phase 7 — Portal UI</a></p>
         <p><strong>Requirements:</strong> <a href="../../requirements/student.html">Student Portal</a></p>
-        <p><strong>Design:</strong> <a href="../../design/philosophy.html">Philosophy</a>, <a href="../../design/theming.html">Theming</a>, <a href="../../design/ux-states.html">UX States</a></p>
+        <p><strong>Design:</strong> <a href="../../design/portal-patterns.html">Portal Patterns</a>, <a href="../../design/philosophy.html">Philosophy</a>, <a href="../../design/theming.html">Theming</a>, <a href="../../design/ux-states.html">UX States</a></p>
         <p><strong>Previous:</strong> <a href="../06-administration/">Phase 6</a> (complete) · <strong>Next:</strong> teacher polish plan (not yet written) · <a href="../08-notifications/">Phase 8 — Notifications</a></p>
       </div>
       <p class="source-footnote">Source: Phase 7 student portal polish</p>

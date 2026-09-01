@@ -44,7 +44,8 @@ window.NABTA_NAV = {
         { href: 'design/theming.html', label: 'Theming' },
         { href: 'design/figma.html', label: 'Figma' },
         { href: 'design/logos.html', label: 'Logos' },
-        { href: 'design/ux-states.html', label: 'UX States' }
+        { href: 'design/ux-states.html', label: 'UX States' },
+        { href: 'design/portal-patterns.html', label: 'Portal Patterns' }
       ]
     },
     {
