@@ -24,7 +24,7 @@ describe('StudentService isolation', () => {
       enrollments: [{ classId: 'c1', class: { name: '10A' } }],
     });
     const prisma = { student: { findFirst } };
-    const storage = { getUploadUrl: jest.fn() };
+    const storage = { getUploadUrl: jest.fn(), getObjectUrl: jest.fn().mockResolvedValue('https://files.test/object') };
     const service = new StudentService(prisma as never, storage as never);
     const me = await service.getMe(studentUser);
     expect(findFirst).toHaveBeenCalledWith(
@@ -88,7 +88,9 @@ describe('StudentService isolation', () => {
         {
           id: 'sub-1',
           status: 'DRAFT',
-          files: [{ id: 'f1', fileName: 'work.pdf', mimeType: 'application/pdf', size: 12 }],
+          files: [
+            { id: 'f1', fileName: 'work.pdf', mimeType: 'application/pdf', size: 12, storageKey: 'k' },
+          ],
         },
       ],
     };
@@ -116,7 +118,10 @@ describe('StudentService isolation', () => {
       },
       submissionFile: { count: jest.fn().mockResolvedValue(1) },
     };
-    const service = new StudentService(prisma as never, { getUploadUrl: jest.fn() } as never);
+    const service = new StudentService(prisma as never, {
+      getUploadUrl: jest.fn(),
+      getObjectUrl: jest.fn().mockResolvedValue('https://files.test/object'),
+    } as never);
     const result = await service.submit(studentUser, 'asg-1');
     expect(prisma.assignmentSubmission.update).toHaveBeenCalledWith(
       expect.objectContaining({

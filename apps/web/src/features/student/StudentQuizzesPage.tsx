@@ -1,18 +1,17 @@
-import { useNavigate } from 'react-router-dom';
+import { Link } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import { useTranslation } from 'react-i18next';
 import { FileQuestion } from 'lucide-react';
 import type { StudentAssessmentListItem } from '@nabta/types';
 import { apiFetch } from '@/lib/api';
 import { QueryError, QueryLoading } from './QueryState';
-import { StudentEmptyState, StudentPageHeader } from './StudentChrome';
-import { WorkItemCard } from './WorkItemCard';
+import { StudentEmptyState, StudentList, StudentPageHeader } from './StudentChrome';
+import { QuizStatusChip } from './StatusChip';
 
 const DONE = new Set(['SUBMITTED', 'EXPIRED']);
 
 export function StudentQuizzesPage() {
   const { t } = useTranslation();
-  const navigate = useNavigate();
   const query = useQuery({
     queryKey: ['student-assessments'],
     queryFn: () => apiFetch<StudentAssessmentListItem[]>('/me/assessments'),
@@ -58,21 +57,27 @@ export function StudentQuizzesPage() {
                 {section.title}{' '}
                 <span className="font-normal text-muted">({section.items.length})</span>
               </h2>
-              <div className="grid gap-3">
+              <StudentList>
                 {section.items.map((item) => (
-                  <WorkItemCard
-                    key={item.id}
-                    kind="assessment"
-                    title={item.title}
-                    subtitle={[
-                      item.subjectName,
-                      t('assessment.attempts', { used: item.attemptsUsed, max: item.maxAttempts }),
-                    ].join(' · ')}
-                    status={item.status}
-                    onPress={() => navigate(`/student/assessments/${item.id}`)}
-                  />
+                  <li key={item.id} className="border-b border-border last:border-b-0">
+                    <Link
+                      to={`/student/assessments/${item.id}`}
+                      className="flex w-full items-start gap-3 px-3 py-2.5 text-start text-inherit no-underline hover:bg-overlay focus-visible:outline-2 focus-visible:outline-offset-[-2px] focus-visible:outline-accent"
+                    >
+                      <div className="min-w-0 flex-1">
+                        <p className="truncate font-medium">{item.title}</p>
+                        <p className="mt-0.5 truncate text-xs text-muted">
+                          {[
+                            item.subjectName,
+                            t('assessment.attempts', { used: item.attemptsUsed, max: item.maxAttempts }),
+                          ].join(' · ')}
+                        </p>
+                      </div>
+                      <QuizStatusChip status={item.status} />
+                    </Link>
+                  </li>
                 ))}
-              </div>
+              </StudentList>
             </section>
           ))}
         </>

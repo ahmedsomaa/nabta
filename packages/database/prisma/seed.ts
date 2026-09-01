@@ -3,6 +3,7 @@ import { resolve } from 'node:path';
 import { UserRole, Locale, ThemePreference } from '../src/generated/prisma/client';
 import { createPrismaClient } from '../src/create-prisma-client';
 import * as argon2 from 'argon2';
+import * as Minio from 'minio';
 
 config({ path: resolve(__dirname, '../../../.env') });
 config({ path: resolve(__dirname, '../.env') });
@@ -17,6 +18,77 @@ const SUBJECTS = [
   { name: 'Biology', code: 'BIO' },
   { name: 'Computer Science', code: 'CS' },
 ] as const;
+
+function escapePdf(text: string) {
+  return text.replace(/\\/g, '\\\\').replace(/\(/g, '\\(').replace(/\)/g, '\\)');
+}
+
+function buildPdf(stream: string): Buffer {
+  const header = '%PDF-1.4\n';
+  const objects = [
+    '1 0 obj << /Type /Catalog /Pages 2 0 R >> endobj\n',
+    '2 0 obj << /Type /Pages /Kids [3 0 R] /Count 1 >> endobj\n',
+    '3 0 obj << /Type /Page /Parent 2 0 R /MediaBox [0 0 612 792] /Contents 4 0 R /Resources << /Font << /F1 5 0 R >> >> >> endobj\n',
+    `4 0 obj << /Length ${Buffer.byteLength(stream)} >> stream\n${stream}\nendstream\nendobj\n`,
+    '5 0 obj << /Type /Font /Subtype /Type1 /BaseFont /Helvetica >> endobj\n',
+  ];
+  let offset = Buffer.byteLength(header);
+  const offsets = [0];
+  for (const object of objects) {
+    offsets.push(offset);
+    offset += Buffer.byteLength(object);
+  }
+  const xref = [
+    'xref',
+    '0 6',
+    '0000000000 65535 f ',
+    ...offsets.slice(1).map((value) => `${String(value).padStart(10, '0')} 00000 n `),
+    '',
+  ].join('\n');
+  const trailer = `trailer << /Size 6 /Root 1 0 R >>\nstartxref\n${offset}\n%%EOF\n`;
+  return Buffer.concat([
+    Buffer.from(header),
+    ...objects.map((object) => Buffer.from(object)),
+    Buffer.from(xref),
+    Buffer.from(trailer),
+  ]);
+}
+
+function axesTemplatePdf(): Buffer {
+  const lines = [
+    'BT',
+    '/F1 16 Tf',
+    '72 740 Td',
+    `(${escapePdf('Gradient and intercept')}) Tj`,
+    '0 -20 Td',
+    '/F1 11 Tf',
+    `(${escapePdf('Sketch y = 2x - 1 and y = -x + 4. Label the intercepts.')}) Tj`,
+    'ET',
+    '0.75 G',
+    '0.4 w',
+  ];
+  for (let x = 72; x <= 540; x += 36) lines.push(`${x} 72 m ${x} 680 l S`);
+  for (let y = 72; y <= 680; y += 36) lines.push(`72 ${y} m 540 ${y} l S`);
+  lines.push('0 G', '1.4 w', '72 376 m 540 376 l S', '306 72 m 306 680 l S');
+  return buildPdf(lines.join('\n'));
+}
+
+async function putSeedObject(key: string, body: Buffer, contentType: string) {
+  const endPoint = process.env.MINIO_ENDPOINT ?? 'localhost';
+  const port = Number(process.env.MINIO_PORT ?? 9000);
+  const useSSL = (process.env.MINIO_USE_SSL ?? 'false') === 'true';
+  const bucket = process.env.MINIO_BUCKET ?? 'nabta-files';
+  const client = new Minio.Client({
+    endPoint,
+    port,
+    useSSL,
+    accessKey: process.env.MINIO_ACCESS_KEY ?? 'minioadmin',
+    secretKey: process.env.MINIO_SECRET_KEY ?? 'minioadmin',
+  });
+  const exists = await client.bucketExists(bucket);
+  if (!exists) await client.makeBucket(bucket, 'us-east-1');
+  await client.putObject(bucket, key, body, body.length, { 'Content-Type': contentType });
+}
 
 async function main() {
   const school = await prisma.school.upsert({
@@ -351,6 +423,28 @@ async function main() {
     },
   });
 
+  const ASSIGNMENT_FILE_ID = '00000000-0000-4000-8000-000000000133';
+  const axesPdf = axesTemplatePdf();
+  const axesKey = `${school.id}/assignments/${ASSIGNMENT_IDS[1]}/axes-template.pdf`;
+  try {
+    await putSeedObject(axesKey, axesPdf, 'application/pdf');
+  } catch (err) {
+    console.warn('MinIO not ready; assignment attachment was not uploaded:', err);
+  }
+  await prisma.assignmentFile.upsert({
+    where: { id: ASSIGNMENT_FILE_ID },
+    update: { assignmentId: ASSIGNMENT_IDS[1], storageKey: axesKey, size: axesPdf.length },
+    create: {
+      id: ASSIGNMENT_FILE_ID,
+      schoolId: school.id,
+      assignmentId: ASSIGNMENT_IDS[1],
+      storageKey: axesKey,
+      fileName: 'axes-template.pdf',
+      mimeType: 'application/pdf',
+      size: axesPdf.length,
+    },
+  });
+
   const SUBMISSION_ID = '00000000-0000-4000-8000-000000000131';
   const SUBMISSION_FILE_ID = '00000000-0000-4000-8000-000000000132';
   await prisma.assignmentSubmission.upsert({
@@ -608,6 +702,51 @@ async function main() {
       sortOrder: 1,
     },
   });
+
+  const ATTEMPT_ID = '00000000-0000-4000-8000-000000000171';
+  const submittedAt = new Date();
+  await prisma.assessmentAttempt.upsert({
+    where: { id: ATTEMPT_ID },
+    update: {
+      status: 'SUBMITTED',
+      submittedAt,
+      score: 2,
+      maxScore: 4,
+      passed: false,
+      questionOrder: [...QUESTION_IDS],
+    },
+    create: {
+      id: ATTEMPT_ID,
+      schoolId: school.id,
+      assessmentId: ASSESSMENT_IDS[0],
+      studentId: student.id,
+      status: 'SUBMITTED',
+      submittedAt,
+      score: 2,
+      maxScore: 4,
+      passed: false,
+      questionOrder: [...QUESTION_IDS],
+    },
+  });
+  const seedAnswers = [
+    { questionId: QUESTION_IDS[0], optionIds: [OPTION_IDS[1]], textAnswer: null },
+    { questionId: QUESTION_IDS[1], optionIds: [OPTION_IDS[4], OPTION_IDS[6]], textAnswer: null },
+    { questionId: QUESTION_IDS[2], optionIds: [OPTION_IDS[7]], textAnswer: null },
+    { questionId: QUESTION_IDS[3], optionIds: [], textAnswer: 'c' },
+  ];
+  for (const answer of seedAnswers) {
+    await prisma.attemptAnswer.upsert({
+      where: { attemptId_questionId: { attemptId: ATTEMPT_ID, questionId: answer.questionId } },
+      update: { optionIds: answer.optionIds, textAnswer: answer.textAnswer },
+      create: {
+        schoolId: school.id,
+        attemptId: ATTEMPT_ID,
+        questionId: answer.questionId,
+        optionIds: answer.optionIds,
+        textAnswer: answer.textAnswer,
+      },
+    });
+  }
 
   console.log('Seeded Egyptian International School (2026/2027, Grades 7–12)');
   console.log('  admin@nabta.local / teacher@nabta.local / student@nabta.local');

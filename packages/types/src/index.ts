@@ -241,8 +241,8 @@ export interface StudentAssignmentDetail {
   maxScore: number;
   score: number | null;
   feedback: string | null;
-  attachments: { id: string; fileName: string; mimeType: string; size: number }[];
-  files: { id: string; fileName: string; mimeType: string; size: number }[];
+  attachments: { id: string; fileName: string; mimeType: string; size: number; downloadUrl: string }[];
+  files: { id: string; fileName: string; mimeType: string; size: number; downloadUrl: string }[];
 }
 
 export interface FilePresignResult {
@@ -566,6 +566,8 @@ export interface StudentAssessmentOverview {
   bestScore: number | null;
   maxScore: number;
   passed: boolean | null;
+  latestAttemptId: string | null;
+  status: StudentAssessmentStatus;
 }
 
 export interface StudentAttemptQuestion {

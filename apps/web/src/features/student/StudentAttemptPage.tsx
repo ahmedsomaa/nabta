@@ -174,7 +174,7 @@ export function StudentAttemptPage() {
             textAnswer: question.textAnswer ?? '',
           };
           return (
-            <div key={question.id} className="space-y-3 rounded-xl border border-border bg-surface p-4">
+            <div key={question.id} className="space-y-3 overflow-hidden rounded-xl border border-border p-4">
               <p className="text-xs font-medium text-muted">
                 {t('student.questionOf', { current: index + 1, total })}
               </p>

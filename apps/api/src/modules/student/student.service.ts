@@ -510,19 +510,23 @@ export class StudentService {
       maxScore: row.maxScore,
       score: published && submission?.score != null ? Number(submission.score) : null,
       feedback: published ? (submission?.feedback ?? null) : null,
-      attachments: row.files.map((file) => ({
-        id: file.id,
-        fileName: file.fileName,
-        mimeType: file.mimeType,
-        size: file.size,
-      })),
-      files: (submission?.files ?? []).map((file) => ({
-        id: file.id,
-        fileName: file.fileName,
-        mimeType: file.mimeType,
-        size: file.size,
-      })),
+      attachments: await this.mapFiles(row.files),
+      files: await this.mapFiles(submission?.files ?? []),
     };
+  }
+
+  private async mapFiles(
+    files: { id: string; fileName: string; mimeType: string; size: number; storageKey: string }[],
+  ) {
+    return Promise.all(
+      files.map(async (file) => ({
+        id: file.id,
+        fileName: file.fileName,
+        mimeType: file.mimeType,
+        size: file.size,
+        downloadUrl: await this.storage.getObjectUrl(file.storageKey),
+      })),
+    );
   }
 
   async presign(user: AuthUser, body: unknown) {

@@ -1,13 +1,13 @@
-import { useNavigate } from 'react-router-dom';
+import { Link } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import { useTranslation } from 'react-i18next';
 import type { UpcomingAssignment } from '@nabta/types';
 import { apiFetch } from '@/lib/api';
 import { QueryError, QueryLoading } from './QueryState';
-import { dueUrgency, formatDue, type DueUrgency } from './StatusChip';
-import { StudentEmptyState, StudentPageHeader } from './StudentChrome';
-import { WorkItemCard } from './WorkItemCard';
+import { dueUrgency, formatDue, StatusChip, type DueUrgency } from './StatusChip';
+import { StudentEmptyState, StudentList, StudentPageHeader } from './StudentChrome';
 import { ClipboardCheckIcon } from '@/components/icons/clipboard-check';
+import { cn } from '@/lib/cn';
 
 const DONE = new Set(['SUBMITTED', 'GRADED']);
 type GroupKey = DueUrgency | 'later' | 'done';
@@ -34,7 +34,6 @@ function groupAssignments(items: UpcomingAssignment[]) {
 
 export function StudentAssignmentsPage() {
   const { t, i18n } = useTranslation();
-  const navigate = useNavigate();
   const query = useQuery({
     queryKey: ['student-assignments'],
     queryFn: () => apiFetch<UpcomingAssignment[]>('/me/assignments'),
@@ -92,20 +91,32 @@ export function StudentAssignmentsPage() {
                 {heading(group.key)}{' '}
                 <span className="font-normal text-muted">({group.items.length})</span>
               </h2>
-              <div className="grid gap-3">
-                {group.items.map((item) => (
-                  <WorkItemCard
-                    key={item.id}
-                    kind="assignment"
-                    showIcon={false}
-                    title={item.title}
-                    subtitle={`${item.subjectName} · ${t('student.due', { date: formatDue(item.dueAt, i18n.language) })}`}
-                    status={item.status}
-                    urgency={dueUrgency(item.dueAt, item.status)}
-                    onPress={() => navigate(`/student/assignments/${item.id}`)}
-                  />
-                ))}
-              </div>
+              <StudentList>
+                {group.items.map((item) => {
+                  const urgency = dueUrgency(item.dueAt, item.status);
+                  return (
+                    <li key={item.id} className="border-b border-border last:border-b-0">
+                      <Link
+                        to={`/student/assignments/${item.id}`}
+                        className="flex w-full items-start gap-3 px-3 py-2.5 text-start text-inherit no-underline hover:bg-overlay focus-visible:outline-2 focus-visible:outline-offset-[-2px] focus-visible:outline-accent"
+                      >
+                        <div className="min-w-0 flex-1">
+                          <p className="truncate font-medium">{item.title}</p>
+                          <p
+                            className={cn(
+                              'mt-0.5 truncate text-xs text-muted',
+                              urgency === 'overdue' && 'text-danger',
+                            )}
+                          >
+                            {item.subjectName} · {t('student.due', { date: formatDue(item.dueAt, i18n.language) })}
+                          </p>
+                        </div>
+                        <StatusChip status={item.status} />
+                      </Link>
+                    </li>
+                  );
+                })}
+              </StudentList>
             </section>
           ))}
         </>

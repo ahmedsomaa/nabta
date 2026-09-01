@@ -2,13 +2,13 @@ import { useRef, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useTranslation } from 'react-i18next';
-import { Alert, Button, Card, toast } from '@heroui/react';
-import { File as FileIcon, Image, Upload } from 'lucide-react';
+import { Alert, Button, toast } from '@heroui/react';
+import { Upload } from 'lucide-react';
 import type { FilePresignResult, StudentAssignmentDetail } from '@nabta/types';
 import { apiFetch } from '@/lib/api';
 import { QueryError, QueryLoading } from './QueryState';
 import { dueUrgency, formatDue, StatusChip } from './StatusChip';
-import { StudentPageHeader } from './StudentChrome';
+import { StudentPageHeader, StudentPanel } from './StudentChrome';
 import { usePageTrail } from '@/layouts/PageTrail';
 import { cn } from '@/lib/cn';
 
@@ -44,17 +44,40 @@ function formatBytes(size: number) {
   return `${mb < 10 ? mb.toFixed(1) : Math.round(mb)} MB`;
 }
 
-function FileRow({ name, mimeType, size }: { name: string; mimeType: string; size?: number }) {
-  const Icon = mimeType.startsWith('image/') ? Image : FileIcon;
+function FileRow({
+  name,
+  size,
+  href,
+}: {
+  name: string;
+  size?: number;
+  href?: string;
+}) {
+  const inner = (
+    <>
+      <div className="min-w-0 flex-1">
+        <p className="truncate font-medium">{name}</p>
+        {size != null ? (
+          <p className="mt-0.5 text-xs tabular-nums text-muted" dir="ltr">
+            {formatBytes(size)}
+          </p>
+        ) : null}
+      </div>
+    </>
+  );
+  if (!href) {
+    return <li className="flex items-start gap-3 px-0 py-2.5 first:pt-0 last:pb-0">{inner}</li>;
+  }
   return (
-    <li className="flex items-center gap-2 text-sm">
-      <Icon className="size-4 shrink-0 text-accent" aria-hidden />
-      <span className="min-w-0 truncate">{name}</span>
-      {size != null ? (
-        <span className="ms-auto shrink-0 text-xs tabular-nums text-muted" dir="ltr">
-          {formatBytes(size)}
-        </span>
-      ) : null}
+    <li>
+      <a
+        href={href}
+        target="_blank"
+        rel="noreferrer"
+        className="flex items-start gap-3 py-2.5 text-inherit no-underline first:pt-0 last:pb-0 hover:text-accent"
+      >
+        {inner}
+      </a>
     </li>
   );
 }
@@ -154,6 +177,9 @@ export function StudentAssignmentPage() {
     assignment.score != null && assignment.maxScore > 0
       ? Math.round((assignment.score / assignment.maxScore) * 100)
       : null;
+  const instructions = assignment.instructions.trim();
+  const attachments = assignment.attachments ?? [];
+  const hasBrief = Boolean(instructions) || attachments.length > 0;
 
   return (
     <div className="space-y-6">
@@ -170,7 +196,7 @@ export function StudentAssignmentPage() {
       <div className="grid min-w-0 items-start gap-6 lg:grid-cols-[minmax(0,1fr)_20rem]">
         <div className="order-1 space-y-4 lg:order-2 lg:sticky lg:top-6">
           {assignment.score != null || assignment.feedback ? (
-            <Card className="p-5">
+            <StudentPanel>
               <p className="text-xs font-medium text-muted">{t('student.feedback')}</p>
               {assignment.score != null ? (
                 <p className="mt-1 text-2xl font-semibold tracking-tight tabular-nums" dir="ltr">
@@ -181,22 +207,17 @@ export function StudentAssignmentPage() {
               {assignment.feedback ? (
                 <p className="mt-3 whitespace-pre-wrap text-sm">{assignment.feedback}</p>
               ) : null}
-            </Card>
+            </StudentPanel>
           ) : null}
 
-          <Card className="p-5">
-            <Card.Header>
-              <div className="flex w-full items-start justify-between gap-2">
-                <Card.Title>{t('student.submission')}</Card.Title>
-                <StatusChip status={assignment.status} />
-              </div>
-            </Card.Header>
+          <StudentPanel>
+            <p className="text-xs font-medium text-muted">{t('student.submission')}</p>
             {currentFile ? (
               <ul className="mt-3">
                 <FileRow
                   name={currentFile.fileName}
-                  mimeType={currentFile.mimeType}
                   size={currentFile.size}
+                  href={currentFile.downloadUrl}
                 />
               </ul>
             ) : null}
@@ -270,35 +291,36 @@ export function StudentAssignmentPage() {
             ) : (
               <p className="mt-3 text-sm text-muted">{t('student.locked')}</p>
             )}
-          </Card>
+          </StudentPanel>
         </div>
 
-        <div className="order-2 space-y-4 lg:order-1">
-          <Card className="p-5">
-            <Card.Header>
-              <Card.Title>{t('student.instructions')}</Card.Title>
-              <Card.Description className="whitespace-pre-wrap text-foreground">
-                {assignment.instructions}
-              </Card.Description>
-            </Card.Header>
-          </Card>
-          {assignment.attachments?.length ? (
-            <Card className="p-5">
-              <Card.Header>
-                <Card.Title>{t('student.attachments')}</Card.Title>
-              </Card.Header>
-              <ul className="mt-3 space-y-2">
-                {assignment.attachments.map((file) => (
-                  <FileRow
-                    key={file.id}
-                    name={file.fileName}
-                    mimeType={file.mimeType}
-                    size={file.size}
-                  />
-                ))}
-              </ul>
-            </Card>
-          ) : null}
+        <div className="order-2 lg:order-1">
+          <StudentPanel>
+            {instructions ? (
+              <>
+                <p className="text-xs font-medium text-muted">{t('student.instructions')}</p>
+                <p className="mt-1 whitespace-pre-wrap text-sm">{instructions}</p>
+              </>
+            ) : null}
+            {attachments.length > 0 ? (
+              <div className={instructions ? 'mt-5 border-t border-border pt-4' : undefined}>
+                <p className="text-xs font-medium text-muted">{t('student.attachments')}</p>
+                <ul className="mt-1 divide-y divide-border">
+                  {attachments.map((file) => (
+                    <FileRow
+                      key={file.id}
+                      name={file.fileName}
+                      size={file.size}
+                      href={file.downloadUrl}
+                    />
+                  ))}
+                </ul>
+              </div>
+            ) : null}
+            {!hasBrief ? (
+              <p className="text-sm text-muted">{t('student.emptyInstructions')}</p>
+            ) : null}
+          </StudentPanel>
         </div>
       </div>
     </div>

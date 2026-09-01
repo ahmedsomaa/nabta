@@ -1,12 +1,13 @@
 import { useNavigate, useParams } from 'react-router-dom';
 import { useMutation, useQuery } from '@tanstack/react-query';
 import { useTranslation } from 'react-i18next';
-import { Alert, Button, Card, Chip } from '@heroui/react';
-import { Clock, Hash, Target } from 'lucide-react';
-import type { StudentAssessmentOverview, StudentAttemptView } from '@nabta/types';
+import { Alert, Button } from '@heroui/react';
+import type { StudentAssessmentOverview, StudentAttemptResult, StudentAttemptView } from '@nabta/types';
 import { apiFetch } from '@/lib/api';
 import { QueryError, QueryLoading } from './QueryState';
-import { StudentPageHeader } from './StudentChrome';
+import { StudentPageHeader, StudentPanel } from './StudentChrome';
+import { QuizStatusChip } from './StatusChip';
+import { QuizAnswerReview, QuizFact } from './QuizAnswerReview';
 import { usePageTrail } from '@/layouts/PageTrail';
 
 export function StudentAssessmentOverviewPage() {
@@ -17,6 +18,11 @@ export function StudentAssessmentOverviewPage() {
     queryKey: ['student-assessment', id],
     queryFn: () => apiFetch<StudentAssessmentOverview>(`/me/assessments/${id}`),
     enabled: Boolean(id),
+  });
+  const result = useQuery({
+    queryKey: ['student-attempt-result', query.data?.latestAttemptId],
+    queryFn: () => apiFetch<StudentAttemptResult>(`/me/attempts/${query.data?.latestAttemptId}/result`),
+    enabled: Boolean(query.data?.latestAttemptId),
   });
   usePageTrail(
     query.data
@@ -38,44 +44,48 @@ export function StudentAssessmentOverviewPage() {
   if (query.isError || !query.data) return <QueryError onRetry={() => void query.refetch()} />;
 
   const quiz = query.data;
+  const instructions = quiz.instructions.trim();
 
   return (
     <div className="space-y-6">
-      <StudentPageHeader title={quiz.title} subtitle={quiz.subjectName} />
-      <Card className="p-5">
-        <Card.Header>
-          <Card.Title>{t('assessment.overview')}</Card.Title>
-          <Card.Description className="whitespace-pre-wrap">{quiz.instructions}</Card.Description>
-        </Card.Header>
-        <div className="mt-4 flex flex-wrap gap-2">
-          <Chip size="sm" variant="soft">
-            <Hash className="size-3" aria-hidden />
+      <StudentPageHeader
+        title={quiz.title}
+        subtitle={quiz.subjectName}
+        trailing={<QuizStatusChip status={quiz.status} />}
+      />
+
+      <StudentPanel>
+        <dl className="grid grid-cols-2 gap-4">
+          <QuizFact label={t('assessment.subject')}>{quiz.subjectName}</QuizFact>
+          <QuizFact label={t('assessment.questionsLabel')}>
             {t('assessment.questions', { count: quiz.questionCount })}
-          </Chip>
-          {quiz.timeLimitMinutes ? (
-            <Chip size="sm" variant="soft">
-              <Clock className="size-3" aria-hidden />
-              {t('assessment.timeLimit', { minutes: quiz.timeLimitMinutes })}
-            </Chip>
-          ) : null}
-          <Chip size="sm" variant="soft">
-            <Target className="size-3" aria-hidden />
+          </QuizFact>
+          <QuizFact label={t('assessment.timeLimitLabel')}>
+            {quiz.timeLimitMinutes
+              ? t('assessment.timeLimit', { minutes: quiz.timeLimitMinutes })
+              : t('assessment.noTimeLimit')}
+          </QuizFact>
+          <QuizFact label={t('assessment.passingLabel')}>
             {t('assessment.passing', { score: quiz.passingScore })}
-          </Chip>
-          <Chip size="sm" variant="soft">
+          </QuizFact>
+          <QuizFact label={t('assessment.attemptsLabel')}>
             {t('assessment.attempts', { used: quiz.attemptsUsed, max: quiz.maxAttempts })}
-          </Chip>
+          </QuizFact>
           {quiz.bestScore != null ? (
-            <Chip size="sm" color="accent" variant="soft">
+            <QuizFact label={t('assessment.scoreLabel')}>
               {t('assessment.score', { score: quiz.bestScore, max: quiz.maxScore })}
-            </Chip>
+              {quiz.passed != null
+                ? ` · ${quiz.passed ? t('assessment.passed') : t('assessment.failed')}`
+                : ''}
+            </QuizFact>
           ) : null}
-          {quiz.passed != null ? (
-            <Chip size="sm" color={quiz.passed ? 'success' : 'danger'} variant="soft">
-              {quiz.passed ? t('assessment.passed') : t('assessment.failed')}
-            </Chip>
-          ) : null}
-        </div>
+        </dl>
+        {instructions ? (
+          <div className="mt-5 border-t border-border pt-4">
+            <p className="text-xs font-medium text-muted">{t('student.instructions')}</p>
+            <p className="mt-1 whitespace-pre-wrap text-sm">{instructions}</p>
+          </div>
+        ) : null}
         {start.isError ? (
           <Alert className="mt-4" status="danger">
             <Alert.Indicator />
@@ -84,7 +94,7 @@ export function StudentAssessmentOverviewPage() {
             </Alert.Content>
           </Alert>
         ) : null}
-        <div className="mt-4 flex flex-wrap gap-2">
+        <div className="mt-5 border-t border-border pt-4">
           {quiz.inProgressAttemptId ? (
             <Button
               variant="primary"
@@ -102,7 +112,9 @@ export function StudentAssessmentOverviewPage() {
             <p className="text-sm text-muted">{t('assessment.noAttempts')}</p>
           )}
         </div>
-      </Card>
+      </StudentPanel>
+
+      {result.data ? <QuizAnswerReview result={result.data} /> : null}
     </div>
   );
 }

@@ -567,12 +567,16 @@ export class AssessmentsService {
     });
     if (!row) throw new NotFoundException('Assessment not found.');
     const summary = this.summarizeStudentAssessment({ ...row, subject: row.subject });
+    const latestFinished = [...row.attempts]
+      .filter((attempt) => attempt.status !== 'IN_PROGRESS')
+      .sort((a, b) => (b.submittedAt?.getTime() ?? 0) - (a.submittedAt?.getTime() ?? 0))[0];
     return {
       ...summary,
       instructions: row.instructions,
       randomizeQuestions: row.randomizeQuestions,
       questionCount: row.questions.length,
       canStart: Boolean(summary.inProgressAttemptId) || summary.attemptsRemaining > 0,
+      latestAttemptId: latestFinished?.id ?? null,
     };
   }
 

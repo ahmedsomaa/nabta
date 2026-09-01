@@ -76,6 +76,22 @@ export function StudentEmptyState({
   );
 }
 
+export function StudentPanel({
+  children,
+  className,
+}: {
+  children: ReactNode;
+  className?: string;
+}) {
+  return (
+    <div className={cn('overflow-hidden rounded-xl border border-border p-5', className)}>{children}</div>
+  );
+}
+
+export function StudentList({ children }: { children: ReactNode }) {
+  return <ul className="overflow-hidden rounded-xl border border-border">{children}</ul>;
+}
+
 export function StudentProgress({ value, label }: { value: number; label: string }) {
   const percent = Math.min(100, Math.max(0, Number.isFinite(value) ? value : 0));
   return (

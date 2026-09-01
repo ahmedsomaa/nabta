@@ -2,7 +2,6 @@ import { useRef } from 'react';
 import { Link } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import { useTranslation } from 'react-i18next';
-import { Card } from '@heroui/react';
 import type { StudentSubjectListItem } from '@nabta/types';
 import { apiFetch } from '@/lib/api';
 import { QueryError, QueryLoading } from './QueryState';
@@ -25,15 +24,13 @@ function ClassCard({ subject }: { subject: StudentSubjectListItem }) {
       onMouseEnter={() => iconRef.current?.startAnimation()}
       onMouseLeave={() => iconRef.current?.stopAnimation()}
     >
-      <Card className="overflow-hidden p-0 transition-colors hover:border-accent/40">
+      <div className="overflow-hidden rounded-xl border border-border transition-colors hover:border-accent/40">
         <div className="flex h-24 items-center justify-center bg-accent/10 text-accent md:h-28">
           <BookTextIcon ref={iconRef} size={32} aria-hidden />
         </div>
         <div className="space-y-2 p-4">
-          <Card.Title className="text-base leading-snug [overflow-wrap:anywhere]">
-            {subject.name}
-          </Card.Title>
-          <Card.Description className="line-clamp-2">{subjectMeta(subject)}</Card.Description>
+          <p className="text-base font-semibold leading-snug [overflow-wrap:anywhere]">{subject.name}</p>
+          <p className="line-clamp-2 text-sm text-muted">{subjectMeta(subject)}</p>
           <div className="flex items-center gap-2 pt-1">
             <StudentProgress
               value={subject.progressPercent}
@@ -49,7 +46,7 @@ function ClassCard({ subject }: { subject: StudentSubjectListItem }) {
             </span>
           </div>
         </div>
-      </Card>
+      </div>
     </Link>
   );
 }

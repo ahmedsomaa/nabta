@@ -79,9 +79,8 @@ export function QueryLoading({
         <Skeleton className="h-4 w-1/2 rounded-md" />
         <div className="grid items-start gap-6 lg:grid-cols-[minmax(0,1fr)_20rem]">
           <Skeleton className="order-1 h-64 rounded-xl lg:order-2" />
-          <div className="order-2 space-y-4 lg:order-1">
-            <Skeleton className="h-40 rounded-xl" />
-            <Skeleton className="h-24 rounded-xl" />
+          <div className="order-2 lg:order-1">
+            <Skeleton className="h-56 rounded-xl" />
           </div>
         </div>
       </div>
