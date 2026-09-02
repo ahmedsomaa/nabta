@@ -29,6 +29,9 @@ packages/database/prisma/*.db
 packages/database/prisma/*.db-journal
 packages/database/src/generated/
 
+# Expo
+.expo/
+
 # Logs
 *.log
 npm-debug.log*
