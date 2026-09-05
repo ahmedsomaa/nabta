@@ -23,31 +23,31 @@
       <p class="lead">Nabta green maps to HeroUI <code>--accent</code>. Semantic roles only — no large raw palettes in product UI.</p>
 
       <div class="callout callout-tip">
-        <p>Portals theme via HeroUI CSS variables (oklch). Override after <code>@import "@heroui/styles"</code>. Docs site keeps the same brand hex in its own CSS. See <a href="theming.html">Theming</a>.</p>
+        <p>Live portal tokens live in <code>apps/web/src/index.css</code> (hex on light). Docs site may keep <code>#10b981</code> in its own CSS. See <a href="theming.html">Theming</a>.</p>
       </div>
 
       <h2>Brand accent</h2>
       <div class="table-wrap"><table>
         <thead><tr><th>Token</th><th>Hex (human)</th><th>Notes</th></tr></thead>
         <tbody>
-          <tr><td><code>--accent</code></td><td><code>#10B981</code></td><td>Nabta green — primary actions, focus, links</td></tr>
+          <tr><td><code>--accent</code></td><td><code>#3FAE6A</code></td><td>Student portal green — primary actions, focus, links</td></tr>
           <tr><td><code>--accent-foreground</code></td><td><code>#FFFFFF</code></td><td>Text/icons on accent</td></tr>
-          <tr><td><code>--accent-hover</code></td><td><code>#059669</code></td><td>Derived / explicit hover (~emerald-600)</td></tr>
-          <tr><td><code>--accent-soft</code> / soft-foreground / soft-hover</td><td>—</td><td>Let HeroUI derive soft surfaces from accent</td></tr>
+          <tr><td><code>--accent-hover</code></td><td><code>#278653</code></td><td>Hover on primary actions</td></tr>
+          <tr><td><code>--accent-soft</code></td><td><code>#E8F6ED</code></td><td>Soft accent wells</td></tr>
         </tbody>
       </table></div>
-      <p>Use accent sparingly. Overuse weakens hierarchy in a calm school product.</p>
+      <p>Teacher and school admin override accent via <code>html[data-portal]</code> (<code>#16876F</code> teacher, <code>#28734A</code> admin). Use accent sparingly. Overuse weakens hierarchy in a calm school product.</p>
 
       <h2>Surfaces &amp; text (light)</h2>
       <div class="table-wrap"><table>
         <thead><tr><th>Token</th><th>Value</th><th>Notes</th></tr></thead>
         <tbody>
-          <tr><td><code>--background</code></td><td><code>#FAFAF9</code></td><td>Stone-50 canvas</td></tr>
-          <tr><td><code>--foreground</code></td><td><code>#1C1917</code></td><td>Stone-900 primary text</td></tr>
-          <tr><td><code>--muted</code></td><td><code>#78716C</code></td><td>Stone-500 secondary text</td></tr>
-          <tr><td><code>--border</code></td><td><code>#E7E5E4</code></td><td>Stone-200 dividers, field borders</td></tr>
-          <tr><td><code>--surface</code></td><td><code>#F5F5F4</code></td><td>Stone-100 cards, panels</td></tr>
-          <tr><td><code>--overlay</code></td><td><code>#FAFAF9</code></td><td>Stone-50 popovers, overlays</td></tr>
+          <tr><td><code>--background</code></td><td><code>#F8FAF9</code></td><td>Mint canvas (page stage)</td></tr>
+          <tr><td><code>--foreground</code></td><td><code>#17231C</code></td><td>Primary text</td></tr>
+          <tr><td><code>--muted</code></td><td><code>#66736B</code></td><td>Secondary text</td></tr>
+          <tr><td><code>--border</code></td><td><code>#E3E9E5</code></td><td>View edges and dividers</td></tr>
+          <tr><td><code>--surface</code></td><td><code>#FFFFFF</code></td><td>White views (lists, panels, tiles)</td></tr>
+          <tr><td><code>--overlay</code></td><td><code>#F8FAF9</code></td><td>Same as canvas — row hover, menus</td></tr>
         </tbody>
       </table></div>
 
@@ -61,7 +61,7 @@
           <tr><td><code>--border</code></td><td><code>#3F3F46</code></td><td>Cool edge between zinc-700/800</td></tr>
           <tr><td><code>--surface</code></td><td><code>#18181B</code></td><td>Zinc rail (sidebar chrome, not OLED black)</td></tr>
           <tr><td><code>--overlay</code></td><td><code>#2E2E33</code></td><td>Menus and hover wells above the stage</td></tr>
-          <tr><td><code>--accent</code></td><td><code>#34D399</code></td><td>Slightly lighter for contrast on dark</td></tr>
+          <tr><td><code>--accent</code></td><td><code>#5BC484</code></td><td>Lighter green for contrast on dark</td></tr>
           <tr><td><code>--accent-foreground</code></td><td><code>#09090B</code></td><td>Zinc-950 text on accent</td></tr>
         </tbody>
       </table></div>
@@ -70,9 +70,9 @@
       <div class="table-wrap"><table>
         <thead><tr><th>Token</th><th>Hex</th><th>Use</th></tr></thead>
         <tbody>
-          <tr><td><code>--success</code></td><td><code>#16A34A</code></td><td>Confirmed grades, attendance present</td></tr>
-          <tr><td><code>--warning</code></td><td><code>#CA8A04</code></td><td>Due soon, incomplete</td></tr>
-          <tr><td><code>--danger</code></td><td><code>#DC2626</code></td><td>Errors, destructive actions (HeroUI naming)</td></tr>
+          <tr><td><code>--success</code></td><td><code>#35A66F</code></td><td>Confirmed grades, attendance present</td></tr>
+          <tr><td><code>--warning</code></td><td><code>#E9A93A</code></td><td>Due soon, timer warning</td></tr>
+          <tr><td><code>--danger</code></td><td><code>#D95C5C</code></td><td>Errors, overdue, timer danger</td></tr>
         </tbody>
       </table></div>
 

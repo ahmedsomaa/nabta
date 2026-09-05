@@ -37,10 +37,11 @@
       <h2>What shipped</h2>
       <ul>
         <li>Nav: Home, Subjects, Assignments, Quizzes, Grades — no More tab, no GPA/attendance/profile</li>
-        <li>Chrome: bordered lists and panels (<code>StudentList</code>, <code>StudentPanel</code>), class-card hero tiles, <code>PageTrail</code> breadcrumbs</li>
-        <li>Assignment detail: instructions and resources in one panel; real file downloads via <code>downloadUrl</code></li>
-        <li>Quiz overview: details panel; after an attempt, per-question answer review</li>
-        <li>Queues are list rows with title, muted subtitle, trailing Chip — not elevated <code>WorkItemCard</code>s</li>
+        <li>Chrome: white <code>bg-surface</code> lists, panels, metric tiles, and subject tiles on a tinted canvas; <code>PageTrail</code> breadcrumbs</li>
+        <li>Home: four metric tiles, today’s tasks and upcoming as white lists, Continue learning as a white Card</li>
+        <li>Assignments: dense work-queue list (tabs + sort). Quizzes: Card list; focused one-question attempt (shell chrome hidden); result hero + review</li>
+        <li>Grades: performance hub — overall average, compact subject list, recent grades</li>
+        <li>Queues stay list rows — not elevated <code>WorkItemCard</code>s. Card is for featured/performance surfaces only</li>
       </ul>
       <p>Reuse these recipes in later portals. See <a href="../../design/portal-patterns.html">Portal Patterns</a>.</p>
 
@@ -62,8 +63,8 @@
       <h2>Visual direction (as shipped)</h2>
       <ul>
         <li>Calm academic richness — not neon, gamification, or a second brand color</li>
-        <li>Page chrome is a 1px <code>rounded-xl border border-border</code> shell with no shadow</li>
-        <li>HeroUI for controls (Button, Chip, Alert, ProgressBar, Radio, Checkbox, Toast, Skeleton) — not as the default list/tile wrapper</li>
+        <li>Page chrome is a 1px <code>rounded-xl border border-border bg-surface</code> view on <code>--background</code>, with no shadow</li>
+        <li>HeroUI for controls; Card only for featured/performance surfaces (quiz cards, grades hero, Continue learning)</li>
         <li>Color via tokens only: <code>--accent</code> / <code>bg-accent/10</code>, <code>--warning</code>, <code>--danger</code>, <code>--success</code></li>
         <li>Static Lucide on content; lucide-animated only on selected hover/empty CTAs</li>
       </ul>

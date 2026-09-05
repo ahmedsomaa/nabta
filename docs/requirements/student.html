@@ -48,6 +48,14 @@
                 <strong>"What should I do today?"</strong>
               </p>
 
+              <h2>Visual</h2>
+              <p>
+                Tinted page canvas (<code>--background</code>). Views are white
+                bordered cards (<code>rounded-xl border border-border bg-surface</code>).
+                No accent-washed sections. Accent fill is for controls only.
+                Recipes: <a href="../design/portal-patterns.html">Portal Patterns</a>.
+              </p>
+
               <h2>Dashboard</h2>
               <p>
                 Home is the action hub. Header: time-of-day greeting plus a
@@ -68,9 +76,8 @@
               </p>
               <h3>Today's Tasks</h3>
               <p>
-                Hero list beside Upcoming. Each row: kind, subject, due, status,
-                and a quick action. Accent for actionable items; danger text for
-                overdue.
+                White bordered list beside Upcoming. Each row: kind, subject,
+                due, status, and a quick action. Danger text for overdue.
               </p>
               <h3>Upcoming</h3>
               <p>
@@ -79,8 +86,8 @@
               </p>
               <h3>Continue Learning</h3>
               <p>
-                Most recently accessed lesson: subject, lesson title, progress,
-                Continue.
+                Most recently accessed lesson on a white Card: subject, lesson
+                title, progress, Continue.
               </p>
               <h3>Recent grades</h3>
               <p>
@@ -144,9 +151,7 @@
 
               <h2>Assignments (Student View)</h2>
               <p>
-                Global queue (not cards): inline summary
-                <strong>To Do · Due soon · Overdue · Completed</strong> (overdue
-                uses danger text). Tabs:
+                Global queue (not cards). Tabs:
                 <strong>All</strong> | <strong>To Do</strong> |
                 <strong>Submitted</strong> | <strong>Graded</strong>, with
                 superscript counts. Sort: due date earliest (default), due date
@@ -282,8 +287,15 @@
                   All / To Do / Completed / Results cards
                 </li>
                 <li>
+                  Quiz attempt is one question at a time with no sidebar;
+                  result uses the normal shell
+                </li>
+                <li>
                   Grades is a performance hub (overall average, subject list,
                   recent grades)
+                </li>
+                <li>
+                  Student views use white bordered surfaces on the tinted page
                 </li>
                 <li>
                   Student can submit assignments and see status/grade/feedback

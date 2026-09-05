@@ -76,7 +76,7 @@
 
       <h2>Component Library</h2>
       <p><a href="https://heroui.com/">HeroUI v3</a> (<code>@heroui/react</code> + <code>@heroui/styles</code>) on React Aria + Tailwind CSS v4. Import Tailwind first, then <code>@heroui/styles</code>. Prefer compound components; use <code>onPress</code> over <code>onClick</code>; use <code>className</code> (not v2 <code>classNames</code>). No HeroUI Provider required in v3. Theme Nabta via CSS variable overrides — see <a href="../design/theming.html">Theming</a>.</p>
-      <p>HeroUI is for <strong>controls</strong>. Lists, detail panels, and tiles use a 1px bordered shell — see <a href="../design/portal-patterns.html">Portal Patterns</a>. Do not wrap queues in HeroUI <code>Card</code>.</p>
+      <p>HeroUI is for <strong>controls</strong>. Lists, panels, and tiles are white <code>bg-surface</code> views on the tinted canvas — see <a href="../design/portal-patterns.html">Portal Patterns</a>. Do not wrap assignment queues in HeroUI <code>Card</code>. Card is allowed for featured/performance surfaces (quiz list, grades hero, Continue learning).</p>
 
       <h2>Icons</h2>
       <ul>
@@ -96,7 +96,7 @@
 
       <h2>Theme (Light / Dark)</h2>
       <ul>
-        <li>HeroUI CSS variables; Nabta <code>--accent</code> = <code>#10B981</code> — see <a href="../design/colors.html">Colors</a> and <a href="../design/theming.html">Theming</a></li>
+        <li>HeroUI CSS variables; student <code>--accent</code> = <code>#3FAE6A</code> — see <a href="../design/colors.html">Colors</a> and <a href="../design/theming.html">Theming</a></li>
         <li>Theme toggle in app shell; persist in localStorage/profile</li>
         <li>Respect <code>prefers-color-scheme</code> as default</li>
       </ul>
@@ -119,6 +119,7 @@
         </tbody>
       </table></div>
       <p>Shared chrome: <code>PortalPanel</code>, <code>PortalList</code>, <code>PortalPageHeader</code> in <code>apps/web/src/components/portal/PortalChrome.tsx</code>. Student pages keep <code>Student*</code> re-exports. Teacher imports portal helpers, not student feature files. Breadcrumbs: <code>PageTrail</code> in <code>apps/web/src/layouts/PageTrail.tsx</code> — <a href="../design/portal-patterns.html">Portal Patterns</a>.</p>
+      <p>Quiz attempt (<code>/student/assessments/:id/attempts/:attemptId</code>, not <code>/result</code>) hides the student sidebar, header trail, and mobile bottom nav so the attempt top bar is the only chrome.</p>
 
       <h2>Route Sketch</h2>
       <pre><code>/login

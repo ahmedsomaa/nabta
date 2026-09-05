@@ -30,29 +30,37 @@
       <p>Packages: <code>@heroui/react</code>, <code>@heroui/styles</code>, <code>tailwind-variants</code>, Tailwind CSS v4. React 19+. No HeroUI Provider in v3.</p>
 
       <h2>Nabta overrides</h2>
-      <p>Override semantic tokens for light and dark (values as oklch or hex — HeroUI prefers oklch). Example skeleton:</p>
+      <p>Source of truth: <code>apps/web/src/index.css</code>. Light uses hex; dark keeps zinc oklch. <code>AuthProvider</code> sets <code>html[data-portal]</code> from the user role.</p>
       <pre><code>:root {
-  --accent: oklch(0.72 0.15 163); /* ≈ #10B981 */
-  --accent-foreground: oklch(1 0 0);
-  --background: oklch(0.985 0.001 106.423); /* stone-50 #fafaf9 */
-  --foreground: oklch(0.216 0.006 56.043); /* stone-900 #1c1917 */
-  --muted: oklch(0.553 0.013 58.071); /* stone-500 */
-  --border: oklch(0.923 0.003 48.717); /* stone-200 */
-  --surface: oklch(0.97 0.001 106.424); /* stone-100 */
-  --overlay: oklch(0.985 0.001 106.423); /* stone-50 */
+  --accent: #3fae6a;
+  --accent-foreground: #ffffff;
+  --accent-hover: #278653;
+  --accent-soft: #e8f6ed;
+  --background: #f8faf9;
+  --foreground: #17231c;
+  --muted: #66736b;
+  --border: #e3e9e5;
+  --surface: #ffffff;
+  --overlay: #f8faf9;
+  --success: #35a66f;
+  --warning: #e9a93a;
+  --danger: #d95c5c;
   --font-sans: "Quicksand", "Zain", system-ui, sans-serif;
   --font-mono: "JetBrains Mono", ui-monospace, monospace;
 }
 
+html[data-portal="teacher"] { --accent: #16876f; --accent-soft: #e5f4f0; }
+html[data-portal="admin"] { --accent: #28734a; --accent-soft: #e8f1eb; }
+
 html.dark {
-  --accent: oklch(0.78 0.14 163); /* ≈ #34D399 */
-  --accent-foreground: oklch(0.141 0.005 285.823); /* zinc-950 */
-  --background: oklch(0.274 0.006 286.033); /* zinc-800 #27272a — stage */
-  --foreground: oklch(0.967 0.001 286.375); /* zinc-100 */
-  --muted: oklch(0.705 0.015 286.067); /* zinc-400 */
-  --border: oklch(0.37 0.012 286); /* between zinc-700/800 */
-  --surface: oklch(0.18 0.005 286); /* rail under zinc-900 */
-  --overlay: oklch(0.32 0.007 286); /* menus / hovers */
+  --accent: #5bc484;
+  --accent-foreground: oklch(0.141 0.005 285.823);
+  --background: oklch(0.274 0.006 286.033); /* zinc-800 stage */
+  --foreground: oklch(0.967 0.001 286.375);
+  --muted: oklch(0.705 0.015 286.067);
+  --border: oklch(0.37 0.012 286);
+  --surface: oklch(0.18 0.005 286);
+  --overlay: oklch(0.32 0.007 286);
 }</code></pre>
       <p>Full token tables: <a href="colors.html">Colors</a>, <a href="typography.html">Typography</a>, <a href="spacing.html">Spacing</a>.</p>
 
@@ -75,15 +83,15 @@ html.dark {
       <p>Duplicate the HeroUI Figma Kit and sync tokens — see <a href="figma.html">Figma</a>.</p>
 
       <h2 id="native">Web (oklch) vs Native (HSL)</h2>
-      <p>All clients share the same Nabta green brand intent (<code>#10B981</code> light, <code>#34D399</code> dark accent). Implementation differs by platform:</p>
+      <p>Web student portal light accent is <code>#3FAE6A</code>. Docs site may still use <code>#10B981</code>. Implementation differs by platform:</p>
       <div class="table-wrap"><table>
         <thead><tr><th>Surface</th><th>Theme mechanism</th><th>Accent token</th></tr></thead>
         <tbody>
-          <tr><td>Web portals, marketing, system-admin</td><td>HeroUI v3 CSS variables in oklch</td><td><code>--accent: oklch(0.72 0.15 163)</code> (light)</td></tr>
-          <tr><td>Mobile student, mobile staff</td><td>HeroUI Native + Uniwind HSL semantic tokens</td><td>Accent HSL aligned to Nabta green (~163° hue)</td></tr>
+          <tr><td>Web portals</td><td>HeroUI v3 CSS variables (hex light, oklch dark)</td><td><code>--accent: #3fae6a</code> (student light)</td></tr>
+          <tr><td>Mobile student, mobile staff</td><td>HeroUI Native + Uniwind HSL semantic tokens</td><td>Accent HSL aligned to Nabta green</td></tr>
         </tbody>
       </table></div>
-      <p>Stone/zinc neutral ramps on web (light stone-50/900 stage, dark zinc-800 rail) — see overrides above. Native apps mirror the same calm, low-contrast aesthetic with platform-appropriate surface tokens. Do not copy oklch literals into React Native — use HeroUI Native theme APIs and Uniwind classes instead.</p>
+      <p>Light canvas is mint off-white; views are white <code>--surface</code>. Dark stays zinc rail vs stage — see overrides above. Do not copy oklch literals into React Native — use HeroUI Native theme APIs and Uniwind classes instead.</p>
           </main>
           <footer id="docs-pager" class="docs-pager-wrap"></footer>
         </div>

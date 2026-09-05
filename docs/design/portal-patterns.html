@@ -27,12 +27,19 @@
       </div>
 
       <h2>Principle</h2>
-      <p>Page chrome is a 1px <code>rounded-xl border border-border</code> shell with <strong>no elevation or shadow</strong>. HeroUI v3 is for <strong>controls</strong> — Button, Chip, Alert, ProgressBar, Radio, Checkbox, Toast, Skeleton, Modal — not as the default wrapper for lists, queues, or tiles.</p>
-      <p>Color stays on tokens: <code>--accent</code> / <code>bg-accent/10</code>, <code>--warning</code>, <code>--danger</code>, <code>--success</code>. No rainbow subject palettes.</p>
+      <p>Page chrome is a 1px <code>rounded-xl border border-border</code> shell with <strong>no elevation or shadow</strong>. HeroUI v3 is for <strong>controls</strong> — Button, Chip, Alert, ProgressBar, Radio, Checkbox, Toast, Skeleton, Modal. Lists, queues, and subject tiles stay a bordered <code>ul</code> or <code>div</code>, not Card. Featured/performance surfaces (quiz list cards, grades hero, Continue learning, quiz overview facts) may use HeroUI <code>Card</code> with <code>bg-surface</code>.</p>
+      <p>Color stays on tokens: <code>--accent</code> / <code>bg-accent/10</code>, <code>--warning</code>, <code>--danger</code>, <code>--success</code>. No rainbow subject palettes. Accent fill is for <strong>controls</strong> only (selected option, progress bar, current navigator item) — not whole sections.</p>
+
+      <h2>Canvas vs view</h2>
+      <pre><code>Page canvas: --background (#f8faf9)
+View:        rounded-xl border border-border bg-surface (#ffffff)
+Row hover:   hover:bg-overlay
+Accent fill: controls only</code></pre>
+      <p>Views sit on the tinted page. Do not leave panels transparent (they blend into the canvas) and do not wash a whole list in <code>bg-accent/5</code>.</p>
 
       <h2>Panel</h2>
       <p>Padded facts block. Use for class details, assignment brief, quiz overview, score/feedback.</p>
-      <pre><code>&lt;div class="overflow-hidden rounded-xl border border-border p-5"&gt;
+      <pre><code>&lt;div class="overflow-hidden rounded-xl border border-border bg-surface p-5"&gt;
   &lt;dl class="grid grid-cols-2 gap-4"&gt;
     &lt;div class="min-w-0"&gt;
       &lt;dt class="text-xs font-medium text-muted"&gt;Label&lt;/dt&gt;
@@ -41,11 +48,11 @@
   &lt;/dl&gt;
   &lt;!-- optional: border-t border-border pt-4 mt-5 for instructions, files, or a primary action --&gt;
 &lt;/div&gt;</code></pre>
-      <p>Student code: <code>StudentPanel</code> in <code>apps/web/src/features/student/StudentChrome.tsx</code>. Later portals may copy the classes or lift a shared helper — do not wrap this in HeroUI <code>Card</code>.</p>
+      <p>Student code: <code>StudentPanel</code> in <code>apps/web/src/features/student/StudentChrome.tsx</code> (<code>PortalPanel</code> includes <code>bg-surface</code>). Later portals import portal helpers. Use Card only when the block is a featured surface, not a facts dump.</p>
 
       <h2>List</h2>
-      <p>Queues and grouped work (assignments, quizzes, to-do, lessons). One bordered <code>ul</code>; rows are links.</p>
-      <pre><code>&lt;ul class="overflow-hidden rounded-xl border border-border"&gt;
+      <p>Queues and grouped work (assignments, to-do, lessons, grades subjects). One bordered <code>ul</code>; rows are links. Global quizzes use Card, not this list.</p>
+      <pre><code>&lt;ul class="overflow-hidden rounded-xl border border-border bg-surface"&gt;
   &lt;li class="border-b border-border last:border-b-0"&gt;
     &lt;a class="flex w-full items-start gap-3 px-3 py-2.5 text-start text-inherit no-underline hover:bg-overlay …"&gt;
       &lt;div class="min-w-0 flex-1"&gt;
@@ -64,11 +71,14 @@
       <p>Student code: <code>StudentList</code>. Do not use <code>WorkItemCard</code> or elevated cards for queues.</p>
 
       <h2>Tile</h2>
-      <p>Keep the content stack (icon hero, title, meta, progress) but the outer shell is the same 1px border. Class cards: accent-tinted hero with a selective lucide-animated icon on hover, then name, code/class/teacher, then <code>ProgressBar</code>.</p>
-      <pre><code>&lt;div class="overflow-hidden rounded-xl border border-border transition-colors hover:border-accent/40"&gt;
+      <p>Keep the content stack (icon hero, title, meta, progress) but the outer shell is the same 1px white view. Subject cards: accent-tinted icon well inside a <code>bg-surface</code> tile, then name, teacher, counts, then <code>ProgressBar</code>.</p>
+      <pre><code>&lt;div class="overflow-hidden rounded-xl border border-border bg-surface transition-colors hover:border-accent/40"&gt;
   &lt;div class="flex h-24 items-center justify-center bg-accent/10 text-accent md:h-28"&gt;…icon…&lt;/div&gt;
   &lt;div class="space-y-2 p-4"&gt;…title, meta, progress…&lt;/div&gt;
 &lt;/div&gt;</code></pre>
+
+      <h2>Metric</h2>
+      <p>Dashboard stat tile: icon well + label + value. Same white bordered view as lists. <code>PortalMetric</code> uses <code>bg-surface</code>, not <code>bg-overlay</code>.</p>
 
       <h2>Page header and trail</h2>
       <p>In-page header: <code>h1</code> (<code>text-2xl font-semibold</code>), optional <code>text-sm text-muted</code> subtitle, optional trailing Chip. Breadcrumbs live in the app shell: <code>Role › section › page</code>. Parent crumbs are React Router links; the last crumb is inert. Mobile may show the last two crumbs.</p>
@@ -79,13 +89,19 @@
 
       <h2>Exceptions</h2>
       <ul>
-        <li><strong>Continue learning</strong> — accent-tinted surface (<code>border-accent/20 bg-accent/10</code>), not a generic card</li>
+        <li><strong>Continue learning</strong> — white <code>Card</code> with <code>bg-surface</code>, not <code>bg-accent/10</code></li>
         <li><strong>File dropzone</strong> — dashed border inside a panel, not a second elevated card</li>
-        <li><strong>Quiz attempt</strong> — sticky timer/progress bar above questions; each question is a bordered panel</li>
+        <li><strong>Quiz attempt (focus mode)</strong> — hide shell sidebar, header trail, and mobile bottom nav on <code>/assessments/:id/attempts/:attemptId</code> (not <code>/result</code>). Top bar is Exit · title · timer. One question at a time; navigator on desktop, Questions modal on mobile</li>
       </ul>
 
+      <h2>Focus mode</h2>
+      <p>Detected in <code>AppShell</code> when the path ends at an in-progress attempt. Result uses the normal student shell. Exit confirms leave; progress stays saved.</p>
+
+      <h2>Grades hub</h2>
+      <p>Read-only performance overview: overall-average hero (Card + large % + progress), compact subject list (desktop rows / mobile stacked cards), recent graded work linking to the assignment or quiz. No last-term comparison, qualitative labels, or leaderboards until the API has them.</p>
+
       <h2>Quiz review</h2>
-      <p>Details panel first (subject, counts, time, passing, attempts, score). Then one panel per question: prompt, then divided option rows. Mark state with chips: Correct, Your answer, Incorrect. Student code: <code>QuizAnswerReview.tsx</code>.</p>
+      <p>Lives on the <strong>result</strong> page only. Overview shows a score plus a link — do not embed the full review there. Each question is a panel: prompt, divided option rows, chips for Correct / Your answer / Incorrect. Student code: <code>QuizAnswerReview.tsx</code>.</p>
 
       <h2>Empty, loading, error</h2>
       <p>Follow <a href="ux-states.html">UX States</a>. Empty: bordered surface, short copy, optional lucide-animated icon. Loading: layout-shaped Skeleton. Error: HeroUI Alert plus retry. Success: Toast or navigation.</p>
@@ -94,7 +110,8 @@
       <div class="table-wrap"><table>
         <thead><tr><th>Do</th><th>Don’t</th></tr></thead>
         <tbody>
-          <tr><td>1px bordered shells for lists, panels, tiles</td><td>HeroUI Card as the default page chrome</td></tr>
+          <tr><td>White <code>bg-surface</code> views on the tinted canvas</td><td>Transparent panels or accent-washed sections</td></tr>
+          <tr><td>Card for featured/performance surfaces</td><td>Card wrapping assignment queues or subject rows</td></tr>
           <tr><td>Token colors only</td><td>A unique hue per subject</td></tr>
           <tr><td>Static Lucide in content; lucide-animated on selected hover/empty CTAs</td><td>Animate every icon</td></tr>
           <tr><td>Logical CSS (<code>ms-</code>, <code>ps-</code>, <code>text-start</code>)</td><td>Left/right physical properties</td></tr>
