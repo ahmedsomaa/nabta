@@ -279,11 +279,24 @@ export interface TeacherMe {
   familyName: string;
 }
 
+export interface TeacherClassScheduleSlot {
+  weekday: number;
+  startsAt: string;
+  endsAt: string;
+  room: string | null;
+}
+
 export interface TeacherClassItem {
   classId: string;
   className: string;
   subjectId: string;
   subjectName: string;
+  subjectCode: string | null;
+  studentCount: number;
+  schedule: TeacherClassScheduleSlot[];
+  pendingCount: number;
+  publishedQuizCount: number;
+  attendanceTakenToday: boolean | null;
 }
 
 export interface TeacherScheduleSlot {
@@ -296,6 +309,8 @@ export interface TeacherScheduleSlot {
   className: string;
   subjectId: string;
   subjectName: string;
+  studentCount: number;
+  attendanceTaken: boolean;
 }
 
 export interface TeacherToGradeItem {
@@ -308,8 +323,23 @@ export interface TeacherToGradeItem {
   subjectName: string;
 }
 
+export type TeacherActivityKind = 'submission' | 'assessment' | 'attendance';
+
+export interface TeacherActivityItem {
+  id: string;
+  kind: TeacherActivityKind;
+  title: string;
+  occurredAt: string;
+  classId: string;
+  className: string;
+  subjectId: string;
+  subjectName: string;
+  studentName: string | null;
+  studentCount: number | null;
+}
+
 export interface TeacherAlert {
-  kind: 'missing_work' | 'low_progress' | 'low_score';
+  kind: 'missing_work' | 'low_progress' | 'low_score' | 'attendance_incomplete';
   message: string;
   classId: string;
   subjectId: string;
@@ -319,6 +349,19 @@ export interface TeacherDashboard {
   schedule: TeacherScheduleSlot[];
   toGrade: TeacherToGradeItem[];
   alerts: TeacherAlert[];
+  recentActivity: TeacherActivityItem[];
+}
+
+export interface TeacherMaterialItem {
+  id: string;
+  fileName: string;
+  mimeType: string;
+  size: number;
+  createdAt: string;
+  downloadUrl: string;
+  lessonId: string;
+  lessonTitle: string;
+  unitTitle: string;
 }
 
 export interface TeacherLessonSummary {
@@ -346,6 +389,8 @@ export interface TeacherAssignmentListItem {
   subjectId: string;
   subjectName: string;
   pendingCount: number;
+  submissionCount: number;
+  gradedCount: number;
 }
 
 export interface TeacherClassDetail {
@@ -353,8 +398,13 @@ export interface TeacherClassDetail {
   className: string;
   subjectId: string;
   subjectName: string;
+  room: string | null;
+  todaySlots: { startsAt: string; endsAt: string; room: string | null }[];
+  studentCount: number;
   units: TeacherUnit[];
   assignments: TeacherAssignmentListItem[];
+  assessments: TeacherAssessmentListItem[];
+  recentActivity: TeacherActivityItem[];
 }
 
 export interface TeacherRosterRow {
@@ -389,7 +439,7 @@ export interface TeacherLessonDetail {
   url: string | null;
   publishedAt: string | null;
   sortOrder: number;
-  materials: { id: string; fileName: string; mimeType: string; size: number }[];
+  materials: { id: string; fileName: string; mimeType: string; size: number; downloadUrl: string }[];
 }
 
 export interface TeacherAssignmentDetail {
@@ -463,6 +513,15 @@ export interface TeacherAttendance {
   }[];
 }
 
+export interface TeacherAttendanceHistoryItem {
+  date: string;
+  present: number;
+  absent: number;
+  late: number;
+  excused: number;
+  total: number;
+}
+
 export type QuestionType = 'MULTIPLE_CHOICE' | 'MULTIPLE_ANSWER' | 'TRUE_FALSE' | 'SHORT_ANSWER';
 export type AttemptStatus = 'IN_PROGRESS' | 'SUBMITTED' | 'EXPIRED';
 export type StudentAssessmentStatus = 'NOT_STARTED' | AttemptStatus;
@@ -494,6 +553,7 @@ export interface TeacherAssessmentListItem {
   subjectName: string;
   questionCount: number;
   attemptCount: number;
+  timeLimitMinutes: number | null;
 }
 
 export interface TeacherAssessmentDetail {

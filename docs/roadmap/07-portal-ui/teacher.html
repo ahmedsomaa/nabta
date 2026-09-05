@@ -24,7 +24,7 @@
           <header id="docs-header" class="docs-page-header"></header>
           <main id="main" class="docs-main">
       <h1>Phase 7 — Teacher portal polish plan</h1>
-      <p class="lead"><span class="badge badge-phase">Phase 7</span> <span class="badge badge-current">Current</span> Execution plan for the teacher web portal. Copy <a href="../../design/portal-patterns.html">Portal Patterns</a> — do not invent a second card language.</p>
+      <p class="lead"><span class="badge badge-phase">Phase 7</span> <span class="badge badge-current">Current</span> Teacher web portal polish. Copy <a href="../../design/portal-patterns.html">Portal Patterns</a> — same white surface views as student, teacher teal accent.</p>
 
       <div class="callout">
         <p><strong>Companion to</strong> <a href="index.html">Phase 7 — Portal UI</a>. Student polish is shipped (<a href="plan.html">student plan</a>). School admin and system admin wait. Do not implement Phase 8+.</p>
@@ -48,12 +48,22 @@
   S7[PageTrail RTL mobile]
   S0 --> S1 --> S2 --> S3 --> S4 --> S5 --> S6 --> S7</pre>
 
+      <h2>What shipped</h2>
+      <ul>
+        <li>Nav stays <strong>Home · Classes · Assignments · Quizzes · Gradebook</strong>. Attendance, lessons, students, and materials stay inside the class workspace.</li>
+        <li>Home is a work queue: greeting + dynamic subtitle, quick actions with inset icon wells, today’s classes (status + attendance), needs your attention as two columns (to-grade rows + alerts), recent activity.</li>
+        <li>Classes is a picker: My Classes header, search, All / Needs grading / Has quiz chips. Tiles use the student shell (inset accent hero) with teacher facts — students, schedule, to-grade, quiz count, today’s attendance when there is a slot. Opening a class uses tabs: Overview · Students · Lessons · Assignments · Quizzes · Attendance · Materials. Course builder stays a dedicated page.</li>
+        <li>Class workspace tabs match the job: Overview is a dashboard (metrics → today’s slots + attendance → upcoming work / to grade → activity); Students is a table with search and filters; Attendance pairs a distribution bar and per-status counts with a colour-coded segmented control per student, plus a single Mark all dropdown for bulk marking and unmarked students left explicitly unmarked; Assignments is a dense table (due, submissions, graded, status); Quizzes are cards with time limit, attempts, and completion; Lessons is a numbered learning path with material counts; Materials is a resource grid grouped by lesson.</li>
+        <li>Teacher APIs compose existing tables: dashboard <code>recentActivity</code>, slot <code>studentCount</code> / <code>attendanceTaken</code>, class-list stats, class-detail <code>room</code> / <code>todaySlots</code> / assessments + activity, assignment <code>submissionCount</code> / <code>gradedCount</code>, assessment <code>timeLimitMinutes</code>, attendance history, materials list with <code>downloadUrl</code>, <code>attendance_incomplete</code> alerts. No archive filters, quiz “to review” queue, calendar, or messages.</li>
+      </ul>
+
       <h2>Visual direction</h2>
       <ul>
         <li>Same 1px <code>rounded-xl border border-border</code> shells as student — no HeroUI <code>Card</code> as list/tile wrapper</li>
         <li>HeroUI for controls: Button, Chip, Alert, ProgressBar, Radio, Toast, Skeleton, Modal</li>
         <li>Import from <code>apps/web/src/components/portal/PortalChrome.tsx</code>, not from <code>features/student/</code></li>
-        <li>Class tiles: accent hero + lucide-animated book + subject + class name. No fake progress (payload has none)</li>
+        <li>Class tiles: student shell (padded card, inset accent hero, animated book) + teacher facts. No fake progress or archive chips</li>
+        <li>Class workspace tabs use the HeroUI <strong>primary</strong> (segmented pill) variant; portal filter chips stay for in-tab filtering</li>
         <li>Token colors only. Logical CSS. Check ~375px</li>
       </ul>
 
@@ -74,7 +84,7 @@ Do not implement school-admin or system-admin polish or Phase 8+ functionality.<
         <li>Notifications, BullMQ, announcements</li>
         <li>New product domains or schema</li>
         <li>Marketing site, mobile apps</li>
-        <li>Post Announcement, More nav, GPA, class-page lesson/assignment sections that are not already routes</li>
+        <li>Post Announcement, More nav, GPA, calendar, messages, archive chips</li>
       </ul>
 
       <h2>Slice 0 — This plan</h2>
@@ -86,14 +96,14 @@ Do not implement school-admin or system-admin polish or Phase 8+ functionality.<
       <p><strong>Verify:</strong> teacher pages import from <code>@/components/portal</code>; student still compiles.</p>
 
       <h2>Slice 2 — Dashboard</h2>
-      <p><strong>Goal:</strong> greeting header; quick-action Buttons (no announcement); today’s classes, to-grade, and alerts as bordered list rows.</p>
+      <p><strong>Goal:</strong> greeting + useful subtitle; quick-action tiles with inset icon wells and hints; today’s classes as the hero list; needs your attention as two columns (to-grade rows + alerts); recent activity last.</p>
       <p><strong>Route:</strong> <code>/teacher/dashboard</code>.</p>
-      <p><strong>Verify:</strong> <code>teacher@nabta.local</code> sees greeting, schedule rows with <code>dir="ltr"</code> times, to-grade counts, alert rows. Create assignment / quiz still navigate.</p>
+      <p><strong>Verify:</strong> <code>teacher@nabta.local</code> sees greeting, <code>dir="ltr"</code> times, status chips, top to-grade rows linking to submissions, alerts linking to the class, and activity rows from real events only.</p>
 
       <h2>Slice 3 — Classes and class</h2>
-      <p><strong>Goal:</strong> class tiles with accent hero (no progress bar). Class page: header, action buttons, bordered roster. Student detail: panels + lists.</p>
-      <p><strong>Routes:</strong> <code>/teacher/classes</code>, class, student.</p>
-      <p><strong>Verify:</strong> tile opens class; roster row opens student; builder/attendance/gradebook buttons still work.</p>
+      <p><strong>Goal:</strong> student tile shell with teacher facts; search plus All / Needs grading / Has quiz. Class workspace uses segmented (HeroUI primary) tabs, each shaped to its job: Overview is a dashboard, Students and Attendance are tables, Assignments is a dense table, Quizzes are cards, Lessons is a numbered path, Materials is a resource grid. Builder and student detail stay full pages.</p>
+      <p><strong>Routes:</strong> <code>/teacher/classes</code>, class tabs, student, builder.</p>
+      <p><strong>Verify:</strong> search and chips filter the grid; tile opens overview; Students search/filters narrow the roster; Lessons → builder; Attendance history rows switch the date; Materials stay bookmarkable.</p>
 
       <h2>Slice 4 — Assignments</h2>
       <p><strong>Goal:</strong> grouped list (draft / published); form settings in a panel; submissions as list rows; keep grade panel bordered.</p>

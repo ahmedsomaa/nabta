@@ -40,6 +40,15 @@ export class TeacherController {
     return this.teacher.listClasses(user);
   }
 
+  @Get('classes/:classId/subjects/:subjectId/materials')
+  materials(
+    @CurrentUser() user: AuthUser,
+    @Param('classId', ParseUUIDPipe) classId: string,
+    @Param('subjectId', ParseUUIDPipe) subjectId: string,
+  ) {
+    return this.teacher.listMaterials(user, classId, subjectId);
+  }
+
   @Get('classes/:classId/subjects/:subjectId/roster')
   roster(
     @CurrentUser() user: AuthUser,
@@ -220,6 +229,11 @@ export class TeacherController {
   @Get('attendance')
   attendance(@CurrentUser() user: AuthUser, @Query() query: unknown) {
     return this.teacher.getAttendance(user, query);
+  }
+
+  @Get('attendance/history')
+  attendanceHistory(@CurrentUser() user: AuthUser, @Query() query: unknown) {
+    return this.teacher.getAttendanceHistory(user, query);
   }
 
   @Put('attendance')

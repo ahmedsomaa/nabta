@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import { useTranslation } from 'react-i18next';
@@ -7,10 +8,14 @@ import type { TeacherAssessmentListItem } from '@nabta/types';
 import { apiFetch } from '@/lib/api';
 import { QueryError, QueryLoading } from './QueryState';
 import { PortalEmptyState, PortalList, PortalPageHeader } from '@/components/portal/PortalChrome';
+import { PortalFilterChips } from '@/components/portal/PortalTabs';
+
+type Filter = 'all' | 'draft' | 'published';
 
 export function TeacherAssessmentsPage() {
   const { t } = useTranslation();
   const navigate = useNavigate();
+  const [filter, setFilter] = useState<Filter>('all');
   const query = useQuery({
     queryKey: ['teacher-assessments'],
     queryFn: () => apiFetch<TeacherAssessmentListItem[]>('/teacher/assessments'),
@@ -21,10 +26,7 @@ export function TeacherAssessmentsPage() {
 
   const draft = query.data.filter((item) => !item.publishedAt);
   const published = query.data.filter((item) => item.publishedAt);
-  const sections = [
-    { key: 'draft', title: t('teacher.draft'), items: draft },
-    { key: 'published', title: t('teacher.published'), items: published },
-  ].filter((section) => section.items.length > 0);
+  const items = filter === 'draft' ? draft : filter === 'published' ? published : query.data;
 
   return (
     <div className="space-y-6">
@@ -47,14 +49,21 @@ export function TeacherAssessmentsPage() {
           {t('teacher.emptyQuizzes')}
         </PortalEmptyState>
       ) : (
-        sections.map((section) => (
-          <section key={section.key} className="space-y-3">
-            <h2 className="text-lg font-semibold">
-              {section.title}{' '}
-              <span className="text-sm font-normal text-muted">({section.items.length})</span>
-            </h2>
+        <>
+          <PortalFilterChips
+            value={filter}
+            onChange={setFilter}
+            options={[
+              { id: 'all', label: t('teacher.filterAll'), count: query.data.length },
+              { id: 'draft', label: t('teacher.draft'), count: draft.length },
+              { id: 'published', label: t('teacher.published'), count: published.length },
+            ]}
+          />
+          {items.length === 0 ? (
+            <PortalEmptyState icon={FileQuestion}>{t('teacher.emptyQuizzes')}</PortalEmptyState>
+          ) : (
             <PortalList>
-              {section.items.map((item) => (
+              {items.map((item) => (
                 <li key={item.id} className="border-b border-border last:border-b-0">
                   <div className="flex items-start gap-3 px-3 py-2.5">
                     <Link
@@ -87,8 +96,8 @@ export function TeacherAssessmentsPage() {
                 </li>
               ))}
             </PortalList>
-          </section>
-        ))
+          )}
+        </>
       )}
     </div>
   );

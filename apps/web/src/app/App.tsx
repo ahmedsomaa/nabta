@@ -22,7 +22,15 @@ import { StudentAssignmentPage } from '@/features/student/StudentAssignmentPage'
 import { StudentQuizzesPage } from '@/features/student/StudentQuizzesPage';
 import { TeacherDashboardPage } from '@/features/teacher/TeacherDashboardPage';
 import { TeacherClassesPage } from '@/features/teacher/TeacherClassesPage';
-import { TeacherClassPage } from '@/features/teacher/TeacherClassPage';
+import { TeacherClassLayout } from '@/features/teacher/TeacherClassLayout';
+import {
+  TeacherClassAssignmentsPage,
+  TeacherClassLessonsPage,
+  TeacherClassMaterialsPage,
+  TeacherClassOverviewPage,
+  TeacherClassQuizzesPage,
+  TeacherClassStudentsPage,
+} from '@/features/teacher/TeacherClassWorkspace';
 import { TeacherStudentPage } from '@/features/teacher/TeacherStudentPage';
 import { TeacherBuilderPage } from '@/features/teacher/TeacherBuilderPage';
 import { TeacherAssignmentsPage } from '@/features/teacher/TeacherAssignmentsPage';
@@ -95,13 +103,20 @@ export function App() {
                   <Route index element={<Navigate to="dashboard" replace />} />
                   <Route path="dashboard" element={<TeacherDashboardPage />} />
                   <Route path="classes" element={<TeacherClassesPage />} />
-                  <Route path="classes/:classId/:subjectId" element={<TeacherClassPage />} />
                   <Route path="classes/:classId/:subjectId/builder" element={<TeacherBuilderPage />} />
-                  <Route path="classes/:classId/:subjectId/attendance" element={<TeacherAttendancePage />} />
                   <Route
                     path="classes/:classId/:subjectId/students/:studentId"
                     element={<TeacherStudentPage />}
                   />
+                  <Route path="classes/:classId/:subjectId" element={<TeacherClassLayout />}>
+                    <Route index element={<TeacherClassOverviewPage />} />
+                    <Route path="students" element={<TeacherClassStudentsPage />} />
+                    <Route path="lessons" element={<TeacherClassLessonsPage />} />
+                    <Route path="assignments" element={<TeacherClassAssignmentsPage />} />
+                    <Route path="quizzes" element={<TeacherClassQuizzesPage />} />
+                    <Route path="attendance" element={<TeacherAttendancePage />} />
+                    <Route path="materials" element={<TeacherClassMaterialsPage />} />
+                  </Route>
                   <Route path="assignments" element={<TeacherAssignmentsPage />} />
                   <Route path="assignments/new" element={<TeacherAssignmentFormPage />} />
                   <Route path="assignments/:id" element={<TeacherAssignmentFormPage />} />

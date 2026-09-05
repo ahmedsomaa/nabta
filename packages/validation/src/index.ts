@@ -312,6 +312,11 @@ export const attendanceQuerySchema = z.object({
   date: z.string().regex(/^\d{4}-\d{2}-\d{2}$/),
 });
 
+export const attendanceHistoryQuerySchema = z.object({
+  classId: z.string().uuid(),
+  subjectId: z.string().uuid(),
+});
+
 export const putAttendanceSchema = z.object({
   classId: z.string().uuid(),
   subjectId: z.string().uuid(),

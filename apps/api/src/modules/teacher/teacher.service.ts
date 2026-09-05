@@ -7,9 +7,15 @@ import {
   Optional,
 } from '@nestjs/common';
 import { randomUUID } from 'node:crypto';
-import type { AuthUser, StudentAssignmentStatus } from '@nabta/types';
+import type {
+  AttendanceStatus,
+  AuthUser,
+  StudentAssignmentStatus,
+  SubmissionStatus,
+} from '@nabta/types';
 import {
   assignmentFileSchema,
+  attendanceHistoryQuerySchema,
   attendanceQuerySchema,
   createLessonSchema,
   createTeacherAssignmentSchema,
@@ -53,6 +59,28 @@ const MIME_EXT: Record<string, string> = {
 function parseDateOnly(value: string) {
   const [year, month, day] = value.split('-').map(Number);
   return new Date(Date.UTC(year ?? 0, (month ?? 1) - 1, day ?? 1));
+}
+
+function todayDateOnly(now = new Date()) {
+  const pad = (value: number) => String(value).padStart(2, '0');
+  return `${now.getFullYear()}-${pad(now.getMonth() + 1)}-${pad(now.getDate())}`;
+}
+
+function pairKey(classId: string, subjectId: string) {
+  return `${classId}:${subjectId}`;
+}
+
+function pickClassRoom(slots: { weekday: number; room: string | null }[], weekday = new Date().getDay()) {
+  const today = slots.filter((slot) => slot.weekday === weekday);
+  if (today.length > 0) {
+    return today.find((slot) => slot.room)?.room ?? today[0]?.room ?? null;
+  }
+  const unique = [...new Set(slots.map((slot) => slot.room).filter((room): room is string => Boolean(room)))];
+  return unique.length === 1 ? unique[0] : null;
+}
+
+function studentDisplayName(givenName: string, familyName: string) {
+  return `${givenName} ${familyName}`.trim();
 }
 
 function scoreNumber(value: { toString(): string } | number | null | undefined): number | null {
@@ -109,15 +137,13 @@ export class TeacherService {
     const teacher = await this.requireTeacher(user);
     const pairs = teacher.teachingAssignments;
     if (pairs.length === 0) {
-      return { schedule: [], toGrade: [], alerts: [] };
+      return { schedule: [], toGrade: [], alerts: [], recentActivity: [] };
     }
     const weekday = new Date().getDay();
-    const or =
-      pairs.length === 0
-        ? [{ classId: '00000000-0000-4000-8000-000000000000' }]
-        : pairs.map((row) => ({ classId: row.classId, subjectId: row.subjectId }));
+    const or = pairs.map((row) => ({ classId: row.classId, subjectId: row.subjectId }));
+    const takenOn = parseDateOnly(todayDateOnly());
 
-    const [slots, assignments] = await Promise.all([
+    const [slots, assignments, sessionsToday, recentActivity] = await Promise.all([
       this.prisma.timetableSlot.findMany({
         where: { schoolId: teacher.schoolId, weekday, OR: or },
         include: { subject: true, class: true },
@@ -132,7 +158,24 @@ export class TeacherService {
         },
         orderBy: { dueAt: 'asc' },
       }),
+      this.prisma.attendanceSession.findMany({
+        where: { schoolId: teacher.schoolId, takenOn, OR: or },
+        select: { classId: true, subjectId: true },
+      }),
+      this.buildRecentActivity(teacher.schoolId, or),
     ]);
+
+    const classIds = [...new Set(slots.map((slot) => slot.classId))];
+    const enrollments =
+      classIds.length === 0
+        ? []
+        : await this.prisma.enrollment.groupBy({
+            by: ['classId'],
+            where: { schoolId: teacher.schoolId, classId: { in: classIds } },
+            _count: { _all: true },
+          });
+    const studentCounts = new Map(enrollments.map((row) => [row.classId, row._count._all]));
+    const takenKeys = new Set(sessionsToday.map((row) => pairKey(row.classId, row.subjectId)));
 
     const toGrade = assignments
       .map((row) => ({
@@ -146,7 +189,10 @@ export class TeacherService {
       }))
       .filter((row) => row.pending > 0);
 
-    const alerts = await this.buildAlerts(teacher.schoolId, pairs);
+    const alerts = await this.buildAlerts(teacher.schoolId, pairs, {
+      todaySlotKeys: new Set(slots.map((slot) => pairKey(slot.classId, slot.subjectId))),
+      takenKeys,
+    });
 
     return {
       schedule: slots.map((slot) => ({
@@ -159,24 +205,37 @@ export class TeacherService {
         className: slot.class.name,
         subjectId: slot.subjectId,
         subjectName: slot.subject.name,
+        studentCount: studentCounts.get(slot.classId) ?? 0,
+        attendanceTaken: takenKeys.has(pairKey(slot.classId, slot.subjectId)),
       })),
       toGrade,
       alerts,
+      recentActivity,
     };
   }
 
   private async buildAlerts(
     schoolId: string,
     pairs: { classId: string; subjectId: string }[],
+    attendance?: { todaySlotKeys: Set<string>; takenKeys: Set<string> },
   ) {
     const alerts: {
-      kind: 'missing_work' | 'low_progress' | 'low_score';
+      kind: 'missing_work' | 'low_progress' | 'low_score' | 'attendance_incomplete';
       message: string;
       classId: string;
       subjectId: string;
     }[] = [];
 
     for (const pair of pairs) {
+      const key = pairKey(pair.classId, pair.subjectId);
+      if (attendance?.todaySlotKeys.has(key) && !attendance.takenKeys.has(key)) {
+        alerts.push({
+          kind: 'attendance_incomplete',
+          message: 'Attendance not taken today',
+          classId: pair.classId,
+          subjectId: pair.subjectId,
+        });
+      }
       const roster = await this.rosterRows(schoolId, pair.classId, pair.subjectId);
       const missing = roster.filter((row) => row.missingWork > 0).length;
       const behind = roster.filter((row) => row.progressPercent < 50).length;
@@ -234,6 +293,119 @@ export class TeacherService {
     return alerts;
   }
 
+  private async buildRecentActivity(
+    schoolId: string,
+    pairs: { classId: string; subjectId: string }[],
+    limit = 8,
+  ) {
+    if (pairs.length === 0) return [];
+    const or = pairs;
+    const [submissions, attempts, sessions] = await Promise.all([
+      this.prisma.assignmentSubmission.findMany({
+        where: {
+          schoolId,
+          submittedAt: { not: null },
+          status: { in: ['SUBMITTED', 'LATE', 'GRADED', 'RETURNED'] },
+          assignment: { OR: or },
+        },
+        include: {
+          student: true,
+          assignment: { include: { class: true, subject: true } },
+        },
+        orderBy: { submittedAt: 'desc' },
+        take: 20,
+      }),
+      this.prisma.assessmentAttempt.findMany({
+        where: {
+          schoolId,
+          submittedAt: { not: null },
+          status: { in: ['SUBMITTED', 'EXPIRED'] },
+          assessment: { OR: or },
+        },
+        include: {
+          student: true,
+          assessment: { include: { class: true, subject: true } },
+        },
+        orderBy: { submittedAt: 'desc' },
+        take: 20,
+      }),
+      this.prisma.attendanceSession.findMany({
+        where: { schoolId, OR: or },
+        include: {
+          class: true,
+          subject: true,
+          records: { select: { id: true } },
+        },
+        orderBy: { createdAt: 'desc' },
+        take: 20,
+      }),
+    ]);
+
+    const items: {
+      id: string;
+      kind: 'submission' | 'assessment' | 'attendance';
+      title: string;
+      occurredAt: Date;
+      classId: string;
+      className: string;
+      subjectId: string;
+      subjectName: string;
+      studentName: string | null;
+      studentCount: number | null;
+    }[] = [];
+
+    for (const row of submissions) {
+      if (!row.submittedAt) continue;
+      items.push({
+        id: row.id,
+        kind: 'submission',
+        title: row.assignment.title,
+        occurredAt: row.submittedAt,
+        classId: row.assignment.classId,
+        className: row.assignment.class.name,
+        subjectId: row.assignment.subjectId,
+        subjectName: row.assignment.subject.name,
+        studentName: studentDisplayName(row.student.givenName, row.student.familyName),
+        studentCount: null,
+      });
+    }
+    for (const row of attempts) {
+      if (!row.submittedAt) continue;
+      items.push({
+        id: row.id,
+        kind: 'assessment',
+        title: row.assessment.title,
+        occurredAt: row.submittedAt,
+        classId: row.assessment.classId,
+        className: row.assessment.class.name,
+        subjectId: row.assessment.subjectId,
+        subjectName: row.assessment.subject.name,
+        studentName: studentDisplayName(row.student.givenName, row.student.familyName),
+        studentCount: null,
+      });
+    }
+    for (const row of sessions) {
+      items.push({
+        id: row.id,
+        kind: 'attendance',
+        title: row.subject.name,
+        occurredAt: row.createdAt,
+        classId: row.classId,
+        className: row.class.name,
+        subjectId: row.subjectId,
+        subjectName: row.subject.name,
+        studentName: null,
+        studentCount: row.records.length,
+      });
+    }
+
+    items.sort((a, b) => b.occurredAt.getTime() - a.occurredAt.getTime());
+    return items.slice(0, limit).map((item) => ({
+      ...item,
+      occurredAt: item.occurredAt.toISOString(),
+    }));
+  }
+
   async listClasses(user: AuthUser) {
     const teacher = await this.requireTeacher(user);
     const rows = await this.prisma.teachingAssignment.findMany({
@@ -241,41 +413,133 @@ export class TeacherService {
       include: { class: true, subject: true },
       orderBy: [{ class: { name: 'asc' } }, { subject: { name: 'asc' } }],
     });
-    return rows.map((row) => ({
-      classId: row.classId,
-      className: row.class.name,
-      subjectId: row.subjectId,
-      subjectName: row.subject.name,
-    }));
+    if (rows.length === 0) return [];
+    const or = rows.map((row) => ({ classId: row.classId, subjectId: row.subjectId }));
+    const classIds = [...new Set(rows.map((row) => row.classId))];
+    const weekday = new Date().getDay();
+    const takenOn = parseDateOnly(todayDateOnly());
+    const [enrollments, slots, assignments, quizzes, sessionsToday] = await Promise.all([
+      this.prisma.enrollment.groupBy({
+        by: ['classId'],
+        where: { schoolId: teacher.schoolId, classId: { in: classIds } },
+        _count: { _all: true },
+      }),
+      this.prisma.timetableSlot.findMany({
+        where: { schoolId: teacher.schoolId, OR: or },
+        orderBy: [{ weekday: 'asc' }, { startsAt: 'asc' }],
+      }),
+      this.prisma.assignment.findMany({
+        where: { schoolId: teacher.schoolId, OR: or, publishedAt: { not: null } },
+        include: {
+          submissions: { where: { status: { in: ['SUBMITTED', 'LATE'] } }, select: { id: true } },
+        },
+      }),
+      this.prisma.assessment.groupBy({
+        by: ['classId', 'subjectId'],
+        where: { schoolId: teacher.schoolId, OR: or, publishedAt: { not: null } },
+        _count: { _all: true },
+      }),
+      this.prisma.attendanceSession.findMany({
+        where: { schoolId: teacher.schoolId, takenOn, OR: or },
+        select: { classId: true, subjectId: true },
+      }),
+    ]);
+    const studentCounts = new Map(enrollments.map((row) => [row.classId, row._count._all]));
+    const quizCounts = new Map(
+      quizzes.map((row) => [pairKey(row.classId, row.subjectId), row._count._all]),
+    );
+    const takenKeys = new Set(sessionsToday.map((row) => pairKey(row.classId, row.subjectId)));
+    const pendingByPair = new Map<string, number>();
+    for (const assignment of assignments) {
+      const key = pairKey(assignment.classId, assignment.subjectId);
+      pendingByPair.set(key, (pendingByPair.get(key) ?? 0) + assignment.submissions.length);
+    }
+    const scheduleByPair = new Map<
+      string,
+      { weekday: number; startsAt: string; endsAt: string; room: string | null }[]
+    >();
+    for (const slot of slots) {
+      const key = pairKey(slot.classId, slot.subjectId);
+      const list = scheduleByPair.get(key) ?? [];
+      list.push({
+        weekday: slot.weekday,
+        startsAt: slot.startsAt,
+        endsAt: slot.endsAt,
+        room: slot.room,
+      });
+      scheduleByPair.set(key, list);
+    }
+
+    return rows.map((row) => {
+      const key = pairKey(row.classId, row.subjectId);
+      const schedule = scheduleByPair.get(key) ?? [];
+      const hasSlotToday = schedule.some((slot) => slot.weekday === weekday);
+      return {
+        classId: row.classId,
+        className: row.class.name,
+        subjectId: row.subjectId,
+        subjectName: row.subject.name,
+        subjectCode: row.subject.code ?? null,
+        studentCount: studentCounts.get(row.classId) ?? 0,
+        schedule,
+        pendingCount: pendingByPair.get(key) ?? 0,
+        publishedQuizCount: quizCounts.get(key) ?? 0,
+        attendanceTakenToday: hasSlotToday ? takenKeys.has(key) : null,
+      };
+    });
   }
 
   async getClassSubject(user: AuthUser, classId: string, subjectId: string) {
     const teacher = await this.requireTeacher(user);
     await this.assertTeaching(teacher, classId, subjectId);
-    const [klass, subject, units, assignments] = await Promise.all([
-      this.prisma.schoolClass.findFirst({ where: { id: classId, schoolId: teacher.schoolId } }),
-      this.prisma.subject.findFirst({ where: { id: subjectId, schoolId: teacher.schoolId } }),
-      this.prisma.unit.findMany({
-        where: { schoolId: teacher.schoolId, subjectId, classId },
-        orderBy: { sortOrder: 'asc' },
-        include: { lessons: { orderBy: { sortOrder: 'asc' } } },
-      }),
-      this.prisma.assignment.findMany({
-        where: { schoolId: teacher.schoolId, classId, subjectId },
-        include: {
-          class: true,
-          subject: true,
-          submissions: { where: { status: { in: ['SUBMITTED', 'LATE'] } } },
-        },
-        orderBy: { dueAt: 'asc' },
-      }),
-    ]);
+    const pair = { classId, subjectId };
+    const [klass, subject, units, assignments, assessments, studentCount, recentActivity, slots] =
+      await Promise.all([
+        this.prisma.schoolClass.findFirst({ where: { id: classId, schoolId: teacher.schoolId } }),
+        this.prisma.subject.findFirst({ where: { id: subjectId, schoolId: teacher.schoolId } }),
+        this.prisma.unit.findMany({
+          where: { schoolId: teacher.schoolId, subjectId, classId },
+          orderBy: { sortOrder: 'asc' },
+          include: { lessons: { orderBy: { sortOrder: 'asc' } } },
+        }),
+        this.prisma.assignment.findMany({
+          where: { schoolId: teacher.schoolId, classId, subjectId },
+          include: {
+            class: true,
+            subject: true,
+            submissions: { select: { status: true } },
+          },
+          orderBy: { dueAt: 'asc' },
+        }),
+        this.prisma.assessment.findMany({
+          where: { schoolId: teacher.schoolId, classId, subjectId },
+          include: {
+            class: true,
+            subject: true,
+            questions: { select: { id: true } },
+            attempts: { where: { status: { in: ['SUBMITTED', 'EXPIRED'] } }, select: { id: true } },
+          },
+          orderBy: { createdAt: 'desc' },
+        }),
+        this.prisma.enrollment.count({ where: { schoolId: teacher.schoolId, classId } }),
+        this.buildRecentActivity(teacher.schoolId, [pair]),
+        this.prisma.timetableSlot.findMany({
+          where: { schoolId: teacher.schoolId, classId, subjectId },
+          select: { weekday: true, room: true, startsAt: true, endsAt: true },
+          orderBy: { startsAt: 'asc' },
+        }),
+      ]);
     if (!klass || !subject) throw new NotFoundException('Class not found.');
     return {
       classId,
       className: klass.name,
       subjectId,
       subjectName: subject.name,
+      room: pickClassRoom(slots),
+      todaySlots: slots
+        .filter((slot) => slot.weekday === new Date().getDay())
+        .map((slot) => ({ startsAt: slot.startsAt, endsAt: slot.endsAt, room: slot.room })),
+      studentCount,
       units: units.map((unit) => ({
         id: unit.id,
         title: unit.title,
@@ -289,7 +553,46 @@ export class TeacherService {
         })),
       })),
       assignments: assignments.map((row) => this.mapAssignmentList(row)),
+      assessments: assessments.map((row) => ({
+        id: row.id,
+        title: row.title,
+        publishedAt: row.publishedAt?.toISOString() ?? null,
+        classId: row.classId,
+        className: row.class.name,
+        subjectId: row.subjectId,
+        subjectName: row.subject.name,
+        questionCount: row.questions.length,
+        attemptCount: row.attempts.length,
+        timeLimitMinutes: row.timeLimitMinutes,
+      })),
+      recentActivity,
     };
+  }
+
+  async listMaterials(user: AuthUser, classId: string, subjectId: string) {
+    const teacher = await this.requireTeacher(user);
+    await this.assertTeaching(teacher, classId, subjectId);
+    const rows = await this.prisma.learningMaterial.findMany({
+      where: {
+        schoolId: teacher.schoolId,
+        lesson: { unit: { classId, subjectId } },
+      },
+      include: { lesson: { include: { unit: true } } },
+      orderBy: { createdAt: 'desc' },
+    });
+    return Promise.all(
+      rows.map(async (row) => ({
+        id: row.id,
+        fileName: row.fileName,
+        mimeType: row.mimeType,
+        size: row.size,
+        createdAt: row.createdAt.toISOString(),
+        downloadUrl: await this.storage.getObjectUrl(row.storageKey),
+        lessonId: row.lessonId,
+        lessonTitle: row.lesson.title,
+        unitTitle: row.lesson.unit.title,
+      })),
+    );
   }
 
   async getRoster(user: AuthUser, classId: string, subjectId: string) {
@@ -582,12 +885,15 @@ export class TeacherService {
       url: lesson.url,
       publishedAt: lesson.publishedAt?.toISOString() ?? null,
       sortOrder: lesson.sortOrder,
-      materials: lesson.materials.map((row) => ({
-        id: row.id,
-        fileName: row.fileName,
-        mimeType: row.mimeType,
-        size: row.size,
-      })),
+      materials: await Promise.all(
+        lesson.materials.map(async (row) => ({
+          id: row.id,
+          fileName: row.fileName,
+          mimeType: row.mimeType,
+          size: row.size,
+          downloadUrl: await this.storage.getObjectUrl(row.storageKey),
+        })),
+      ),
     };
   }
 
@@ -683,7 +989,7 @@ export class TeacherService {
       include: {
         class: true,
         subject: true,
-        submissions: { where: { status: { in: ['SUBMITTED', 'LATE'] } } },
+        submissions: { select: { status: true } },
       },
       orderBy: { dueAt: 'asc' },
     });
@@ -1057,6 +1363,34 @@ export class TeacherService {
     return this.getAttendance(user, { classId: input.classId, subjectId: input.subjectId, date: input.date });
   }
 
+  async getAttendanceHistory(user: AuthUser, query: unknown) {
+    const input = attendanceHistoryQuerySchema.parse(query);
+    const teacher = await this.requireTeacher(user);
+    await this.assertTeaching(teacher, input.classId, input.subjectId);
+    const sessions = await this.prisma.attendanceSession.findMany({
+      where: {
+        schoolId: teacher.schoolId,
+        classId: input.classId,
+        subjectId: input.subjectId,
+      },
+      include: { records: { select: { status: true } } },
+      orderBy: { takenOn: 'desc' },
+      take: 10,
+    });
+    return sessions.map((session) => {
+      const count = (status: AttendanceStatus) =>
+        session.records.filter((row) => row.status === status).length;
+      return {
+        date: session.takenOn.toISOString().slice(0, 10),
+        present: count('PRESENT'),
+        absent: count('ABSENT'),
+        late: count('LATE'),
+        excused: count('EXCUSED'),
+        total: session.records.length,
+      };
+    });
+  }
+
   private mapAssignmentList(row: {
     id: string;
     title: string;
@@ -1066,8 +1400,9 @@ export class TeacherService {
     subjectId: string;
     class: { name: string };
     subject: { name: string };
-    submissions: unknown[];
+    submissions: { status: SubmissionStatus }[];
   }) {
+    const submitted = row.submissions.filter((item) => item.status !== 'DRAFT');
     return {
       id: row.id,
       title: row.title,
@@ -1077,7 +1412,12 @@ export class TeacherService {
       className: row.class.name,
       subjectId: row.subjectId,
       subjectName: row.subject.name,
-      pendingCount: row.submissions.length,
+      pendingCount: submitted.filter((item) => item.status === 'SUBMITTED' || item.status === 'LATE')
+        .length,
+      submissionCount: submitted.length,
+      gradedCount: submitted.filter(
+        (item) => item.status === 'GRADED' || item.status === 'RETURNED',
+      ).length,
     };
   }
 

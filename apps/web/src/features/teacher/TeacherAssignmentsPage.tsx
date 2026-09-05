@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import { useTranslation } from 'react-i18next';
@@ -7,11 +8,15 @@ import { apiFetch } from '@/lib/api';
 import { formatDue } from '@/features/student/StatusChip';
 import { QueryError, QueryLoading } from './QueryState';
 import { PortalEmptyState, PortalList, PortalPageHeader } from '@/components/portal/PortalChrome';
+import { PortalFilterChips } from '@/components/portal/PortalTabs';
 import { ClipboardCheckIcon } from '@/components/icons/clipboard-check';
+
+type Filter = 'all' | 'toGrade' | 'draft' | 'published';
 
 export function TeacherAssignmentsPage() {
   const { t, i18n } = useTranslation();
   const navigate = useNavigate();
+  const [filter, setFilter] = useState<Filter>('all');
   const query = useQuery({
     queryKey: ['teacher-assignments'],
     queryFn: () => apiFetch<TeacherAssignmentListItem[]>('/teacher/assignments'),
@@ -20,12 +25,17 @@ export function TeacherAssignmentsPage() {
   if (query.isLoading) return <QueryLoading variant="grid" />;
   if (query.isError || !query.data) return <QueryError onRetry={() => void query.refetch()} />;
 
+  const toGrade = query.data.filter((item) => item.pendingCount > 0);
   const draft = query.data.filter((item) => !item.publishedAt);
   const published = query.data.filter((item) => item.publishedAt);
-  const sections = [
-    { key: 'draft', title: t('teacher.draft'), items: draft },
-    { key: 'published', title: t('teacher.published'), items: published },
-  ].filter((section) => section.items.length > 0);
+  const items =
+    filter === 'toGrade'
+      ? toGrade
+      : filter === 'draft'
+        ? draft
+        : filter === 'published'
+          ? published
+          : query.data;
 
   return (
     <div className="space-y-6">
@@ -48,14 +58,22 @@ export function TeacherAssignmentsPage() {
           {t('teacher.emptyAssignments')}
         </PortalEmptyState>
       ) : (
-        sections.map((section) => (
-          <section key={section.key} className="space-y-3">
-            <h2 className="text-lg font-semibold">
-              {section.title}{' '}
-              <span className="text-sm font-normal text-muted">({section.items.length})</span>
-            </h2>
+        <>
+          <PortalFilterChips
+            value={filter}
+            onChange={setFilter}
+            options={[
+              { id: 'all', label: t('teacher.filterAll'), count: query.data.length },
+              { id: 'toGrade', label: t('teacher.filterToGrade'), count: toGrade.length },
+              { id: 'draft', label: t('teacher.draft'), count: draft.length },
+              { id: 'published', label: t('teacher.published'), count: published.length },
+            ]}
+          />
+          {items.length === 0 ? (
+            <PortalEmptyState icon={ClipboardCheckIcon}>{t('teacher.emptyAssignments')}</PortalEmptyState>
+          ) : (
             <PortalList>
-              {section.items.map((item) => (
+              {items.map((item) => (
                 <li key={item.id} className="border-b border-border last:border-b-0">
                   <div className="flex items-start gap-3 px-3 py-2.5">
                     <Link
@@ -88,8 +106,8 @@ export function TeacherAssignmentsPage() {
                 </li>
               ))}
             </PortalList>
-          </section>
-        ))
+          )}
+        </>
       )}
     </div>
   );

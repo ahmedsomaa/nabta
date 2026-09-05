@@ -96,7 +96,7 @@
 
       <h2>Theme (Light / Dark)</h2>
       <ul>
-        <li>HeroUI CSS variables; student <code>--accent</code> = <code>#3FAE6A</code> — see <a href="../design/colors.html">Colors</a> and <a href="../design/theming.html">Theming</a></li>
+        <li>HeroUI CSS variables; student <code>--accent</code> = <code>#3FAE6A</code>, teacher <code>#16876F</code> via <code>html[data-portal]</code> — see <a href="../design/colors.html">Colors</a> and <a href="../design/theming.html">Theming</a></li>
         <li>Theme toggle in app shell; persist in localStorage/profile</li>
         <li>Respect <code>prefers-color-scheme</code> as default</li>
       </ul>
@@ -118,7 +118,7 @@
           <tr><td>Admin</td><td>Sidebar: Overview, Users, Academics, Reports, Settings</td><td>Bottom nav + drawer</td></tr>
         </tbody>
       </table></div>
-      <p>Shared chrome: <code>PortalPanel</code>, <code>PortalList</code>, <code>PortalPageHeader</code> in <code>apps/web/src/components/portal/PortalChrome.tsx</code>. Student pages keep <code>Student*</code> re-exports. Teacher imports portal helpers, not student feature files. Breadcrumbs: <code>PageTrail</code> in <code>apps/web/src/layouts/PageTrail.tsx</code> — <a href="../design/portal-patterns.html">Portal Patterns</a>.</p>
+      <p>Shared chrome: <code>PortalPanel</code>, <code>PortalList</code>, <code>PortalPageHeader</code> in <code>apps/web/src/components/portal/PortalChrome.tsx</code>; tabs in <code>PortalTabs.tsx</code>. Student pages keep <code>Student*</code> re-exports. Teacher imports portal helpers, not student feature files. Class workspace tabs are URL routes under <code>/teacher/classes/:classId/:subjectId</code>. Breadcrumbs: <code>PageTrail</code> in <code>apps/web/src/layouts/PageTrail.tsx</code> — <a href="../design/portal-patterns.html">Portal Patterns</a>.</p>
       <p>Quiz attempt (<code>/student/assessments/:id/attempts/:attemptId</code>, not <code>/result</code>) hides the student sidebar, header trail, and mobile bottom nav so the attempt top bar is the only chrome.</p>
 
       <h2>Route Sketch</h2>
@@ -140,8 +140,13 @@
 /teacher/dashboard
 /teacher/classes
 /teacher/classes/:classId/:subjectId
-/teacher/classes/:classId/:subjectId/builder
+/teacher/classes/:classId/:subjectId/students
+/teacher/classes/:classId/:subjectId/lessons
+/teacher/classes/:classId/:subjectId/assignments
+/teacher/classes/:classId/:subjectId/quizzes
 /teacher/classes/:classId/:subjectId/attendance
+/teacher/classes/:classId/:subjectId/materials
+/teacher/classes/:classId/:subjectId/builder
 /teacher/classes/:classId/:subjectId/students/:studentId
 /teacher/assignments
 /teacher/assignments/new

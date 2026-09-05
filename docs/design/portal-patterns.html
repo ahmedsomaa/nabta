@@ -120,12 +120,19 @@ Accent fill: controls only</code></pre>
       </table></div>
 
       <h2>Reuse in other portals</h2>
-      <p>Shared helpers live in <code>apps/web/src/components/portal/PortalChrome.tsx</code> (<code>PortalPanel</code>, <code>PortalList</code>, <code>PortalPageHeader</code>, <code>PortalEmptyState</code>, <code>IconWell</code>, <code>PortalProgress</code>, <code>PortalMetric</code>). Student pages keep <code>Student*</code> re-exports. Teacher and later portals import portal helpers — do not import student feature files. Do not invent a second visual system.</p>
+      <h2>Teacher Home</h2>
+      <p>A prioritized work queue, not a widget dump. Stable order: greeting → quick actions → today’s classes → needs your attention (two columns: to grade + alerts) → recent activity. Quick actions use an inset rounded icon well with card padding — the accent fill does not touch the border. Class tiles keep the full-bleed accent hero band. Today’s classes use a bordered list with status chips and primary actions. Needs your attention shows the top few real rows per column (assignment links, not a quiz-review queue). Activity is a compact timeline from the teacher dashboard payload. Teacher teal <code>#16876F</code> stays on <code>html[data-portal="teacher"]</code>.</p>
+
+      <h2>Teacher class workspace</h2>
+      <p>Hero panel (icon, subject, class, student count) plus URL tabs: Overview · Students · Lessons · Assignments · Quizzes · Attendance · Materials. Queues stay lists; the roster and gradebook stay tables. Course builder remains a full page for drag-and-drop. Do not add Attendance, Lessons, or Materials to the main sidebar.</p>
+
+      <p>Shared helpers live in <code>apps/web/src/components/portal/PortalChrome.tsx</code> (<code>PortalPanel</code>, <code>PortalList</code>, <code>PortalPageHeader</code>, <code>PortalEmptyState</code>, <code>IconWell</code>, <code>PortalProgress</code>, <code>PortalMetric</code>) and <code>PortalTabs.tsx</code> (<code>PortalTabs</code>, <code>PortalFilterChips</code>, <code>PortalNavTabs</code>). Student pages keep <code>Student*</code> re-exports. Teacher and later portals import portal helpers — do not import student feature files. Do not invent a second visual system.</p>
       <p>System admin (<code>apps/system-admin</code>) uses the same HeroUI + Nabta tokens — apply the same shells there.</p>
 
       <h2>File map</h2>
       <ul>
         <li><code>apps/web/src/components/portal/PortalChrome.tsx</code> — shared panel, list, header, empty, progress, metric, icon well</li>
+        <li><code>apps/web/src/components/portal/PortalTabs.tsx</code> — tabs, filter chips, class workspace nav tabs</li>
         <li><code>apps/web/src/features/student/StudentChrome.tsx</code> — <code>Student*</code> re-exports</li>
         <li><code>apps/web/src/layouts/PageTrail.tsx</code> — breadcrumbs</li>
         <li><code>apps/web/src/layouts/StudentLayout.tsx</code> — nav: Home, Subjects, Assignments, Quizzes, Grades</li>

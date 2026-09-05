@@ -172,6 +172,7 @@ export class AssessmentsService {
       subjectName: row.subject.name,
       questionCount: row.questions.length,
       attemptCount: row.attempts.length,
+      timeLimitMinutes: row.timeLimitMinutes,
     }));
   }
 

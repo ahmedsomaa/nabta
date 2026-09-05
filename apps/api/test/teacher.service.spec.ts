@@ -142,4 +142,226 @@ describe('TeacherService isolation', () => {
     );
     expect(published[0]?.status).toBe('RETURNED');
   });
+
+  it('enriches dashboard slots, activity, and attendance alerts', async () => {
+    const submittedAt = new Date('2026-09-05T10:00:00.000Z');
+    const prisma = {
+      teacher: { findFirst: jest.fn().mockResolvedValue(teacherRow) },
+      timetableSlot: {
+        findMany: jest.fn().mockResolvedValue([
+          {
+            id: 'slot-1',
+            weekday: 1,
+            startsAt: '09:00',
+            endsAt: '10:00',
+            room: '204',
+            classId: 'c1',
+            subjectId: 'math',
+            class: { name: '10A' },
+            subject: { name: 'Mathematics' },
+          },
+        ]),
+      },
+      assignment: { findMany: jest.fn().mockResolvedValue([]) },
+      attendanceSession: { findMany: jest.fn().mockResolvedValue([]) },
+      assignmentSubmission: {
+        findMany: jest.fn().mockResolvedValue([
+          {
+            id: 'sub-1',
+            submittedAt,
+            student: { givenName: 'Sara', familyName: 'Ahmed' },
+            assignment: {
+              title: 'Algebra Practice',
+              classId: 'c1',
+              subjectId: 'math',
+              class: { name: '10A' },
+              subject: { name: 'Mathematics' },
+            },
+          },
+        ]),
+      },
+      assessmentAttempt: { findMany: jest.fn().mockResolvedValue([]) },
+      enrollment: {
+        groupBy: jest.fn().mockResolvedValue([{ classId: 'c1', _count: { _all: 24 } }]),
+        findMany: jest.fn().mockResolvedValue([]),
+      },
+      lesson: { findMany: jest.fn().mockResolvedValue([]) },
+      lessonProgress: { findMany: jest.fn().mockResolvedValue([]) },
+      assessment: { findMany: jest.fn().mockResolvedValue([]) },
+    };
+    const service = new TeacherService(prisma as never, { getUploadUrl: jest.fn() } as never);
+    const dash = await service.getDashboard(teacherUser);
+    expect(dash.schedule[0]).toMatchObject({
+      studentCount: 24,
+      attendanceTaken: false,
+      room: '204',
+    });
+    expect(dash.alerts.some((alert) => alert.kind === 'attendance_incomplete')).toBe(true);
+    expect(dash.recentActivity[0]).toMatchObject({
+      kind: 'submission',
+      title: 'Algebra Practice',
+      studentName: 'Sara Ahmed',
+    });
+  });
+
+  it('enriches the class list from enrollments, timetable, and pending work', async () => {
+    const prisma = {
+      teacher: { findFirst: jest.fn().mockResolvedValue(teacherRow) },
+      teachingAssignment: {
+        findMany: jest.fn().mockResolvedValue([
+          {
+            classId: 'c1',
+            subjectId: 'math',
+            class: { name: '10A' },
+            subject: { name: 'Mathematics', code: 'MATH-10-A' },
+          },
+        ]),
+      },
+      enrollment: {
+        groupBy: jest.fn().mockResolvedValue([{ classId: 'c1', _count: { _all: 24 } }]),
+      },
+      timetableSlot: {
+        findMany: jest.fn().mockResolvedValue([
+          { classId: 'c1', subjectId: 'math', weekday: 0, startsAt: '09:00', endsAt: '10:00', room: '204' },
+          { classId: 'c1', subjectId: 'math', weekday: 2, startsAt: '09:00', endsAt: '10:00', room: '204' },
+          {
+            classId: 'c1',
+            subjectId: 'math',
+            weekday: new Date().getDay(),
+            startsAt: '09:00',
+            endsAt: '10:00',
+            room: '204',
+          },
+        ]),
+      },
+      assignment: {
+        findMany: jest.fn().mockResolvedValue([
+          { classId: 'c1', subjectId: 'math', submissions: [{ id: 's1' }, { id: 's2' }] },
+        ]),
+      },
+      assessment: {
+        groupBy: jest
+          .fn()
+          .mockResolvedValue([{ classId: 'c1', subjectId: 'math', _count: { _all: 1 } }]),
+      },
+      attendanceSession: { findMany: jest.fn().mockResolvedValue([]) },
+    };
+    const service = new TeacherService(prisma as never, { getUploadUrl: jest.fn() } as never);
+    const classes = await service.listClasses(teacherUser);
+    expect(classes[0]).toMatchObject({
+      subjectCode: 'MATH-10-A',
+      studentCount: 24,
+      pendingCount: 2,
+      publishedQuizCount: 1,
+      attendanceTakenToday: false,
+    });
+    expect(classes[0]?.schedule.length).toBeGreaterThanOrEqual(2);
+  });
+
+  it('splits assignment submissions into pending, submitted, and graded counts', async () => {
+    const prisma = {
+      teacher: {
+        findFirst: jest.fn().mockResolvedValue({
+          ...teacherRow,
+          teachingAssignments: [{ classId: 'c1', subjectId: 'math' }],
+        }),
+      },
+      assignment: {
+        findMany: jest.fn().mockResolvedValue([
+          {
+            id: 'asg-1',
+            title: 'Algebra Practice',
+            dueAt: new Date('2026-09-10T12:00:00.000Z'),
+            publishedAt: new Date('2026-09-01T08:00:00.000Z'),
+            classId: 'c1',
+            subjectId: 'math',
+            class: { name: '10A' },
+            subject: { name: 'Mathematics' },
+            submissions: [
+              { status: 'DRAFT' },
+              { status: 'SUBMITTED' },
+              { status: 'LATE' },
+              { status: 'GRADED' },
+              { status: 'RETURNED' },
+            ],
+          },
+        ]),
+      },
+    };
+    const service = new TeacherService(prisma as never, { getUploadUrl: jest.fn() } as never);
+    const assignments = await service.listAssignments(teacherUser);
+    expect(assignments[0]).toMatchObject({
+      pendingCount: 2,
+      submissionCount: 4,
+      gradedCount: 2,
+    });
+  });
+
+  it('summarises attendance history by status for the class pair', async () => {
+    const prisma = {
+      teacher: { findFirst: jest.fn().mockResolvedValue(teacherRow) },
+      teachingAssignment: { findFirst: jest.fn().mockResolvedValue({ id: 'ta' }) },
+      attendanceSession: {
+        findMany: jest.fn().mockResolvedValue([
+          {
+            takenOn: new Date('2026-09-04T00:00:00.000Z'),
+            records: [
+              { status: 'PRESENT' },
+              { status: 'PRESENT' },
+              { status: 'ABSENT' },
+              { status: 'LATE' },
+              { status: 'EXCUSED' },
+            ],
+          },
+        ]),
+      },
+    };
+    const service = new TeacherService(prisma as never, { getUploadUrl: jest.fn() } as never);
+    const history = await service.getAttendanceHistory(teacherUser, {
+      classId: '11111111-1111-4111-8111-111111111111',
+      subjectId: '22222222-2222-4222-8222-222222222222',
+    });
+    expect(history[0]).toEqual({
+      date: '2026-09-04',
+      present: 2,
+      absent: 1,
+      late: 1,
+      excused: 1,
+      total: 5,
+    });
+  });
+
+  it('lists class materials with download URLs', async () => {
+    const prisma = {
+      teacher: { findFirst: jest.fn().mockResolvedValue(teacherRow) },
+      teachingAssignment: { findFirst: jest.fn().mockResolvedValue({ id: 'ta' }) },
+      learningMaterial: {
+        findMany: jest.fn().mockResolvedValue([
+          {
+            id: 'mat-1',
+            fileName: 'notes.pdf',
+            mimeType: 'application/pdf',
+            size: 1024,
+            createdAt: new Date('2026-09-05T08:00:00.000Z'),
+            storageKey: 'school-a/materials/math/lesson-1/notes.pdf',
+            lessonId: 'lesson-1',
+            lesson: { title: 'Algebra', unit: { title: 'Unit 1' } },
+          },
+        ]),
+      },
+    };
+    const storage = {
+      getUploadUrl: jest.fn(),
+      getObjectUrl: jest.fn().mockResolvedValue('https://files/notes.pdf'),
+    };
+    const service = new TeacherService(prisma as never, storage as never);
+    const materials = await service.listMaterials(teacherUser, 'c1', 'math');
+    expect(storage.getObjectUrl).toHaveBeenCalledWith('school-a/materials/math/lesson-1/notes.pdf');
+    expect(materials[0]).toMatchObject({
+      fileName: 'notes.pdf',
+      downloadUrl: 'https://files/notes.pdf',
+      lessonTitle: 'Algebra',
+      unitTitle: 'Unit 1',
+    });
+  });
 });

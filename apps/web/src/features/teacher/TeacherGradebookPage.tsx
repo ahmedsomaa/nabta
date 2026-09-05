@@ -6,6 +6,7 @@ import type { TeacherClassItem, TeacherGradebook } from '@nabta/types';
 import { apiFetch } from '@/lib/api';
 import { QueryError, QueryLoading } from './QueryState';
 import { PortalEmptyState, PortalPageHeader } from '@/components/portal/PortalChrome';
+import { PortalFilterChips } from '@/components/portal/PortalTabs';
 import { usePageTrail } from '@/layouts/PageTrail';
 
 export function TeacherGradebookPage() {
@@ -48,22 +49,19 @@ export function TeacherGradebookPage() {
   return (
     <div className="space-y-4">
       <PortalPageHeader title={t('nav.gradebook')} />
-      <div className="flex flex-wrap gap-2">
-        {classes.data.map((item) => (
-          <button
-            key={`${item.classId}-${item.subjectId}`}
-            type="button"
-            className={`rounded-lg border px-3 py-1.5 text-sm ${
-              selected?.classId === item.classId && selected?.subjectId === item.subjectId
-                ? 'border-accent bg-accent/10'
-                : 'border-border'
-            }`}
-            onClick={() => navigate(`/teacher/gradebook/${item.classId}/${item.subjectId}`)}
-          >
-            {item.className} · {item.subjectName}
-          </button>
-        ))}
-      </div>
+      <PortalFilterChips
+        value={`${selected?.classId}:${selected?.subjectId}`}
+        onChange={(next) => {
+          const [nextClassId, nextSubjectId] = next.split(':');
+          if (nextClassId && nextSubjectId) {
+            navigate(`/teacher/gradebook/${nextClassId}/${nextSubjectId}`);
+          }
+        }}
+        options={classes.data.map((item) => ({
+          id: `${item.classId}:${item.subjectId}`,
+          label: `${item.className} · ${item.subjectName}`,
+        }))}
+      />
       {book.isLoading ? (
         <QueryLoading variant="table" />
       ) : book.isError || !book.data ? (
@@ -71,7 +69,7 @@ export function TeacherGradebookPage() {
       ) : book.data.assignments.length === 0 && book.data.assessments.length === 0 ? (
         <PortalEmptyState icon={ClipboardList}>{t('teacher.emptyAssignments')}</PortalEmptyState>
       ) : (
-        <div className="overflow-x-auto rounded-xl border border-border">
+        <div className="overflow-x-auto rounded-xl border border-border bg-surface">
           <table className="w-full min-w-[40rem] text-start text-sm [&_td]:text-start [&_th]:text-start">
             <thead className="bg-surface text-muted">
               <tr>
