@@ -164,6 +164,11 @@ export interface UpcomingAssignment {
   dueAt: string | null;
   subjectName: string;
   status: string;
+  maxScore?: number;
+  score?: number | null;
+  publishedAt?: string | null;
+  gradesPublishedAt?: string | null;
+  attachmentCount?: number;
 }
 
 export interface ContinueLearning {
@@ -187,6 +192,10 @@ export interface StudentSubjectListItem {
   teacherName: string | null;
   className: string;
   progressPercent: number;
+  lessonCount: number;
+  assignmentCount: number;
+  quizCount: number;
+  pendingAssignmentCount: number;
 }
 
 export interface StudentLessonSummary {
@@ -204,6 +213,17 @@ export interface StudentUnit {
   lessons: StudentLessonSummary[];
 }
 
+export type StudentActivityKind = 'lesson' | 'assignment' | 'assessment';
+
+export interface StudentActivityItem {
+  id: string;
+  kind: StudentActivityKind;
+  title: string;
+  occurredAt: string;
+  score: number | null;
+  maxScore: number | null;
+}
+
 export interface StudentSubjectDetail {
   id: string;
   name: string;
@@ -215,6 +235,7 @@ export interface StudentSubjectDetail {
   units: StudentUnit[];
   assignments: UpcomingAssignment[];
   assessments: StudentAssessmentListItem[];
+  recentActivity: StudentActivityItem[];
 }
 
 export interface StudentLessonDetail {
@@ -546,6 +567,10 @@ export interface StudentAssessmentListItem {
   bestScore: number | null;
   maxScore: number;
   passed: boolean | null;
+  questionCount: number;
+  submittedAt: string | null;
+  publishedAt?: string | null;
+  answeredCount?: number;
   status: StudentAssessmentStatus;
 }
 
@@ -596,6 +621,7 @@ export interface StudentAttemptResult {
   score: number;
   maxScore: number;
   passed: boolean;
+  startedAt: string;
   submittedAt: string | null;
   questions: {
     id: string;

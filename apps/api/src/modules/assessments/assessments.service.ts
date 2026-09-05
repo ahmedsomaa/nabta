@@ -506,7 +506,10 @@ export class AssessmentsService {
       include: {
         subject: true,
         questions: { select: { points: true } },
-        attempts: { where: { studentId: student.id } },
+        attempts: {
+          where: { studentId: student.id },
+          include: { answers: { select: { optionIds: true, textAnswer: true } } },
+        },
       },
       orderBy: { createdAt: 'desc' },
     });
@@ -539,7 +542,19 @@ export class AssessmentsService {
       inProgressAttemptId: inProgress?.id ?? null,
       bestScore: best?.score ?? null,
       maxScore,
+      questionCount: row.questions.length,
+      submittedAt:
+        [...finished]
+          .filter((attempt) => attempt.submittedAt)
+          .sort((a, b) => (b.submittedAt?.getTime() ?? 0) - (a.submittedAt?.getTime() ?? 0))[0]
+          ?.submittedAt?.toISOString() ?? null,
       passed: best?.passed ?? null,
+      publishedAt: row.publishedAt?.toISOString() ?? null,
+      answeredCount: inProgress
+        ? inProgress.answers.filter(
+            (answer) => answer.optionIds.length > 0 || Boolean(answer.textAnswer?.trim()),
+          ).length
+        : 0,
       status,
     };
   }
@@ -562,7 +577,10 @@ export class AssessmentsService {
       include: {
         subject: true,
         questions: { select: { id: true, points: true } },
-        attempts: { where: { studentId: student.id } },
+        attempts: {
+          where: { studentId: student.id },
+          include: { answers: { select: { optionIds: true, textAnswer: true } } },
+        },
       },
     });
     if (!row) throw new NotFoundException('Assessment not found.');
@@ -820,6 +838,7 @@ export class AssessmentsService {
       score: Number(attempt.score ?? 0),
       maxScore: attempt.maxScore,
       passed: Boolean(attempt.passed),
+      startedAt: attempt.startedAt.toISOString(),
       submittedAt: attempt.submittedAt?.toISOString() ?? null,
       questions: questions.map((question) => {
         const answer = answers.get(question.id);

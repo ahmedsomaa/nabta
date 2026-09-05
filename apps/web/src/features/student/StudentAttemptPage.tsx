@@ -9,16 +9,16 @@ import {
   CheckboxGroup,
   Input,
   Label,
+  Modal,
   Radio,
   RadioGroup,
   TextField,
 } from '@heroui/react';
-import type { StudentAssessmentOverview, StudentAttemptResult, StudentAttemptView } from '@nabta/types';
+import type { StudentAssessmentOverview, StudentAttemptQuestion, StudentAttemptResult, StudentAttemptView } from '@nabta/types';
 import { apiFetch } from '@/lib/api';
 import { QueryError, QueryLoading } from './QueryState';
-import { StudentPageHeader, StudentProgress } from './StudentChrome';
+import { StudentProgress } from './StudentChrome';
 import { cn } from '@/lib/cn';
-import { usePageTrail } from '@/layouts/PageTrail';
 
 function formatRemaining(expiresAt: string | null) {
   if (!expiresAt) return null;
@@ -34,7 +34,73 @@ function remainingMs(expiresAt: string | null) {
   return new Date(expiresAt).getTime() - Date.now();
 }
 
+function timerClass(ms: number | null) {
+  if (ms == null) return 'text-sm font-medium tabular-nums';
+  if (ms < 2 * 60_000) return 'text-sm font-medium tabular-nums text-danger';
+  if (ms <= 5 * 60_000) return 'text-sm font-medium tabular-nums text-warning';
+  return 'text-sm font-medium tabular-nums';
+}
+
 type Draft = { optionIds: string[]; textAnswer: string };
+
+function isDraftAnswered(draft: Draft | undefined, question: StudentAttemptQuestion) {
+  const value = draft ?? {
+    optionIds: question.selectedOptionIds,
+    textAnswer: question.textAnswer ?? '',
+  };
+  return value.optionIds.length > 0 || value.textAnswer.trim().length > 0;
+}
+
+function QuestionNavigator({
+  questions,
+  currentIndex,
+  drafts,
+  onSelect,
+}: {
+  questions: StudentAttemptQuestion[];
+  currentIndex: number;
+  drafts: Record<string, Draft>;
+  onSelect: (index: number) => void;
+}) {
+  const { t } = useTranslation();
+  const answered = questions.filter((question) => isDraftAnswered(drafts[question.id], question)).length;
+  const unanswered = questions.length - answered;
+
+  return (
+    <div className="space-y-3">
+      <div>
+        <p className="text-sm font-medium">{t('assessment.questionsNav')}</p>
+        <p className="mt-0.5 text-xs text-muted">
+          {t('student.answeredOf', { answered, total: questions.length })}
+          {' · '}
+          {t('assessment.unanswered', { count: unanswered })}
+        </p>
+      </div>
+      <ol className="grid grid-cols-5 gap-2 lg:grid-cols-1">
+        {questions.map((question, index) => {
+          const answeredQuestion = isDraftAnswered(drafts[question.id], question);
+          const current = index === currentIndex;
+          return (
+            <li key={question.id}>
+              <button
+                type="button"
+                onClick={() => onSelect(index)}
+                className={cn(
+                  'flex w-full items-center justify-center rounded-lg border px-2 py-2 text-sm tabular-nums lg:justify-start lg:px-3',
+                  current && 'border-accent bg-accent/10 font-medium text-accent',
+                  !current && answeredQuestion && 'border-border bg-surface text-foreground',
+                  !current && !answeredQuestion && 'border-dashed border-border text-muted',
+                )}
+              >
+                {index + 1}
+              </button>
+            </li>
+          );
+        })}
+      </ol>
+    </div>
+  );
+}
 
 export function StudentAttemptPage() {
   const { t } = useTranslation();
@@ -42,8 +108,13 @@ export function StudentAttemptPage() {
   const { id = '', attemptId = '' } = useParams();
   const [clock, setClock] = useState(() => formatRemaining(null));
   const [drafts, setDrafts] = useState<Record<string, Draft>>({});
+  const [currentIndex, setCurrentIndex] = useState(0);
+  const [exitOpen, setExitOpen] = useState(false);
+  const [submitOpen, setSubmitOpen] = useState(false);
+  const [navOpen, setNavOpen] = useState(false);
   const expirySubmit = useRef(false);
   const seeded = useRef(false);
+  const leaving = useRef(false);
   const textTimers = useRef<Record<string, ReturnType<typeof setTimeout>>>({});
   const query = useQuery({
     queryKey: ['student-attempt', attemptId],
@@ -56,15 +127,6 @@ export function StudentAttemptPage() {
     queryFn: () => apiFetch<StudentAssessmentOverview>(`/me/assessments/${id}`),
     enabled: Boolean(id),
   });
-  usePageTrail(
-    overview.data
-      ? [
-          { label: t('nav.quizzes'), to: '/student/quizzes' },
-          { label: overview.data.title, to: `/student/assessments/${id}` },
-          { label: t('assessment.statusInProgress') },
-        ]
-      : [],
-  );
 
   useEffect(() => {
     if (!query.data || seeded.current) return;
@@ -89,6 +151,7 @@ export function StudentAttemptPage() {
   useEffect(() => {
     if (!query.data) return;
     if (query.data.status !== 'IN_PROGRESS') {
+      leaving.current = true;
       navigate(`/student/assessments/${id}/attempts/${attemptId}/result`, { replace: true });
     }
   }, [query.data, id, attemptId, navigate]);
@@ -100,7 +163,10 @@ export function StudentAttemptPage() {
   const submit = useMutation({
     mutationFn: () =>
       apiFetch<StudentAttemptResult>(`/me/attempts/${attemptId}/submit`, { method: 'POST' }),
-    onSuccess: () => navigate(`/student/assessments/${id}/attempts/${attemptId}/result`),
+    onSuccess: () => {
+      leaving.current = true;
+      navigate(`/student/assessments/${id}/attempts/${attemptId}/result`);
+    },
   });
 
   useEffect(() => {
@@ -111,20 +177,53 @@ export function StudentAttemptPage() {
     submit.mutate();
   }, [clock, query.data, submit]);
 
-  if (query.isLoading) return <QueryLoading />;
-  if (query.isError || !query.data) return <QueryError onRetry={() => void query.refetch()} />;
+  useEffect(() => {
+    const onBeforeUnload = (event: BeforeUnloadEvent) => {
+      if (leaving.current) return;
+      event.preventDefault();
+      event.returnValue = '';
+    };
+    window.addEventListener('beforeunload', onBeforeUnload);
+    window.history.pushState({ attemptStay: true }, '');
+    const onPopState = () => {
+      if (leaving.current) return;
+      setExitOpen(true);
+      window.history.pushState({ attemptStay: true }, '');
+    };
+    window.addEventListener('popstate', onPopState);
+    return () => {
+      window.removeEventListener('beforeunload', onBeforeUnload);
+      window.removeEventListener('popstate', onPopState);
+    };
+  }, []);
+
+  if (query.isLoading) {
+    return (
+      <div className="p-6">
+        <QueryLoading />
+      </div>
+    );
+  }
+  if (query.isError || !query.data) {
+    return (
+      <div className="p-6">
+        <QueryError onRetry={() => void query.refetch()} />
+      </div>
+    );
+  }
 
   const attempt = query.data;
   const total = attempt.questions.length;
-  const answered = attempt.questions.filter((question) => {
-    const draft = drafts[question.id] ?? {
-      optionIds: question.selectedOptionIds,
-      textAnswer: question.textAnswer ?? '',
-    };
-    return draft.optionIds.length > 0 || draft.textAnswer.trim().length > 0;
-  }).length;
+  const question = attempt.questions[currentIndex];
+  const answered = attempt.questions.filter((item) => isDraftAnswered(drafts[item.id], item)).length;
+  const unanswered = total - answered;
   const msLeft = remainingMs(attempt.expiresAt);
-  const timerLow = msLeft != null && msLeft > 0 && msLeft <= 2 * 60 * 1000;
+  const draft = question
+    ? (drafts[question.id] ?? {
+        optionIds: question.selectedOptionIds,
+        textAnswer: question.textAnswer ?? '',
+      })
+    : { optionIds: [], textAnswer: '' };
 
   const persistOptions = (questionId: string, optionIds: string[]) => {
     setDrafts((current) => ({
@@ -134,113 +233,272 @@ export function StudentAttemptPage() {
     save.mutate({ questionId, optionIds, textAnswer: null });
   };
 
+  const goNext = () => {
+    if (currentIndex < total - 1) {
+      setCurrentIndex(currentIndex + 1);
+      return;
+    }
+    const firstUnanswered = attempt.questions.findIndex((item) => !isDraftAnswered(drafts[item.id], item));
+    if (firstUnanswered >= 0) setCurrentIndex(firstUnanswered);
+  };
+
+  const leaveToOverview = () => {
+    leaving.current = true;
+    navigate(`/student/assessments/${id}`);
+  };
+
+  const selectQuestion = (index: number) => {
+    setCurrentIndex(index);
+    setNavOpen(false);
+  };
+
   return (
-    <div className="space-y-6">
-      <StudentPageHeader title={overview.data?.title ?? t('assessment.overview')} />
-
-      <div className="sticky top-0 z-10 -mx-4 space-y-2 border-b border-border bg-background/95 px-4 py-3 backdrop-blur md:-mx-6 md:px-6">
-        <div className="flex flex-wrap items-center justify-between gap-2">
-          {clock ? (
-            <p className={cn('text-sm font-medium', timerLow && 'text-warning')}>
-              {t('assessment.timeLeft', { time: clock })}
-            </p>
-          ) : (
-            <span />
-          )}
-          <p className="text-sm text-muted">
-            {t('student.answeredOf', { answered, total })}
+    <div className="flex min-h-svh flex-col">
+      <header className="sticky top-0 z-10 border-b border-border bg-background/95 backdrop-blur">
+        <div className="flex items-center gap-3 px-4 py-3 md:px-6">
+          <Button variant="tertiary" size="sm" onPress={() => setExitOpen(true)}>
+            {t('assessment.exit')}
+          </Button>
+          <p className="min-w-0 flex-1 truncate text-center text-sm font-medium">
+            {overview.data?.title ?? t('assessment.overview')}
           </p>
+          {clock ? (
+            <p className={timerClass(msLeft)}>{t('assessment.timeLeft', { time: clock })}</p>
+          ) : (
+            <span className="w-16" />
+          )}
         </div>
-        {total > 0 ? (
-          <StudentProgress
-            value={Math.round((answered / total) * 100)}
-            label={t('student.answeredOf', { answered, total })}
-          />
-        ) : null}
+      </header>
+
+      <div className="mx-auto flex w-full max-w-5xl flex-1 gap-8 px-4 py-6 md:px-6">
+        <div className="mx-auto w-full max-w-3xl space-y-5">
+          {question ? (
+            <>
+              <div className="flex items-center justify-between gap-3">
+                <p className="text-sm font-medium">
+                  {t('student.questionOf', { current: currentIndex + 1, total })}
+                </p>
+                <Button
+                  variant="tertiary"
+                  size="sm"
+                  className="lg:hidden"
+                  onPress={() => setNavOpen(true)}
+                >
+                  {t('assessment.questionsNav')}
+                </Button>
+              </div>
+              {total > 0 ? (
+                <StudentProgress
+                  value={Math.round((answered / total) * 100)}
+                  label={t('student.answeredOf', { answered, total })}
+                />
+              ) : null}
+
+              <div className="space-y-3 overflow-hidden rounded-xl border border-border bg-surface p-4">
+                <p className="font-medium">{question.prompt}</p>
+                {question.type === 'SHORT_ANSWER' ? (
+                  <TextField
+                    name={`q-${question.id}`}
+                    value={draft.textAnswer}
+                    onChange={(value) => {
+                      setDrafts((current) => ({
+                        ...current,
+                        [question.id]: { optionIds: [], textAnswer: value },
+                      }));
+                      if (textTimers.current[question.id]) clearTimeout(textTimers.current[question.id]);
+                      textTimers.current[question.id] = setTimeout(() => {
+                        save.mutate({ questionId: question.id, textAnswer: value, optionIds: [] });
+                      }, 400);
+                    }}
+                  >
+                    <Label>{t('assessment.yourAnswer')}</Label>
+                    <Input />
+                  </TextField>
+                ) : question.type === 'MULTIPLE_ANSWER' ? (
+                  <CheckboxGroup
+                    name={`q-${question.id}`}
+                    value={draft.optionIds}
+                    onChange={(value) => persistOptions(question.id, value)}
+                    className="gap-2"
+                  >
+                    <Label className="sr-only">{question.prompt}</Label>
+                    {question.options.map((option) => {
+                      const selected = draft.optionIds.includes(option.id);
+                      return (
+                        <Checkbox
+                          key={option.id}
+                          value={option.id}
+                          className={cn(
+                            'w-full rounded-xl border px-3 py-3',
+                            selected ? 'border-accent bg-accent/10' : 'border-border',
+                          )}
+                        >
+                          <Checkbox.Content>
+                            <Checkbox.Control>
+                              <Checkbox.Indicator />
+                            </Checkbox.Control>
+                            {option.text}
+                          </Checkbox.Content>
+                        </Checkbox>
+                      );
+                    })}
+                  </CheckboxGroup>
+                ) : (
+                  <RadioGroup
+                    name={`q-${question.id}`}
+                    value={draft.optionIds[0] ?? ''}
+                    onChange={(value) => persistOptions(question.id, value ? [value] : [])}
+                    className="gap-2"
+                  >
+                    <Label className="sr-only">{question.prompt}</Label>
+                    {question.options.map((option) => {
+                      const selected = draft.optionIds[0] === option.id;
+                      return (
+                        <Radio
+                          key={option.id}
+                          value={option.id}
+                          className={cn(
+                            'w-full rounded-xl border px-3 py-3',
+                            selected ? 'border-accent bg-accent/10' : 'border-border',
+                          )}
+                        >
+                          <Radio.Content>
+                            <Radio.Control>
+                              <Radio.Indicator />
+                            </Radio.Control>
+                            {option.text}
+                          </Radio.Content>
+                        </Radio>
+                      );
+                    })}
+                  </RadioGroup>
+                )}
+                <p className="text-xs text-muted">
+                  {save.isPending ? t('assessment.saving') : save.isSuccess ? t('assessment.saved') : null}
+                </p>
+              </div>
+
+              <div className="flex flex-wrap items-center justify-between gap-3">
+                <Button
+                  variant="secondary"
+                  isDisabled={currentIndex === 0}
+                  onPress={() => setCurrentIndex((index) => Math.max(0, index - 1))}
+                >
+                  {t('assessment.previous')}
+                </Button>
+                <Button variant="secondary" onPress={goNext}>
+                  {currentIndex === total - 1 ? t('assessment.review') : t('assessment.next')}
+                </Button>
+              </div>
+            </>
+          ) : null}
+
+          {submit.isError ? (
+            <Alert status="danger">
+              <Alert.Indicator />
+              <Alert.Content>
+                <Alert.Title>{(submit.error as Error).message}</Alert.Title>
+              </Alert.Content>
+            </Alert>
+          ) : null}
+
+          <Button variant="primary" onPress={() => setSubmitOpen(true)} isPending={submit.isPending}>
+            {t('assessment.submit')}
+          </Button>
+        </div>
+
+        <aside className="hidden w-52 shrink-0 lg:block">
+          <div className="sticky top-20">
+            <QuestionNavigator
+              questions={attempt.questions}
+              currentIndex={currentIndex}
+              drafts={drafts}
+              onSelect={setCurrentIndex}
+            />
+          </div>
+        </aside>
       </div>
 
-      {submit.isError ? (
-        <Alert status="danger">
-          <Alert.Indicator />
-          <Alert.Content>
-            <Alert.Title>{(submit.error as Error).message}</Alert.Title>
-          </Alert.Content>
-        </Alert>
-      ) : null}
-      <div className="space-y-5">
-        {attempt.questions.map((question, index) => {
-          const draft = drafts[question.id] ?? {
-            optionIds: question.selectedOptionIds,
-            textAnswer: question.textAnswer ?? '',
-          };
-          return (
-            <div key={question.id} className="space-y-3 overflow-hidden rounded-xl border border-border p-4">
-              <p className="text-xs font-medium text-muted">
-                {t('student.questionOf', { current: index + 1, total })}
-              </p>
-              <p className="font-medium">{question.prompt}</p>
-              {question.type === 'SHORT_ANSWER' ? (
-                <TextField
-                  name={`q-${question.id}`}
-                  value={draft.textAnswer}
-                  onChange={(value) => {
-                    setDrafts((current) => ({
-                      ...current,
-                      [question.id]: { optionIds: [], textAnswer: value },
-                    }));
-                    if (textTimers.current[question.id]) clearTimeout(textTimers.current[question.id]);
-                    textTimers.current[question.id] = setTimeout(() => {
-                      save.mutate({ questionId: question.id, textAnswer: value, optionIds: [] });
-                    }, 400);
-                  }}
-                >
-                  <Label>{t('assessment.yourAnswer')}</Label>
-                  <Input />
-                </TextField>
-              ) : question.type === 'MULTIPLE_ANSWER' ? (
-                <CheckboxGroup
-                  name={`q-${question.id}`}
-                  value={draft.optionIds}
-                  onChange={(value) => persistOptions(question.id, value)}
-                >
-                  <Label className="sr-only">{question.prompt}</Label>
-                  {question.options.map((option) => (
-                    <Checkbox key={option.id} value={option.id}>
-                      <Checkbox.Content>
-                        <Checkbox.Control>
-                          <Checkbox.Indicator />
-                        </Checkbox.Control>
-                        {option.text}
-                      </Checkbox.Content>
-                    </Checkbox>
-                  ))}
-                </CheckboxGroup>
-              ) : (
-                <RadioGroup
-                  name={`q-${question.id}`}
-                  value={draft.optionIds[0] ?? ''}
-                  onChange={(value) => persistOptions(question.id, value ? [value] : [])}
-                >
-                  <Label className="sr-only">{question.prompt}</Label>
-                  {question.options.map((option) => (
-                    <Radio key={option.id} value={option.id}>
-                      <Radio.Content>
-                        <Radio.Control>
-                          <Radio.Indicator />
-                        </Radio.Control>
-                        {option.text}
-                      </Radio.Content>
-                    </Radio>
-                  ))}
-                </RadioGroup>
-              )}
-            </div>
-          );
-        })}
-      </div>
-      <Button variant="primary" onPress={() => submit.mutate()} isPending={submit.isPending}>
-        {t('assessment.submit')}
-      </Button>
+      <Modal.Backdrop isOpen={exitOpen} onOpenChange={setExitOpen}>
+        <Modal.Container>
+          <Modal.Dialog>
+            <Modal.Header>
+              <Modal.Heading>{t('assessment.exitTitle')}</Modal.Heading>
+            </Modal.Header>
+            <Modal.Body>
+              <p className="text-sm">{t('assessment.exitBody')}</p>
+            </Modal.Body>
+            <Modal.Footer>
+              <Button slot="close" variant="tertiary">
+                {t('assessment.stay')}
+              </Button>
+              <Button variant="primary" onPress={leaveToOverview}>
+                {t('assessment.leave')}
+              </Button>
+            </Modal.Footer>
+          </Modal.Dialog>
+        </Modal.Container>
+      </Modal.Backdrop>
+
+      <Modal.Backdrop isOpen={submitOpen} onOpenChange={setSubmitOpen}>
+        <Modal.Container>
+          <Modal.Dialog>
+            <Modal.Header>
+              <Modal.Heading>{t('assessment.submitTitle')}</Modal.Heading>
+            </Modal.Header>
+            <Modal.Body className="space-y-1">
+              <p className="text-sm">{t('assessment.submitAnswered', { answered, total })}</p>
+              {unanswered > 0 ? (
+                <p className="text-sm text-muted">{t('assessment.unanswered', { count: unanswered })}</p>
+              ) : null}
+            </Modal.Body>
+            <Modal.Footer>
+              <Button
+                variant="tertiary"
+                onPress={() => {
+                  setSubmitOpen(false);
+                  const firstUnanswered = attempt.questions.findIndex(
+                    (item) => !isDraftAnswered(drafts[item.id], item),
+                  );
+                  if (firstUnanswered >= 0) setCurrentIndex(firstUnanswered);
+                }}
+              >
+                {t('assessment.review')}
+              </Button>
+              <Button
+                variant="primary"
+                onPress={() => submit.mutate()}
+                isPending={submit.isPending}
+              >
+                {t('assessment.submit')}
+              </Button>
+            </Modal.Footer>
+          </Modal.Dialog>
+        </Modal.Container>
+      </Modal.Backdrop>
+
+      <Modal.Backdrop isOpen={navOpen} onOpenChange={setNavOpen}>
+        <Modal.Container>
+          <Modal.Dialog>
+            <Modal.Header>
+              <Modal.Heading>{t('assessment.questionsNav')}</Modal.Heading>
+            </Modal.Header>
+            <Modal.Body>
+              <QuestionNavigator
+                questions={attempt.questions}
+                currentIndex={currentIndex}
+                drafts={drafts}
+                onSelect={selectQuestion}
+              />
+            </Modal.Body>
+            <Modal.Footer>
+              <Button slot="close" variant="tertiary">
+                {t('assessment.cancel')}
+              </Button>
+            </Modal.Footer>
+          </Modal.Dialog>
+        </Modal.Container>
+      </Modal.Backdrop>
     </div>
   );
 }

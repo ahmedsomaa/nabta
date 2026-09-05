@@ -186,9 +186,12 @@ export function StudentAssignmentPage() {
       <StudentPageHeader
         title={assignment.title}
         subtitle={
-          <span className={urgency === 'overdue' ? 'text-danger' : undefined}>
-            {assignment.subjectName} · {t('student.due', { date: formatDue(assignment.dueAt, i18n.language) })}
-          </span>
+          <>
+            {t('student.assignmentSubtitle')}
+            <span className={cn('mt-1 block', urgency === 'overdue' ? 'text-danger' : undefined)}>
+              {assignment.subjectName} · {t('student.due', { date: formatDue(assignment.dueAt, i18n.language) })}
+            </span>
+          </>
         }
         trailing={<StatusChip status={assignment.status} />}
       />

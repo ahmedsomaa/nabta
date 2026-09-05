@@ -1,8 +1,15 @@
-import type { ReactNode } from 'react';
-import type { LucideIcon } from 'lucide-react';
-import { Link, NavLink, Outlet, useLocation } from 'react-router-dom';
-import { useTranslation } from 'react-i18next';
-import { Avatar, Breadcrumbs, Button, Dropdown, Label, Separator } from '@heroui/react';
+import type { ReactNode } from "react";
+import type { LucideIcon } from "lucide-react";
+import { Link, NavLink, Outlet, useLocation } from "react-router-dom";
+import { useTranslation } from "react-i18next";
+import {
+  Avatar,
+  Breadcrumbs,
+  Button,
+  Dropdown,
+  Label,
+  Separator,
+} from "@heroui/react";
 import {
   ChevronRight,
   ChevronsUpDown,
@@ -11,13 +18,17 @@ import {
   Moon,
   Sprout,
   Sun,
-} from 'lucide-react';
-import { LocaleThemeControls } from '@/components/shared/LocaleThemeControls';
-import { useAuth } from '@/features/auth/AuthProvider';
-import { useTheme } from '@/features/theme/ThemeProvider';
-import { initialsFromName } from '@/lib/initials';
-import { cn } from '@/lib/cn';
-import { PageTrailProvider, usePageTrailItems, type TrailItem } from './PageTrail';
+} from "lucide-react";
+import { LocaleThemeControls } from "@/components/shared/LocaleThemeControls";
+import { useAuth } from "@/features/auth/AuthProvider";
+import { useTheme } from "@/features/theme/ThemeProvider";
+import { initialsFromName } from "@/lib/initials";
+import { cn } from "@/lib/cn";
+import {
+  PageTrailProvider,
+  usePageTrailItems,
+  type TrailItem,
+} from "./PageTrail";
 
 export interface NavItem {
   to: string;
@@ -26,7 +37,11 @@ export interface NavItem {
 }
 
 function isSystemAdminRole(role: string | undefined): boolean {
-  return role === 'SYSTEM_ADMIN';
+  return role === "SYSTEM_ADMIN";
+}
+
+function isFocusedQuizAttempt(pathname: string) {
+  return /\/assessments\/[^/]+\/attempts\/[^/]+$/.test(pathname);
 }
 
 function BrandMark({
@@ -67,7 +82,6 @@ export function AppShell({
   homeTo: string;
   toolbar?: ReactNode;
 }) {
-
   const { t } = useTranslation();
   const { user } = useAuth();
   const location = useLocation();
@@ -75,126 +89,174 @@ export function AppShell({
   const current =
     [...allItems]
       .sort((a, b) => b.to.length - a.to.length)
-      .find((item) => location.pathname === item.to || location.pathname.startsWith(`${item.to}/`)) ??
-    null;
+      .find(
+        (item) =>
+          location.pathname === item.to ||
+          location.pathname.startsWith(`${item.to}/`),
+      ) ?? null;
   const isSystemAdmin = isSystemAdminRole(user?.role);
-  const schoolName = user?.schoolName || t('app.name');
-  const orgLabel = isSystemAdmin ? t('app.name') : schoolName;
-  const roleLabel = t(`nav.roles.${user?.role ?? 'STUDENT'}`);
-  const brandSubtitle = isSystemAdmin ? t('app.tagline') : roleLabel;
+  const schoolName = user?.schoolName || t("app.name");
+  const orgLabel = isSystemAdmin ? t("app.name") : schoolName;
+  const roleLabel = t(`nav.roles.${user?.role ?? "STUDENT"}`);
+  const brandSubtitle = isSystemAdmin ? t("app.tagline") : roleLabel;
   const schoolLogoUrl = user?.schoolLogoUrl ?? null;
+  const focusMode = isFocusedQuizAttempt(location.pathname);
 
   return (
     <PageTrailProvider>
-    <div className="flex min-h-svh bg-surface text-foreground">
-      <aside className="sticky top-0 hidden h-svh w-64 shrink-0 flex-col md:flex">
-        <div className="flex h-16 items-center px-3">
-          <NavLink
-            to={homeTo}
-            className="flex w-full items-center gap-2 rounded-lg px-1.5 py-1.5 no-underline hover:bg-overlay"
-          >
-            <BrandMark
-              isSystemAdmin={isSystemAdmin}
-              schoolName={schoolName}
-              schoolLogoUrl={schoolLogoUrl}
-            />
-            <span className="grid min-w-0 flex-1 text-start leading-tight">
-              <span className="truncate text-sm font-semibold text-foreground">{orgLabel}</span>
-              <span className="truncate text-xs text-muted">{brandSubtitle}</span>
-            </span>
-          </NavLink>
-        </div>
+      <div className="flex min-h-svh bg-surface text-foreground">
+        {focusMode ? null : (
+        <aside className="sticky top-0 hidden h-svh w-64 shrink-0 flex-col md:flex">
+          <div className="flex h-16 items-center px-3">
+            <NavLink
+              to={homeTo}
+              className="flex w-full items-center gap-2 rounded-lg px-1.5 py-1.5 no-underline hover:bg-overlay"
+            >
+              <BrandMark
+                isSystemAdmin={isSystemAdmin}
+                schoolName={schoolName}
+                schoolLogoUrl={schoolLogoUrl}
+              />
+              <span className="grid min-w-0 flex-1 text-start leading-tight">
+                <span className="truncate text-sm font-semibold text-foreground">
+                  {orgLabel}
+                </span>
+                <span className="truncate text-xs text-muted">
+                  {brandSubtitle}
+                </span>
+              </span>
+            </NavLink>
+          </div>
 
-        <div className="flex min-h-0 flex-1 flex-col gap-6 overflow-y-auto px-3 py-2">
-          <NavGroup label={t('nav.workspace')}>
-            {items.map((item) => (
-              <ShellLink key={item.to} item={item} />
-            ))}
-          </NavGroup>
-          {moreItems.length > 0 ? (
-            <NavGroup label={t('nav.more')}>
-              {moreItems.map((item) => (
+          <div className="flex min-h-0 flex-1 flex-col gap-6 overflow-y-auto px-3 py-2">
+            <NavGroup label={t("nav.workspace")}>
+              {items.map((item) => (
                 <ShellLink key={item.to} item={item} />
               ))}
             </NavGroup>
-          ) : null}
-        </div>
+            {moreItems.length > 0 ? (
+              <NavGroup label={t("nav.more")}>
+                {moreItems.map((item) => (
+                  <ShellLink key={item.to} item={item} />
+                ))}
+              </NavGroup>
+            ) : null}
+          </div>
 
-        <div className="mt-auto shrink-0 p-3">
-          <UserMenu />
-        </div>
-      </aside>
+          <div className="mt-auto shrink-0 p-3">
+            <UserMenu />
+          </div>
+        </aside>
+        )}
 
-      <div className="flex min-h-svh min-w-0 flex-1 flex-col md:p-1">
-        <div className="flex min-h-svh min-w-0 flex-1 flex-col bg-background md:min-h-0 md:rounded-xl md:border md:border-border md:shadow-sm">
-          <header className="flex h-14 shrink-0 items-center gap-2 px-4 md:h-16 md:px-6">
-            <div className="flex min-w-0 flex-1 items-center gap-2">
-              <NavLink to={homeTo} className="md:hidden">
-                <BrandMark
-                  isSystemAdmin={isSystemAdmin}
-                  schoolName={schoolName}
-                  schoolLogoUrl={schoolLogoUrl}
+        <div
+          className={cn(
+            "flex min-h-svh min-w-0 flex-1 flex-col",
+            !focusMode && "md:p-1",
+          )}
+        >
+          <div
+            className={cn(
+              "flex min-h-svh min-w-0 flex-1 flex-col bg-background",
+              !focusMode &&
+                "md:min-h-0 md:rounded-xl md:border md:border-border md:shadow-sm",
+            )}
+          >
+            {focusMode ? null : (
+            <header className="flex h-14 shrink-0 items-center gap-2 px-4 md:h-16 md:px-6">
+              <div className="flex min-w-0 flex-1 items-center gap-2">
+                <NavLink to={homeTo} className="md:hidden">
+                  <BrandMark
+                    isSystemAdmin={isSystemAdmin}
+                    schoolName={schoolName}
+                    schoolLogoUrl={schoolLogoUrl}
+                  />
+                </NavLink>
+                <Separator
+                  orientation="vertical"
+                  className="hidden h-4 md:block"
                 />
-              </NavLink>
-              <Separator orientation="vertical" className="hidden h-4 md:block" />
-              <ShellTrail
-                roleLabel={roleLabel}
-                section={current ? { label: t(current.labelKey), to: current.to } : null}
-              />
-            </div>
-            <div className="flex items-center gap-2">
-              {toolbar}
-              <div className="md:hidden">
-                <LocaleThemeControls />
+                <ShellTrail
+                  homeFirst={user?.role === "STUDENT"}
+                  homeLabel={t("nav.home")}
+                  homeTo={homeTo}
+                  roleLabel={roleLabel}
+                  section={
+                    current
+                      ? { label: t(current.labelKey), to: current.to }
+                      : null
+                  }
+                />
               </div>
-            </div>
-          </header>
+              <div className="flex items-center gap-2">
+                {toolbar}
+                <div className="md:hidden">
+                  <LocaleThemeControls />
+                </div>
+              </div>
+            </header>
+            )}
 
-          <main className="min-w-0 flex-1 overflow-x-hidden p-4 pb-24 md:p-6 md:pb-6">
-            <Outlet />
-          </main>
-        </div>
-      </div>
-
-      <nav className="fixed inset-x-0 bottom-0 z-20 flex border-t border-border bg-background md:hidden">
-        {items.map((item) => {
-          const Icon = item.icon;
-          return (
-            <NavLink
-              key={item.to}
-              to={item.to}
-              className={({ isActive }) => {
-                const nested = location.pathname.startsWith(`${item.to}/`);
-                const on = isActive || nested;
-                return `flex flex-1 flex-col items-center gap-1 py-2.5 text-[10px] no-underline ${
-                  on ? 'text-accent font-semibold' : 'text-muted'
-                }`;
-              }}
+            <main
+              className={cn(
+                "min-w-0 flex-1 overflow-x-hidden",
+                focusMode ? "p-0" : "p-4 pb-24 md:p-6 md:pb-6",
+              )}
             >
-              <Icon className="size-4" aria-hidden />
-              {t(item.labelKey)}
-            </NavLink>
-          );
-        })}
-      </nav>
-    </div>
+              <Outlet />
+            </main>
+          </div>
+        </div>
+
+        {focusMode ? null : (
+        <nav className="fixed inset-x-0 bottom-0 z-20 flex border-t border-border bg-background md:hidden">
+          {items.map((item) => {
+            const Icon = item.icon;
+            return (
+              <NavLink
+                key={item.to}
+                to={item.to}
+                className={({ isActive }) => {
+                  const nested = location.pathname.startsWith(`${item.to}/`);
+                  const on = isActive || nested;
+                  return `flex flex-1 flex-col items-center gap-1 py-2.5 text-[10px] no-underline ${
+                    on ? "text-accent font-semibold" : "text-muted"
+                  }`;
+                }}
+              >
+                <Icon className="size-4" aria-hidden />
+                {t(item.labelKey)}
+              </NavLink>
+            );
+          })}
+        </nav>
+        )}
+      </div>
     </PageTrailProvider>
   );
 }
 
 function ShellTrail({
+  homeFirst,
+  homeLabel,
+  homeTo,
   roleLabel,
   section,
 }: {
+  homeFirst: boolean;
+  homeLabel: string;
+  homeTo: string;
   roleLabel: string;
   section: { label: string; to: string } | null;
 }) {
   const trail = usePageTrailItems();
-  const crumbs: TrailItem[] = [
-    { label: roleLabel },
-    ...(section ? [section] : []),
-    ...trail,
-  ];
+  const crumbs: TrailItem[] = homeFirst
+    ? [
+        { label: homeLabel, to: homeTo },
+        ...(section && section.to !== homeTo ? [section] : []),
+        ...trail,
+      ]
+    : [{ label: roleLabel }, ...(section ? [section] : []), ...trail];
   if (crumbs.length === 0) return null;
   const visibleFrom = Math.max(0, crumbs.length - 2);
 
@@ -208,8 +270,8 @@ function ShellTrail({
           <Breadcrumbs.Item
             key={`${crumb.label}-${index}`}
             className={cn(
-              'min-w-0 items-center',
-              hideOnMobile ? 'hidden md:inline-flex' : 'inline-flex',
+              "min-w-0 items-center",
+              hideOnMobile ? "hidden md:inline-flex" : "inline-flex",
             )}
           >
             {() => (
@@ -261,7 +323,9 @@ function ShellLink({ item }: { item: NavItem }) {
       to={item.to}
       className={({ isActive }) =>
         `flex items-center gap-2 rounded-lg px-2 py-2 text-sm no-underline ${
-          isActive || nested ? 'bg-accent/10 font-medium text-accent' : 'text-foreground hover:bg-overlay'
+          isActive || nested
+            ? "bg-accent/10 font-medium text-accent"
+            : "text-foreground hover:bg-overlay"
         }`
       }
     >
@@ -275,17 +339,18 @@ function UserMenu() {
   const { t, i18n } = useTranslation();
   const { logout, user } = useAuth();
   const { resolved, setTheme } = useTheme();
-  const isArabic = i18n.language === 'ar' || i18n.language.startsWith('ar');
-  const email = user?.email ?? '';
-  const displayName = email.split('@')[0] || t(`nav.roles.${user?.role ?? 'STUDENT'}`);
+  const isArabic = i18n.language === "ar" || i18n.language.startsWith("ar");
+  const email = user?.email ?? "";
+  const displayName =
+    email.split("@")[0] || t(`nav.roles.${user?.role ?? "STUDENT"}`);
   const initials = displayName.slice(0, 2).toUpperCase();
 
   const toggleLocale = () => {
-    const next = isArabic ? 'en' : 'ar';
+    const next = isArabic ? "en" : "ar";
     void i18n.changeLanguage(next);
-    localStorage.setItem('nabta.locale', next);
+    localStorage.setItem("nabta.locale", next);
     document.documentElement.lang = next;
-    document.documentElement.dir = next === 'ar' ? 'rtl' : 'ltr';
+    document.documentElement.dir = next === "ar" ? "rtl" : "ltr";
   };
 
   return (
@@ -293,7 +358,7 @@ function UserMenu() {
       <Button
         variant="ghost"
         className="h-auto w-full justify-start gap-2 px-2 py-2"
-        aria-label={t('nav.account')}
+        aria-label={t("nav.account")}
       >
         <Avatar size="sm" color="accent">
           <Avatar.Fallback>{initials}</Avatar.Fallback>
@@ -307,41 +372,56 @@ function UserMenu() {
       <Dropdown.Popover
         placement="top start"
         className="min-w-56"
-        dir={isArabic ? 'rtl' : 'ltr'}
+        dir={isArabic ? "rtl" : "ltr"}
       >
         <Dropdown.Menu
-          dir={isArabic ? 'rtl' : 'ltr'}
+          dir={isArabic ? "rtl" : "ltr"}
           onAction={(key) => {
-            if (key === 'logout') void logout();
-            if (key === 'locale') toggleLocale();
-            if (key === 'theme') setTheme(resolved === 'dark' ? 'light' : 'dark');
+            if (key === "logout") void logout();
+            if (key === "locale") toggleLocale();
+            if (key === "theme")
+              setTheme(resolved === "dark" ? "light" : "dark");
           }}
         >
           <Dropdown.Item
             id="locale"
-            textValue={isArabic ? t('locale.switchToEnglish') : t('locale.switchToArabic')}
+            textValue={
+              isArabic
+                ? t("locale.switchToEnglish")
+                : t("locale.switchToArabic")
+            }
             className="justify-start text-start"
           >
             <Languages className="size-4 shrink-0" aria-hidden />
-            <Label>{isArabic ? t('locale.en') : t('locale.ar')}</Label>
+            <Label>{isArabic ? t("locale.en") : t("locale.ar")}</Label>
           </Dropdown.Item>
           <Dropdown.Item
             id="theme"
-            textValue={resolved === 'dark' ? t('theme.switchToLight') : t('theme.switchToDark')}
+            textValue={
+              resolved === "dark"
+                ? t("theme.switchToLight")
+                : t("theme.switchToDark")
+            }
             className="justify-start text-start"
           >
-            {resolved === 'dark' ? <Sun className="size-4 shrink-0" aria-hidden /> : <Moon className="size-4 shrink-0" aria-hidden />}
-            <Label>{resolved === 'dark' ? t('theme.light') : t('theme.dark')}</Label>
+            {resolved === "dark" ? (
+              <Sun className="size-4 shrink-0" aria-hidden />
+            ) : (
+              <Moon className="size-4 shrink-0" aria-hidden />
+            )}
+            <Label>
+              {resolved === "dark" ? t("theme.light") : t("theme.dark")}
+            </Label>
           </Dropdown.Item>
           <Separator />
           <Dropdown.Item
             id="logout"
-            textValue={t('nav.logout')}
+            textValue={t("nav.logout")}
             variant="danger"
             className="justify-start text-start"
           >
             <LogOut className="size-4 shrink-0 text-danger" aria-hidden />
-            <Label>{t('nav.logout')}</Label>
+            <Label>{t("nav.logout")}</Label>
           </Dropdown.Item>
         </Dropdown.Menu>
       </Dropdown.Popover>

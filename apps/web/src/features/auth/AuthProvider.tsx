@@ -21,9 +21,32 @@ interface AuthContextValue {
 
 const AuthContext = createContext<AuthContextValue | null>(null);
 
+function portalFromRole(role: AuthUser['role'] | undefined) {
+  if (role === 'STUDENT') return 'student';
+  if (role === 'TEACHER') return 'teacher';
+  if (role === 'ADMIN') return 'admin';
+  return null;
+}
+
+function applyPortal(role: AuthUser['role'] | undefined) {
+  const portal = portalFromRole(role);
+  if (portal) {
+    document.documentElement.dataset.portal = portal;
+  } else {
+    delete document.documentElement.dataset.portal;
+  }
+}
+
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<AuthUser | null>(null);
   const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    applyPortal(user?.role);
+    return () => {
+      delete document.documentElement.dataset.portal;
+    };
+  }, [user?.role]);
 
   const refreshMe = useCallback(async () => {
     try {

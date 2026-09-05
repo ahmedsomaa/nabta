@@ -1,113 +1,340 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Student Portal — Nabta</title>
-  <link rel="stylesheet" href="../assets/docs.css">
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500&family=Quicksand:wght@400;500;600;700&family=Zain:wght@400;700&display=swap" rel="stylesheet">
-</head>
-<body data-section="requirements" data-title="Student Portal">
-  <a href="#main" class="skip-link">Skip to content</a>
-  <header id="docs-topnav" class="docs-topnav" aria-label="Top navigation"></header>
-  <div class="docs-mobile-bar">
-    <button type="button" id="sidebar-toggle" class="sidebar-toggle" aria-expanded="false" aria-label="Open menu">&#9776;</button>
-    <a href="../index.html" class="docs-mobile-brand">Nabta</a>
-  </div>
-  <div id="sidebar-overlay" class="sidebar-overlay"></div>
-  <div class="docs-layout">
-    <aside id="docs-sidebar" class="docs-sidebar" aria-label="Sidebar"></aside>
-    <div class="docs-content">
-      <div class="docs-body">
-        <div class="docs-article">
-          <header id="docs-header" class="docs-page-header"></header>
-          <main id="main" class="docs-main">
-<h1>Student Portal</h1>
-      <p class="lead">The most focused experience — answers: <strong>"What should I do today?"</strong></p>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Student Portal — Nabta</title>
+    <link rel="stylesheet" href="../assets/docs.css" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link
+      href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500&family=Quicksand:wght@400;500;600;700&family=Zain:wght@400;700&display=swap"
+      rel="stylesheet"
+    />
+  </head>
+  <body data-section="requirements" data-title="Student Portal">
+    <a href="#main" class="skip-link">Skip to content</a>
+    <header
+      id="docs-topnav"
+      class="docs-topnav"
+      aria-label="Top navigation"
+    ></header>
+    <div class="docs-mobile-bar">
+      <button
+        type="button"
+        id="sidebar-toggle"
+        class="sidebar-toggle"
+        aria-expanded="false"
+        aria-label="Open menu"
+      >
+        &#9776;
+      </button>
+      <a href="../index.html" class="docs-mobile-brand">Nabta</a>
+    </div>
+    <div id="sidebar-overlay" class="sidebar-overlay"></div>
+    <div class="docs-layout">
+      <aside
+        id="docs-sidebar"
+        class="docs-sidebar"
+        aria-label="Sidebar"
+      ></aside>
+      <div class="docs-content">
+        <div class="docs-body">
+          <div class="docs-article">
+            <header id="docs-header" class="docs-page-header"></header>
+            <main id="main" class="docs-main">
+              <h1>Student Portal</h1>
+              <p class="lead">
+                The most focused experience — answers:
+                <strong>"What should I do today?"</strong>
+              </p>
 
-      <h2>Dashboard</h2>
-      <p>Header: "Good morning, Ahmed"</p>
-      <h3>Today's Schedule</h3>
-      <pre><code>08:00  Mathematics  Room 204
-09:00  Physics      Lab 2
-10:30  English      Room 105</code></pre>
-      <h3>Upcoming</h3>
-      <p>Assignments, quizzes, exams, deadlines with due dates.</p>
-      <h3>Continue Learning</h3>
-      <p>Most recently accessed lesson.</p>
-      <h3>Academic Overview</h3>
-      <p>Subject grades and assignment completion belong here. GPA, attendance %, and analytics-heavy dashboards are later product — do not imply they shipped with the current web portal.</p>
+              <h2>Dashboard</h2>
+              <p>
+                Home is the action hub. Header: time-of-day greeting plus a
+                short “what’s happening today” line. No profile control on this
+                header. Student breadcrumbs start at <strong>Home</strong> (not
+                the role name).
+              </p>
+              <pre><code>Greeting
+[ Subjects | Tasks to complete | Upcoming quizzes | Overall progress ]
+[ Today's Tasks (hero)          | Upcoming ]
+[ Continue Learning ]
+[ Recent Grades                 | Announcements (later) ]</code></pre>
+              <h3>Stats</h3>
+              <p>
+                Four tiles: subject count, actionable assignments, upcoming
+                quizzes, and mean lesson progress. No invented GPA or
+                term-over-term delta.
+              </p>
+              <h3>Today's Tasks</h3>
+              <p>
+                Hero list beside Upcoming. Each row: kind, subject, due, status,
+                and a quick action. Accent for actionable items; danger text for
+                overdue.
+              </p>
+              <h3>Upcoming</h3>
+              <p>
+                Next items that are not already in Today's Tasks (capped at 7).
+                Compact date + title.
+              </p>
+              <h3>Continue Learning</h3>
+              <p>
+                Most recently accessed lesson: subject, lesson title, progress,
+                Continue.
+              </p>
+              <h3>Recent grades</h3>
+              <p>
+                Last few graded assignments and scored quizzes, with an empty
+                state when none exist.
+              </p>
+              <h3>Announcements</h3>
+              <p>
+                Layout slot only — school/class announcements are later product
+                (<a href="../roadmap/08-notifications/">Phase 8</a>). No
+                announcement API or nav item.
+              </p>
 
-      <h2>My Classes</h2>
-      <p>List enrolled subjects. Each opens a subject page with:</p>
-      <ul>
-        <li>Teacher, class, progress</li>
-        <li>Lessons, assignments, quizzes</li>
-        <li>Announcements — later product (Phase 8)</li>
-      </ul>
+              <h2>Subjects</h2>
+              <p>
+                Tile grid of enrolled subjects: subject name, teacher, inset icon
+                hero, lesson/assignment/quiz counts with icons, and progress.
+                Client chips: All | In progress | Completed. Each subject opens a
+                workspace on the same URL with local tabs:
+              </p>
+              <pre><code>Overview | Lessons | Assignments | Quizzes</code></pre>
+              <p>Subject tabs use the secondary variant. Lessons, Assignments, and Quizzes show totals.</p>
+              <p>
+                The subject header carries a back link to Subjects, an icon hero
+                with the subject name and code, and a borderless label/value
+                table for teacher, class (the homeroom section, e.g. 1C), and schedule.
+              </p>
+              <ul>
+                <li>
+                  Overview — Continue Learning hero (unit – lesson, subject
+                  progress bar, Continue), then To Do (next 3 items with icons)
+                  beside Your Progress (large percent + lesson count), then
+                  Recent Activity (completed lessons and scored work with
+                  relative dates). Not a full assignment/quiz list.
+                </li>
+                <li>
+                  Lessons — numbered path (01, 02, …) with All / In progress /
+                  Completed chips. Completed, in progress +
+                  Continue, or not started. No lock model; every published
+                  lesson stays open. No intra-lesson percent.
+                </li>
+                <li>
+                  Assignments / Quizzes — subject-scoped cards (no subject name
+                  on the row): All / To Do / Submitted / Graded (assignments) or
+                  All / To Do / Completed (quizzes), due or score, and Open /
+                  View or Start / View results. No invented descriptions or quiz
+                  due dates.
+                </li>
+                <li>Announcements — later product (Phase 8)</li>
+              </ul>
 
-      <h2>Learning Experience</h2>
-      <p>Focused lesson interface with content area and course/unit navigation sidebar.</p>
-      <p>Support: video, rich text, PDFs, images, external resources, downloadable files, embedded content. Track lesson progress.</p>
+              <h2>Learning Experience</h2>
+              <p>
+                Focused lesson interface with content area and course/unit
+                navigation sidebar.
+              </p>
+              <p>
+                Support: video, rich text, PDFs, images, external resources,
+                downloadable files, embedded content. Track lesson progress.
+              </p>
 
-      <h2>Assignments (Student View)</h2>
-      <p>Students can view instructions, due date, resources, upload/replace submission before deadline, submit, and view status, grade, and feedback.</p>
-      <p><strong>Statuses</strong> (owned by teacher workflow — see <a href="teacher.html">Teacher Portal</a>):</p>
-      <pre><code>Not Started → Draft → Submitted → Late → Graded → Returned</code></pre>
+              <h2>Assignments (Student View)</h2>
+              <p>
+                Global queue (not cards): inline summary
+                <strong>To Do · Due soon · Overdue · Completed</strong> (overdue
+                uses danger text). Tabs:
+                <strong>All</strong> | <strong>To Do</strong> |
+                <strong>Submitted</strong> | <strong>Graded</strong>, with
+                superscript counts. Sort: due date earliest (default), due date
+                latest, recently added, recently graded. Dense rows: status
+                icon, title, subject · points · attachments, human due date
+                (Due tomorrow / Sep 10 / Overdue · Sep 3), and Open / View.
+                Graded rows show the published score. Students can view
+                instructions, due date, resources, upload/replace submission
+                before deadline, submit, and view status, grade, and feedback.
+              </p>
+              <p>
+                <strong>Statuses</strong> (owned by teacher workflow — see
+                <a href="teacher.html">Teacher Portal</a>):
+              </p>
+              <pre><code>Not Started → Draft → Submitted → Late → Graded → Returned</code></pre>
+              <p>
+                To Do includes Not started, Draft, Returned, and Late. Submitted
+                and Graded have their own tabs.
+              </p>
 
-      <h2>Assessments (Student View)</h2>
-      <p>The current web nav labels this <strong>Quizzes</strong>. Flow: Overview → Start → Questions → Submit → Result → Feedback</p>
-      <p>Question types: multiple choice, multiple answer, true/false, short answer.</p>
+              <h2>Assessments (Student View)</h2>
+              <p>
+                The current web nav labels this <strong>Quizzes</strong>. Global
+                page uses cards (not the assignment work-queue list). Tabs:
+                <strong>All</strong> | <strong>To Do</strong> |
+                <strong>Completed</strong> | <strong>Results</strong>, with
+                superscript counts. Sort: recently added (default), recently
+                completed, highest score. In-progress quizzes pin first. Each
+                card shows subject, questions, time limit, attempts, and a
+                Start / Continue / View results action. In progress shows
+                answered count and a thin bar. Completed and Results show
+                score as 18/20 and percent. Cards open the overview (the start
+                gate). Flow: Overview → Start modal → Attempt (one question)
+                → Submit confirm → Result.
+              </p>
+              <p>
+                Overview: title and subject, a facts card (questions, time
+                limit or none, attempts used of max, points), teacher
+                instructions as written, and a generated “Before you begin”
+                list from real rules only (time, attempts, auto-submit if
+                timed). Timed quizzes warn that the timer starts on start.
+                Start opens a confirm modal; Continue (in progress) skips it.
+                A prior result is a score plus a link, not an embedded review.
+              </p>
+              <p>
+                Attempt: sidebar and bottom nav are hidden; the attempt top
+                bar is the only chrome (exit, title, timer). One question at
+                a time, with Previous / Next, a numbered navigator
+                (desktop column, mobile modal), save status, and a submit
+                confirm that shows answered and unanswered counts. Exit
+                confirms leave; progress stays saved. Result uses the normal
+                shell: large score and percent, passed/failed, question
+                count, duration when start and submit times exist, then
+                answer review. No due dates, praise copy, or invented
+                descriptions.
+              </p>
+              <p>
+                Question types: multiple choice, multiple answer, true/false,
+                short answer.
+              </p>
 
-      <h2>Grades</h2>
-      <p>Subject-level current grades. Clicking a subject shows assessments, assignments, scores, feedback, grade history.</p>
-      <p>Grading schemes are configurable per school (percentage, letter, GPA, IB-style, custom).</p>
+              <h2>Grades</h2>
+              <p>
+                A read-only performance hub, not a to-do queue. Header plus a
+                large overall average (mean of scored subjects only) with a
+                progress bar. Compact subject list: name, %, bar, and letter
+                when the school has one — desktop rows, mobile stacked cards.
+                Recent grades link to the assignment or quiz. Clicking a
+                subject still opens that subject’s assignments, quizzes,
+                scores, and feedback.
+              </p>
+              <p>
+                No qualitative “Excellent” labels, last-term comparison,
+                leaderboards, or invented categories. Year/term selectors,
+                category weights, and a trend chart appear when the API
+                provides them. Grading schemes are configurable per school
+                (percentage, letter, GPA, IB-style, custom).
+              </p>
 
-      <h2>Attendance (Student View)</h2>
-      <p><strong>Later product</strong> — not in the current web nav. When built: Present, Absent, Late, Excused, with percentage and counts.</p>
+              <h2>Attendance (Student View)</h2>
+              <p>
+                <strong>Later product</strong> — not in the current web nav.
+                When built: Present, Absent, Late, Excused, with percentage and
+                counts.
+              </p>
 
-      <h2>Also Available</h2>
-      <p>Later product (not implied as shipped):</p>
-      <ul>
-        <li>Announcements and notifications (<a href="../roadmap/08-notifications/">Phase 8</a>)</li>
-        <li>GPA / academic average</li>
-        <li>Profile management</li>
-      </ul>
-      <p>Upcoming deadlines already appear on Home and Assignments.</p>
+              <h2>Also Available</h2>
+              <p>Later product (not implied as shipped):</p>
+              <ul>
+                <li>Calendar page and nav</li>
+                <li>Messages</li>
+                <li>Notification center / header bell</li>
+                <li>Profile page and header profile control</li>
+                <li>
+                  Home announcements (<a href="../roadmap/08-notifications/"
+                    >Phase 8</a
+                  >)
+                </li>
+                <li>
+                  GPA, term-over-term grade delta, and qualitative status labels
+                </li>
+              </ul>
+              <p>Upcoming deadlines already appear on Home and Assignments.</p>
 
-      <h2>Navigation</h2>
-      <p>Current web portal:</p>
-      <pre><code>Home | My Classes | Assignments | Quizzes | Grades</code></pre>
-      <p>Attendance, announcements, profile, and GPA are later — not a More tab today. Composition recipes: <a href="../design/portal-patterns.html">Portal Patterns</a>.</p>
+              <h2>Navigation</h2>
+              <p>Current web portal:</p>
+              <pre><code>Home | Subjects | Assignments | Quizzes | Grades</code></pre>
+              <p>
+                Calendar, messages, notifications, attendance, announcements,
+                profile, and GPA are later — not extra nav items today.
+                Composition recipes:
+                <a href="../design/portal-patterns.html">Portal Patterns</a>.
+              </p>
 
-      <h2>Acceptance Criteria</h2>
-      <ul class="checklist">
-        <li>Dashboard shows today's schedule, upcoming work, and continue learning</li>
-        <li>Student can browse enrolled subjects and open lesson content</li>
-        <li>Student can submit assignments and see status/grade/feedback</li>
-        <li>Student can take quizzes and view results</li>
-        <li>Student can view subject grades</li>
-        <li>Complete workflow works: login → dashboard → subject → assignment → submit → see grade</li>
-      </ul>
+              <h2>Acceptance Criteria</h2>
+              <ul class="checklist">
+                <li>
+                  Home shows greeting, four stats, today's tasks beside
+                  upcoming, continue learning, recent grades, and an
+                  announcements later-slot
+                </li>
+                <li>
+                  Student breadcrumbs start at Home; teacher/admin breadcrumbs
+                  still start with the role
+                </li>
+                <li>
+                  Subjects tiles show teacher, lesson/assignment/quiz counts, and
+                  progress; subject page has Overview / Lessons / Assignments /
+                  Quizzes tabs
+                </li>
+                <li>
+                  Assignments use All / To Do / Submitted / Graded tabs; Quizzes use
+                  All / To Do / Completed / Results cards
+                </li>
+                <li>
+                  Grades is a performance hub (overall average, subject list,
+                  recent grades)
+                </li>
+                <li>
+                  Student can submit assignments and see status/grade/feedback
+                </li>
+                <li>Student can take quizzes and view results</li>
+                <li>
+                  Complete workflow works: login → Home → task or subject →
+                  assignment → submit → see grade
+                </li>
+              </ul>
 
-      <div class="related-links">
-        <h2>Related</h2>
-        <p><span class="badge badge-phase">Phases</span> <a href="../roadmap/03-student-experience/">Phase 3 — Student Experience</a>, <a href="../roadmap/05-assessments/">Phase 5 — Assessments</a>, <a href="../roadmap/07-portal-ui/">Phase 7 — Portal UI</a></p>
-        <p><span class="badge badge-arch">Architecture</span> <a href="../technical/frontend-architecture.html">Frontend Architecture</a>, <a href="../technical/sequences.html">Sequence Diagrams</a></p>
-        <p><strong>Design:</strong> <a href="../design/portal-patterns.html">Portal Patterns</a></p>
-        <p>Also see: <a href="teacher.html">Teacher Portal</a> (assignment/grading workflow owner)</p>
-      </div>
-      <p class="source-footnote">Source: requirements.md §§13–19, 46</p>
-          </main>
-          <footer id="docs-pager" class="docs-pager-wrap"></footer>
+              <div class="related-links">
+                <h2>Related</h2>
+                <p>
+                  <span class="badge badge-phase">Phases</span>
+                  <a href="../roadmap/03-student-experience/"
+                    >Phase 3 — Student Experience</a
+                  >,
+                  <a href="../roadmap/05-assessments/">Phase 5 — Assessments</a
+                  >, <a href="../roadmap/07-portal-ui/">Phase 7 — Portal UI</a>
+                </p>
+                <p>
+                  <span class="badge badge-arch">Architecture</span>
+                  <a href="../technical/frontend-architecture.html"
+                    >Frontend Architecture</a
+                  >, <a href="../technical/sequences.html">Sequence Diagrams</a>
+                </p>
+                <p>
+                  <strong>Design:</strong>
+                  <a href="../design/portal-patterns.html">Portal Patterns</a>
+                </p>
+                <p>
+                  Also see:
+                  <a href="teacher.html">Teacher Portal</a> (assignment/grading
+                  workflow owner)
+                </p>
+              </div>
+              <p class="source-footnote">Source: requirements.md §§13–19, 46</p>
+            </main>
+            <footer id="docs-pager" class="docs-pager-wrap"></footer>
+          </div>
+          <aside
+            id="docs-toc"
+            class="docs-toc"
+            aria-label="Table of contents"
+          ></aside>
         </div>
-        <aside id="docs-toc" class="docs-toc" aria-label="Table of contents"></aside>
       </div>
     </div>
-  </div>
-  <script src="../assets/nav-config.js"></script>
-  <script src="../assets/layout.js"></script>
-  <script src="../assets/docs.js"></script>
-</body>
+    <script src="../assets/nav-config.js"></script>
+    <script src="../assets/layout.js"></script>
+    <script src="../assets/docs.js"></script>
+  </body>
 </html>

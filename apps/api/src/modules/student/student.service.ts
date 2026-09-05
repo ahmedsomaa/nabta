@@ -229,11 +229,39 @@ export class StudentService {
       },
     });
 
-    const progress = await this.prisma.lessonProgress.findMany({
-      where: { studentId: student.id, completedAt: { not: null } },
-      select: { lessonId: true },
-    });
+    const [progress, assignments, quizCounts] = await Promise.all([
+      this.prisma.lessonProgress.findMany({
+        where: { studentId: student.id, completedAt: { not: null } },
+        select: { lessonId: true },
+      }),
+      this.prisma.assignment.findMany({
+        where: {
+          schoolId: student.schoolId,
+          classId: { in: classIds },
+          publishedAt: { not: null },
+        },
+        include: { submissions: { where: { studentId: student.id } } },
+      }),
+      this.prisma.assessment.groupBy({
+        by: ['subjectId'],
+        where: { schoolId: student.schoolId, classId: { in: classIds }, publishedAt: { not: null } },
+        _count: { _all: true },
+      }),
+    ]);
     const done = new Set(progress.map((row) => row.lessonId));
+    const assignmentCountBySubject = new Map<string, number>();
+    const pendingBySubject = new Map<string, number>();
+    for (const assignment of assignments) {
+      assignmentCountBySubject.set(
+        assignment.subjectId,
+        (assignmentCountBySubject.get(assignment.subjectId) ?? 0) + 1,
+      );
+      const status = this.displayStatus(assignment.dueAt, assignment.submissions[0] ?? null);
+      if (['NOT_STARTED', 'DRAFT', 'RETURNED', 'LATE'].includes(status)) {
+        pendingBySubject.set(assignment.subjectId, (pendingBySubject.get(assignment.subjectId) ?? 0) + 1);
+      }
+    }
+    const quizCountBySubject = new Map(quizCounts.map((row) => [row.subjectId, row._count._all]));
 
     return rows.map((row) => {
       const lessons = row.subject.units.flatMap((unit) => unit.lessons);
@@ -246,6 +274,10 @@ export class StudentService {
         teacherName: teacherName(row.teacher.givenName, row.teacher.familyName),
         className: row.class.name,
         progressPercent: percent,
+        lessonCount: lessons.length,
+        assignmentCount: assignmentCountBySubject.get(row.subject.id) ?? 0,
+        quizCount: quizCountBySubject.get(row.subject.id) ?? 0,
+        pendingAssignmentCount: pendingBySubject.get(row.subject.id) ?? 0,
       };
     });
   }
@@ -283,7 +315,7 @@ export class StudentService {
       this.prisma.schoolClass.findUnique({ where: { id: teaching.classId } }),
       this.prisma.lessonProgress.findMany({
         where: { studentId: student.id, completedAt: { not: null } },
-        select: { lessonId: true },
+        select: { lessonId: true, completedAt: true },
       }),
       this.prisma.timetableSlot.findMany({
         where: {
@@ -297,8 +329,66 @@ export class StudentService {
     ]);
     const done = new Set(completed.map((row) => row.lessonId));
     const lessons = subject.units.flatMap((unit) => unit.lessons);
+    const lessonById = new Map(lessons.map((lesson) => [lesson.id, lesson]));
     const percent =
       lessons.length === 0 ? 0 : Math.round((lessons.filter((l) => done.has(l.id)).length / lessons.length) * 100);
+
+    const activity: {
+      id: string;
+      kind: 'lesson' | 'assignment' | 'assessment';
+      title: string;
+      occurredAt: Date;
+      score: number | null;
+      maxScore: number | null;
+    }[] = [];
+    for (const row of completed) {
+      const lesson = lessonById.get(row.lessonId);
+      if (!lesson || !row.completedAt) continue;
+      activity.push({
+        id: lesson.id,
+        kind: 'lesson',
+        title: lesson.title,
+        occurredAt: row.completedAt,
+        score: null,
+        maxScore: null,
+      });
+    }
+    for (const row of subject.assignments) {
+      const submission = row.submissions[0];
+      if (!submission) continue;
+      const status = this.displayStatus(row.dueAt, submission);
+      if (status !== 'GRADED' && status !== 'SUBMITTED' && status !== 'LATE') continue;
+      const occurredAt = submission.gradedAt ?? submission.submittedAt;
+      if (!occurredAt) continue;
+      activity.push({
+        id: row.id,
+        kind: 'assignment',
+        title: row.title,
+        occurredAt,
+        score: status === 'GRADED' && submission.score != null ? Number(submission.score) : null,
+        maxScore: row.maxScore,
+      });
+    }
+    for (const row of subject.assessments) {
+      const latest = [...row.attempts]
+        .filter((attempt) => attempt.status !== 'IN_PROGRESS' && attempt.submittedAt)
+        .sort((a, b) => (b.submittedAt?.getTime() ?? 0) - (a.submittedAt?.getTime() ?? 0))[0];
+      if (!latest?.submittedAt) continue;
+      const maxScore = row.questions.reduce((sum, question) => sum + question.points, 0);
+      activity.push({
+        id: row.id,
+        kind: 'assessment',
+        title: row.title,
+        occurredAt: latest.submittedAt,
+        score: latest.score != null ? Number(latest.score) : null,
+        maxScore,
+      });
+    }
+    activity.sort((a, b) => b.occurredAt.getTime() - a.occurredAt.getTime());
+    const recentActivity = activity.slice(0, 5).map((item) => ({
+      ...item,
+      occurredAt: item.occurredAt.toISOString(),
+    }));
 
     return {
       id: subject.id,
@@ -328,13 +418,21 @@ export class StudentService {
           completed: done.has(lesson.id),
         })),
       })),
-      assignments: subject.assignments.map((row) => ({
-        id: row.id,
-        title: row.title,
-        dueAt: row.dueAt.toISOString(),
-        subjectName: subject.name,
-        status: this.displayStatus(row.dueAt, row.submissions[0] ?? null),
-      })),
+      assignments: subject.assignments.map((row) => {
+        const submission = row.submissions[0] ?? null;
+        return {
+          id: row.id,
+          title: row.title,
+          dueAt: row.dueAt.toISOString(),
+          subjectName: subject.name,
+          status: this.displayStatus(row.dueAt, submission),
+          maxScore: row.maxScore,
+          score:
+            submission?.gradesPublishedAt && submission.score != null
+              ? Number(submission.score)
+              : null,
+        };
+      }),
       assessments: subject.assessments.map((row) => {
         const inProgress = row.attempts.find((attempt) => attempt.status === 'IN_PROGRESS');
         const finished = row.attempts.filter((attempt) => attempt.status !== 'IN_PROGRESS');
@@ -356,6 +454,12 @@ export class StudentService {
           inProgressAttemptId: inProgress?.id ?? null,
           bestScore: best,
           maxScore,
+          questionCount: row.questions.length,
+          submittedAt:
+            [...finished]
+              .filter((attempt) => attempt.submittedAt)
+              .sort((a, b) => (b.submittedAt?.getTime() ?? 0) - (a.submittedAt?.getTime() ?? 0))[0]
+              ?.submittedAt?.toISOString() ?? null,
           passed: best == null || maxScore <= 0 ? null : (best / maxScore) * 100 >= row.passingScore,
           status: inProgress
             ? 'IN_PROGRESS'
@@ -366,6 +470,7 @@ export class StudentService {
                 : 'NOT_STARTED',
         };
       }),
+      recentActivity,
     };
   }
 
@@ -468,16 +573,28 @@ export class StudentService {
       include: {
         subject: true,
         submissions: { where: { studentId: student.id } },
+        _count: { select: { files: true } },
       },
       orderBy: { dueAt: 'asc' },
     });
-    return rows.map((row) => ({
-      id: row.id,
-      title: row.title,
-      dueAt: row.dueAt.toISOString(),
-      subjectName: row.subject.name,
-      status: this.displayStatus(row.dueAt, row.submissions[0] ?? null),
-    }));
+    return rows.map((row) => {
+      const submission = row.submissions[0] ?? null;
+      return {
+        id: row.id,
+        title: row.title,
+        dueAt: row.dueAt.toISOString(),
+        subjectName: row.subject.name,
+        status: this.displayStatus(row.dueAt, submission),
+        maxScore: row.maxScore,
+        score:
+          submission?.gradesPublishedAt && submission.score != null
+            ? Number(submission.score)
+            : null,
+        publishedAt: row.publishedAt?.toISOString() ?? null,
+        gradesPublishedAt: submission?.gradesPublishedAt?.toISOString() ?? null,
+        attachmentCount: row._count.files,
+      };
+    });
   }
 
   async getAssignment(user: AuthUser, assignmentId: string) {

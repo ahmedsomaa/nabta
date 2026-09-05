@@ -1,14 +1,22 @@
-import { Link, useNavigate, useParams } from 'react-router-dom';
+import { Link, useParams } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import { useTranslation } from 'react-i18next';
-import { Chip } from '@heroui/react';
-import type { StudentGradeDetail, StudentGradeListItem } from '@nabta/types';
+import { Card, Chip } from '@heroui/react';
+import type {
+  StudentAssessmentListItem,
+  StudentGradeDetail,
+  StudentGradeListItem,
+  UpcomingAssignment,
+} from '@nabta/types';
 import { apiFetch } from '@/lib/api';
 import { EmptyCard, QueryError, QueryLoading } from './QueryState';
 import { letterChipColor } from './StatusChip';
 import { StudentEmptyState, StudentPageHeader, StudentProgress } from './StudentChrome';
 import { GraduationCapIcon } from '@/components/icons/graduation-cap';
+import { formatShortMonthDay } from './studentDates';
 import { usePageTrail } from '@/layouts/PageTrail';
+
+const RECENT_LIMIT = 8;
 
 export function StudentGradesPage() {
   const { subjectId } = useParams();
@@ -17,11 +25,18 @@ export function StudentGradesPage() {
 }
 
 function GradeList() {
-  const { t } = useTranslation();
-  const navigate = useNavigate();
+  const { t, i18n } = useTranslation();
   const list = useQuery({
     queryKey: ['student-grades'],
     queryFn: () => apiFetch<StudentGradeListItem[]>('/me/grades'),
+  });
+  const assignments = useQuery({
+    queryKey: ['student-assignments'],
+    queryFn: () => apiFetch<UpcomingAssignment[]>('/me/assignments'),
+  });
+  const assessments = useQuery({
+    queryKey: ['student-assessments'],
+    queryFn: () => apiFetch<StudentAssessmentListItem[]>('/me/assessments'),
   });
 
   if (list.isLoading) return <QueryLoading variant="table" />;
@@ -32,82 +47,126 @@ function GradeList() {
     scored.length > 0
       ? Math.round(scored.reduce((sum, row) => sum + (row.percentage ?? 0), 0) / scored.length)
       : null;
-  const statusParts = [
-    t('grades.subjectsCount', { count: list.data.length }),
-    average == null ? t('grades.noScore') : t('student.homeAverage', { percent: average }),
-  ];
+
+  const recent = [
+    ...(assignments.data ?? [])
+      .filter((item) => item.status === 'GRADED' && item.score != null && item.maxScore != null)
+      .map((item) => ({
+        key: `assignment-${item.id}`,
+        href: `/student/assignments/${item.id}`,
+        title: item.title,
+        subjectName: item.subjectName,
+        kind: t('nav.assignments'),
+        score: item.score ?? 0,
+        maxScore: item.maxScore ?? 0,
+        at: item.gradesPublishedAt ?? item.publishedAt ?? null,
+      })),
+    ...(assessments.data ?? [])
+      .filter((item) => item.bestScore != null && item.maxScore > 0)
+      .map((item) => ({
+        key: `assessment-${item.id}`,
+        href: `/student/assessments/${item.id}`,
+        title: item.title,
+        subjectName: item.subjectName,
+        kind: t('nav.quizzes'),
+        score: item.bestScore ?? 0,
+        maxScore: item.maxScore,
+        at: item.submittedAt ?? item.publishedAt ?? null,
+      })),
+  ]
+    .sort((a, b) => (b.at ?? '').localeCompare(a.at ?? ''))
+    .slice(0, RECENT_LIMIT);
 
   return (
-    <div className="space-y-4">
-      <StudentPageHeader title={t('grades.title')} />
+    <div className="space-y-8">
+      <StudentPageHeader title={t('grades.title')} subtitle={t('grades.subtitle')} />
       {list.data.length === 0 ? (
         <StudentEmptyState icon={GraduationCapIcon}>{t('grades.empty')}</StudentEmptyState>
       ) : (
         <>
-          <p className="flex flex-wrap items-center gap-x-2 gap-y-1 text-sm text-muted">
-            {statusParts.map((part, index) => (
-              <span key={part} className="contents">
-                {index > 0 ? (
-                  <span className="text-border" aria-hidden>
-                    ·
-                  </span>
-                ) : null}
-                {part}
-              </span>
-            ))}
-          </p>
-          <div className="min-w-0 overflow-x-auto rounded-xl border border-border">
-            <table className="w-full min-w-[28rem] text-sm">
-              <thead className="bg-surface text-muted">
-                <tr>
-                  <th className="px-4 py-2 text-start font-medium">{t('nav.myClasses')}</th>
-                  <th className="w-48 px-4 py-2 text-end font-medium">{t('grades.current')}</th>
-                  <th className="w-28 px-4 py-2 text-end font-medium">{t('grades.letter')}</th>
-                </tr>
-              </thead>
-              <tbody>
-                {list.data.map((row) => (
-                  <tr
-                    key={row.subjectId}
-                    className="cursor-pointer border-t border-border hover:bg-overlay"
-                    onClick={() => navigate(`/student/grades/${row.subjectId}`)}
+          {average != null ? (
+            <Card className="bg-surface">
+              <Card.Header>
+                <Card.Description>{t('grades.overallAverage')}</Card.Description>
+              </Card.Header>
+              <Card.Content className="space-y-4">
+                <p className="text-5xl font-semibold tracking-tight tabular-nums">{average}%</p>
+                <StudentProgress value={average} label={t('grades.overallAverage')} />
+              </Card.Content>
+            </Card>
+          ) : null}
+
+          <section className="space-y-3">
+            <h2 className="text-lg font-semibold">{t('grades.yourSubjects')}</h2>
+            <ul className="overflow-hidden rounded-xl border border-border bg-surface">
+              {list.data.map((row) => (
+                <li key={row.subjectId} className="border-b border-border last:border-b-0">
+                  <Link
+                    to={`/student/grades/${row.subjectId}`}
+                    className="flex flex-col gap-2 px-4 py-3 text-inherit no-underline hover:bg-overlay md:flex-row md:items-center md:gap-4"
                   >
-                    <td className="px-4 py-3 text-start">
-                      <Link
-                        to={`/student/grades/${row.subjectId}`}
-                        className="font-medium text-foreground no-underline hover:text-accent"
-                      >
-                        {row.subjectName}
-                      </Link>
-                      <span className="text-muted"> · {row.className}</span>
-                    </td>
-                    <td className="px-4 py-3 text-end">
-                      <div className="flex items-center justify-end gap-3">
-                        {row.percentage != null ? (
-                          <div className="hidden w-16 md:block">
-                            <StudentProgress
-                              value={row.percentage}
-                              label={t('grades.current')}
-                            />
-                          </div>
+                    <div className="min-w-0 flex-1">
+                      <p className="font-medium [overflow-wrap:anywhere]">{row.subjectName}</p>
+                      <p className="mt-0.5 truncate text-xs text-muted">{row.className}</p>
+                    </div>
+                    {row.percentage != null ? (
+                      <div className="flex items-center gap-3 md:w-72">
+                        <p className="w-12 shrink-0 text-lg font-semibold tabular-nums md:text-end">
+                          {row.percentage}%
+                        </p>
+                        <div className="min-w-0 flex-1">
+                          <StudentProgress value={row.percentage} label={t('grades.current')} />
+                        </div>
+                        {row.letter ? (
+                          <Chip size="sm" color={letterChipColor(row.letter)} variant="soft">
+                            {row.letter}
+                          </Chip>
                         ) : null}
-                        <span className="tabular-nums">
-                          {row.percentage == null ? t('grades.noScore') : `${row.percentage}%`}
-                        </span>
                       </div>
-                    </td>
-                    <td className="px-4 py-3">
-                      <div className="flex justify-end">
-                        <Chip size="sm" color={letterChipColor(row.letter)} variant="soft">
-                          {row.letter ?? t('grades.noScore')}
-                        </Chip>
-                      </div>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
+                    ) : (
+                      <p className="text-sm text-muted">{t('grades.noScore')}</p>
+                    )}
+                  </Link>
+                </li>
+              ))}
+            </ul>
+          </section>
+
+          {recent.length > 0 ? (
+            <section className="space-y-3">
+              <h2 className="text-lg font-semibold">{t('grades.recent')}</h2>
+              <ul className="overflow-hidden rounded-xl border border-border bg-surface">
+                {recent.map((item) => {
+                  const percent =
+                    item.maxScore > 0 ? Math.round((item.score / item.maxScore) * 100) : null;
+                  const dateLabel = formatShortMonthDay(item.at, i18n.language);
+                  return (
+                    <li key={item.key} className="border-b border-border last:border-b-0">
+                      <Link
+                        to={item.href}
+                        className="flex items-start justify-between gap-3 px-4 py-3 text-inherit no-underline hover:bg-overlay"
+                      >
+                        <div className="min-w-0">
+                          <p className="truncate font-medium">{item.title}</p>
+                          <p className="mt-0.5 truncate text-xs text-muted">
+                            {[item.subjectName, item.kind, dateLabel].filter(Boolean).join(' · ')}
+                          </p>
+                        </div>
+                        <div className="shrink-0 text-end">
+                          <p className="text-sm font-medium tabular-nums" dir="ltr">
+                            {item.score} / {item.maxScore}
+                          </p>
+                          {percent != null ? (
+                            <p className="mt-0.5 text-xs tabular-nums text-muted">{percent}%</p>
+                          ) : null}
+                        </div>
+                      </Link>
+                    </li>
+                  );
+                })}
+              </ul>
+            </section>
+          ) : null}
         </>
       )}
     </div>
@@ -158,7 +217,7 @@ function GradeDetail({ subjectId }: { subjectId: string }) {
         {row.assignments.length === 0 ? (
           <EmptyCard>{t('student.emptyAssignments')}</EmptyCard>
         ) : (
-          <div className="divide-y divide-border overflow-hidden rounded-xl border border-border">
+          <div className="divide-y divide-border overflow-hidden rounded-xl border border-border bg-surface">
             {row.assignments.map((item) => (
               <GradeRow
                 key={item.id}
@@ -178,7 +237,7 @@ function GradeDetail({ subjectId }: { subjectId: string }) {
         {row.assessments.length === 0 ? (
           <EmptyCard>{t('assessment.empty')}</EmptyCard>
         ) : (
-          <div className="divide-y divide-border overflow-hidden rounded-xl border border-border">
+          <div className="divide-y divide-border overflow-hidden rounded-xl border border-border bg-surface">
             {row.assessments.map((item) => (
               <GradeRow
                 key={item.id}

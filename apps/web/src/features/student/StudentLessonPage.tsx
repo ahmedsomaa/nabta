@@ -7,6 +7,7 @@ import type { LessonType, StudentLessonDetail, StudentSubjectListItem, StudentUn
 import { apiFetch } from '@/lib/api';
 import { QueryError, QueryLoading } from './QueryState';
 import { LESSON_TYPE_ICON, lessonTypeKey } from './lessonType';
+import { StudentPageHeader } from './StudentChrome';
 import { cn } from '@/lib/cn';
 import { usePageTrail } from '@/layouts/PageTrail';
 
@@ -145,7 +146,7 @@ export function StudentLessonPage() {
     query.data
       ? [
           {
-            label: subjectName ?? t('nav.myClasses'),
+            label: subjectName ?? t('nav.subjects'),
             to: `/student/classes/${subjectId}`,
           },
           { label: query.data.title },
@@ -185,9 +186,10 @@ export function StudentLessonPage() {
         <UnitSidebar units={lesson.units} subjectId={lesson.subjectId} currentId={lesson.id} />
       </div>
       <div className="order-1 min-w-0 flex-1 space-y-4 lg:order-2 lg:max-w-3xl">
-        <div className="flex flex-wrap items-start justify-between gap-3">
-          <div className="min-w-0 flex-1 space-y-3">
-            <h1 className="min-w-0 text-2xl font-semibold tracking-tight [overflow-wrap:anywhere]">{lesson.title}</h1>
+        <StudentPageHeader
+          title={lesson.title}
+          subtitle={t('student.lessonSubtitle')}
+          trailing={
             <div className="flex flex-wrap items-center gap-2">
               <Chip size="sm" variant="soft">
                 <TypeIcon className="size-3" aria-hidden />
@@ -199,18 +201,18 @@ export function StudentLessonPage() {
                   {t('student.completed')}
                 </Chip>
               ) : null}
+              <Button
+                size="sm"
+                className="shrink-0"
+                variant={lesson.completed ? 'secondary' : 'primary'}
+                isPending={progress.isPending}
+                onPress={() => progress.mutate(!lesson.completed)}
+              >
+                {lesson.completed ? t('student.markIncomplete') : t('student.markComplete')}
+              </Button>
             </div>
-          </div>
-          <Button
-            size="sm"
-            className="shrink-0"
-            variant={lesson.completed ? 'secondary' : 'primary'}
-            isPending={progress.isPending}
-            onPress={() => progress.mutate(!lesson.completed)}
-          >
-            {lesson.completed ? t('student.markIncomplete') : t('student.markComplete')}
-          </Button>
-        </div>
+          }
+        />
         {progress.isError ? <QueryError onRetry={() => progress.mutate(!lesson.completed)} /> : null}
         <LessonBody type={lesson.type} body={lesson.body} url={lesson.url} title={lesson.title} />
         <div className="flex flex-wrap justify-between gap-2 border-t border-border pt-4">

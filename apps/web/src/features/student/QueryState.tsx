@@ -70,7 +70,7 @@ export function QueryLoading({
         <Skeleton className="h-8 w-1/3 rounded-lg" />
         <div className="grid grid-cols-2 gap-3 md:grid-cols-3 xl:grid-cols-4">
           {['a', 'b', 'c', 'd'].map((key) => (
-            <div key={key} className="overflow-hidden rounded-xl border border-border">
+            <div key={key} className="overflow-hidden rounded-xl border border-border bg-surface">
               <Skeleton className="h-24 rounded-none md:h-28" />
               <div className="space-y-2 p-4">
                 <Skeleton className="h-4 w-2/3 rounded-md" />

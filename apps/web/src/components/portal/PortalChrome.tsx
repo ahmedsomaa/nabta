@@ -58,7 +58,7 @@ export function PortalEmptyState({
   action,
 }: {
   icon: React.ComponentType<{ size?: number; className?: string }>;
-  children: string;
+  children: ReactNode;
   action?: { label: string; onPress: () => void };
 }) {
   return (
@@ -66,7 +66,7 @@ export function PortalEmptyState({
       <div className="text-accent">
         <Icon className="mx-auto" size={32} />
       </div>
-      <p className="max-w-sm text-sm text-muted">{children}</p>
+      <div className="max-w-sm text-sm text-muted">{children}</div>
       {action ? (
         <Button size="sm" variant="secondary" onPress={action.onPress}>
           {action.label}
@@ -84,12 +84,14 @@ export function PortalPanel({
   className?: string;
 }) {
   return (
-    <div className={cn('overflow-hidden rounded-xl border border-border p-5', className)}>{children}</div>
+    <div className={cn('overflow-hidden rounded-xl border border-border bg-surface p-5', className)}>
+      {children}
+    </div>
   );
 }
 
 export function PortalList({ children }: { children: ReactNode }) {
-  return <ul className="overflow-hidden rounded-xl border border-border">{children}</ul>;
+  return <ul className="overflow-hidden rounded-xl border border-border bg-surface">{children}</ul>;
 }
 
 export const portalListRowClass =
@@ -138,12 +140,12 @@ export function PortalMetric({
     </div>
   );
   if (!onPress) {
-    return <div className="rounded-xl border border-border bg-overlay">{body}</div>;
+    return <div className="rounded-xl border border-border bg-surface">{body}</div>;
   }
   return (
     <button
       type="button"
-      className="rounded-xl border border-border bg-overlay text-start transition-colors hover:border-accent/40"
+      className="rounded-xl border border-border bg-surface text-start transition-colors hover:border-accent/40"
       onClick={onPress}
     >
       {body}

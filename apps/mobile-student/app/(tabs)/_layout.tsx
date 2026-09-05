@@ -6,7 +6,7 @@ export default function TabsLayout() {
   return (
     <Tabs screenOptions={{ headerShown: true }}>
       <Tabs.Screen name="index" options={{ title: t('nav.home') }} />
-      <Tabs.Screen name="classes" options={{ title: t('nav.myClasses') }} />
+      <Tabs.Screen name="classes" options={{ title: t('nav.subjects') }} />
       <Tabs.Screen name="assignments" options={{ title: t('nav.assignments') }} />
       <Tabs.Screen name="grades" options={{ title: t('nav.grades') }} />
     </Tabs>

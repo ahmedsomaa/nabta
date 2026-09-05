@@ -8,7 +8,7 @@ export default function ClassesScreen() {
     <View className="flex-1 bg-background p-4">
       <Card>
         <Card.Body>
-          <Card.Title>{t('nav.myClasses')}</Card.Title>
+          <Card.Title>{t('nav.subjects')}</Card.Title>
           <Card.Description>{t('mobile.comingSoon')}</Card.Description>
         </Card.Body>
       </Card>
