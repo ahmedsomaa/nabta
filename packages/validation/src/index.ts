@@ -222,12 +222,45 @@ export const filePresignSchema = z.object({
   fileName: z.string().min(1).max(180),
 });
 
-export const assignmentDraftSchema = z.object({
-  storageKey: z.string().min(1).max(500),
-  mimeType: z.string().min(1).max(120),
-  size: z.number().int().min(1).max(10 * 1024 * 1024),
-  fileName: z.string().min(1).max(180),
-});
+export const STUDENT_SUBMISSION_MIME = [
+  'application/pdf',
+  'image/jpeg',
+  'image/png',
+  'image/webp',
+  'text/plain',
+  'application/msword',
+  'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+] as const;
+
+export const DEFAULT_ALLOWED_MIME_TYPES: string[] = [...STUDENT_SUBMISSION_MIME];
+export const UNTITLED_ASSIGNMENT_TITLE = 'Untitled assignment';
+export const UNTITLED_QUIZ_TITLE = 'Untitled quiz';
+
+const httpUrl = z
+  .string()
+  .url()
+  .max(2000)
+  .refine((value) => value.startsWith('http://') || value.startsWith('https://'), {
+    message: 'URL must start with http:// or https://',
+  });
+
+export const assignmentSubmissionTypeEnum = z.enum(['FILE', 'TEXT', 'LINK', 'MULTIPLE', 'NONE']);
+export const assignmentResubmitPolicyEnum = z.enum(['NEVER', 'ALWAYS', 'UNTIL_DUE']);
+
+export const assignmentDraftSchema = z
+  .object({
+    storageKey: z.string().min(1).max(500).optional(),
+    mimeType: z.string().min(1).max(120).optional(),
+    size: z.number().int().min(1).max(10 * 1024 * 1024).optional(),
+    fileName: z.string().min(1).max(180).optional(),
+    textResponse: z.string().max(20_000).nullable().optional(),
+    linkUrl: z.union([httpUrl, z.literal(''), z.null()]).optional(),
+  })
+  .superRefine((value, ctx) => {
+    if (value.storageKey && (!value.mimeType || value.size == null || !value.fileName)) {
+      ctx.addIssue({ code: z.ZodIssueCode.custom, message: 'File metadata is required.' });
+    }
+  });
 
 const fileMeta = {
   mimeType: z.string().min(1).max(120),
@@ -243,7 +276,7 @@ const materialFileMeta = {
 
 export const teacherFilePresignSchema = z.discriminatedUnion('purpose', [
   z.object({ purpose: z.literal('material'), lessonId: z.string().uuid(), ...materialFileMeta }),
-  z.object({ purpose: z.literal('assignment'), assignmentId: z.string().uuid(), ...fileMeta }),
+  z.object({ purpose: z.literal('assignment'), assignmentId: z.string().uuid(), ...materialFileMeta }),
 ]);
 
 export const createUnitSchema = z.object({
@@ -314,23 +347,55 @@ export const updateMaterialSchema = z.object({
   lessonId: z.string().uuid().optional(),
 });
 
+const assignmentSettingsFields = {
+  title: z.string().max(160).optional(),
+  instructions: z.string().max(20_000).optional(),
+  dueAt: z.union([z.coerce.date(), z.null()]).optional(),
+  closeAt: z.union([z.coerce.date(), z.null()]).optional(),
+  allowLate: z.boolean().optional(),
+  submissionType: assignmentSubmissionTypeEnum.optional(),
+  maxFiles: z.number().int().min(1).max(20).optional(),
+  allowedMimeTypes: z
+    .array(z.enum(STUDENT_SUBMISSION_MIME))
+    .min(1)
+    .max(STUDENT_SUBMISSION_MIME.length)
+    .optional(),
+  resubmitPolicy: assignmentResubmitPolicyEnum.optional(),
+  maxScore: z.number().int().min(1).max(1000).optional(),
+};
+
 export const createTeacherAssignmentSchema = z.object({
   classId: z.string().uuid(),
   subjectId: z.string().uuid(),
-  title: z.string().min(1).max(160),
-  instructions: z.string().min(1).max(20_000),
-  dueAt: z.coerce.date(),
-  maxScore: z.number().int().min(1).max(1000).optional(),
+  ...assignmentSettingsFields,
 });
 
 export const updateTeacherAssignmentSchema = z.object({
-  title: z.string().min(1).max(160).optional(),
-  instructions: z.string().min(1).max(20_000).optional(),
-  dueAt: z.coerce.date().optional(),
-  maxScore: z.number().int().min(1).max(1000).optional(),
+  classId: z.string().uuid().optional(),
+  subjectId: z.string().uuid().optional(),
+  ...assignmentSettingsFields,
 });
 
-export const assignmentFileSchema = assignmentDraftSchema;
+export const publishTeacherAssignmentSchema = z.object({
+  publishedAt: z.coerce.date().optional(),
+});
+
+export const assignmentFileSchema = z.union([
+  z.object({
+    storageKey: z.string().min(1).max(500),
+    fileName: z.string().min(1).max(180),
+    mimeType: z.string().min(1).max(120),
+    size: z.number().int().min(1).max(50 * 1024 * 1024),
+  }),
+  z.object({
+    fileName: z.string().min(1).max(180),
+    url: httpUrl,
+  }),
+]);
+
+export const updateAssignmentFileSchema = z.object({
+  fileName: z.string().min(1).max(180),
+});
 
 export const gradeSubmissionSchema = z.object({
   score: z.number().min(0).max(1000),
@@ -369,31 +434,37 @@ export const gradebookQuerySchema = z.object({
 
 const questionTypeEnum = z.enum(['MULTIPLE_CHOICE', 'MULTIPLE_ANSWER', 'TRUE_FALSE', 'SHORT_ANSWER']);
 
+const optionalAssessmentDate = z.union([z.coerce.date(), z.null()]).optional();
+
 export const createAssessmentSchema = z.object({
   classId: z.string().uuid(),
   subjectId: z.string().uuid(),
   unitId: z.string().uuid().optional().nullable(),
-  title: z.string().min(1).max(160),
+  title: z.string().max(160).optional(),
   instructions: z.string().max(20_000).optional(),
   timeLimitMinutes: z.number().int().min(1).max(240).optional().nullable(),
   maxAttempts: z.number().int().min(1).max(20).optional(),
   passingScore: z.number().int().min(0).max(100).optional(),
   randomizeQuestions: z.boolean().optional(),
+  opensAt: optionalAssessmentDate,
+  dueAt: optionalAssessmentDate,
 });
 
 export const updateAssessmentSchema = z.object({
-  title: z.string().min(1).max(160).optional(),
+  title: z.string().max(160).optional(),
   instructions: z.string().max(20_000).optional(),
   unitId: z.string().uuid().optional().nullable(),
   timeLimitMinutes: z.number().int().min(1).max(240).optional().nullable(),
   maxAttempts: z.number().int().min(1).max(20).optional(),
   passingScore: z.number().int().min(0).max(100).optional(),
   randomizeQuestions: z.boolean().optional(),
+  opensAt: optionalAssessmentDate,
+  dueAt: optionalAssessmentDate,
 });
 
 export const createQuestionSchema = z.object({
   type: questionTypeEnum,
-  prompt: z.string().min(1).max(4000),
+  prompt: z.string().max(4000).optional(),
   points: z.number().int().min(1).max(100).optional(),
   feedback: z.string().max(4000).optional().nullable(),
   options: z
@@ -407,7 +478,7 @@ export const createQuestionSchema = z.object({
 });
 
 export const updateQuestionSchema = z.object({
-  prompt: z.string().min(1).max(4000).optional(),
+  prompt: z.string().max(4000).optional(),
   points: z.number().int().min(1).max(100).optional(),
   feedback: z.string().max(4000).optional().nullable(),
   type: questionTypeEnum.optional(),

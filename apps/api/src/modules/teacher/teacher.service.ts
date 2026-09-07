@@ -20,22 +20,32 @@ import {
   createLessonSchema,
   createTeacherAssignmentSchema,
   createUnitSchema,
+  DEFAULT_ALLOWED_MIME_TYPES,
   gradebookQuerySchema,
   gradeSubmissionSchema,
   lessonMaterialSchema,
+  publishTeacherAssignmentSchema,
   putAttendanceSchema,
   reorderLessonsSchema,
   reorderUnitsSchema,
   teacherFilePresignSchema,
+  UNTITLED_ASSIGNMENT_TITLE,
+  updateAssignmentFileSchema,
   updateLessonSchema,
   updateMaterialSchema,
   updateTeacherAssignmentSchema,
   updateUnitSchema,
 } from '@nabta/validation';
+import { sanitizeAssignmentHtml, stripAssignmentHtml } from '../../common/assignment-html';
 import { PrismaService } from '../../prisma/prisma.service';
 import { requireSchoolId } from '../academic/school-scope';
 import { STORAGE_SERVICE, type StorageService } from '../storage/storage.service';
 import { GradeRecordService } from '../assessments/grade-record.service';
+
+function draftAssignmentTitle(title?: string) {
+  const trimmed = title?.trim() ?? '';
+  return trimmed || UNTITLED_ASSIGNMENT_TITLE;
+}
 
 const DOC_MAX_BYTES = 10 * 1024 * 1024;
 const VIDEO_MAX_BYTES = 50 * 1024 * 1024;
@@ -533,8 +543,11 @@ export class TeacherService {
           include: {
             class: true,
             subject: true,
-            questions: { select: { id: true } },
-            attempts: { where: { status: { in: ['SUBMITTED', 'EXPIRED'] } }, select: { id: true } },
+            questions: { select: { id: true, points: true } },
+            attempts: {
+              where: { status: { in: ['SUBMITTED', 'EXPIRED'] } },
+              select: { id: true, studentId: true },
+            },
           },
           orderBy: { createdAt: 'desc' },
         }),
@@ -574,12 +587,17 @@ export class TeacherService {
         id: row.id,
         title: row.title,
         publishedAt: row.publishedAt?.toISOString() ?? null,
+        opensAt: row.opensAt?.toISOString() ?? null,
+        dueAt: row.dueAt?.toISOString() ?? null,
         classId: row.classId,
         className: row.class.name,
         subjectId: row.subjectId,
         subjectName: row.subject.name,
         questionCount: row.questions.length,
         attemptCount: row.attempts.length,
+        studentCount,
+        submittedCount: new Set(row.attempts.map((attempt) => attempt.studentId)).size,
+        maxScore: row.questions.reduce((sum, question) => sum + question.points, 0),
         timeLimitMinutes: row.timeLimitMinutes,
       })),
       recentActivity,
@@ -1080,14 +1098,19 @@ export class TeacherService {
         schoolId: teacher.schoolId,
         classId: input.classId,
         subjectId: input.subjectId,
-        title: input.title,
-        instructions: input.instructions,
-        dueAt: input.dueAt,
+        title: draftAssignmentTitle(input.title),
+        instructions: sanitizeAssignmentHtml(input.instructions ?? ''),
+        dueAt: input.dueAt ?? null,
+        closeAt: input.closeAt ?? null,
+        allowLate: input.allowLate ?? true,
+        submissionType: input.submissionType ?? 'FILE',
+        maxFiles: input.maxFiles ?? 1,
+        allowedMimeTypes: input.allowedMimeTypes ? [...input.allowedMimeTypes] : [...DEFAULT_ALLOWED_MIME_TYPES],
+        resubmitPolicy: input.resubmitPolicy ?? 'NEVER',
         maxScore: input.maxScore ?? 100,
       },
-      include: { class: true, subject: true, files: true },
     });
-    return this.mapAssignmentDetail(row);
+    return this.getAssignment(user, row.id);
   }
 
   async getAssignment(user: AuthUser, id: string) {
@@ -1100,45 +1123,87 @@ export class TeacherService {
     const input = updateTeacherAssignmentSchema.parse(body);
     const teacher = await this.requireTeacher(user);
     const row = await this.requireAssignment(teacher, id);
-    const updated = await this.prisma.assignment.update({
+    const classId = input.classId ?? row.classId;
+    const subjectId = input.subjectId ?? row.subjectId;
+    if (classId !== row.classId || subjectId !== row.subjectId) {
+      if (row.submissions.some((item) => item.status !== 'DRAFT')) {
+        throw new BadRequestException('Class cannot change after students have submitted.');
+      }
+      await this.assertTeaching(teacher, classId, subjectId);
+    }
+    await this.prisma.assignment.update({
       where: { id: row.id },
       data: {
-        ...(input.title != null ? { title: input.title } : {}),
-        ...(input.instructions != null ? { instructions: input.instructions } : {}),
-        ...(input.dueAt != null ? { dueAt: input.dueAt } : {}),
-        ...(input.maxScore != null ? { maxScore: input.maxScore } : {}),
+        classId,
+        subjectId,
+        ...(input.title !== undefined ? { title: draftAssignmentTitle(input.title) } : {}),
+        ...(input.instructions !== undefined
+          ? { instructions: sanitizeAssignmentHtml(input.instructions) }
+          : {}),
+        ...(input.dueAt !== undefined ? { dueAt: input.dueAt } : {}),
+        ...(input.closeAt !== undefined ? { closeAt: input.closeAt } : {}),
+        ...(input.allowLate !== undefined ? { allowLate: input.allowLate } : {}),
+        ...(input.submissionType !== undefined ? { submissionType: input.submissionType } : {}),
+        ...(input.maxFiles !== undefined ? { maxFiles: input.maxFiles } : {}),
+        ...(input.allowedMimeTypes !== undefined ? { allowedMimeTypes: [...input.allowedMimeTypes] } : {}),
+        ...(input.resubmitPolicy !== undefined ? { resubmitPolicy: input.resubmitPolicy } : {}),
+        ...(input.maxScore !== undefined ? { maxScore: input.maxScore } : {}),
       },
-      include: { class: true, subject: true, files: true },
     });
-    return this.mapAssignmentDetail(updated);
+    return this.getAssignment(user, row.id);
   }
 
-  async publishAssignment(user: AuthUser, id: string) {
+  async publishAssignment(user: AuthUser, id: string, body: unknown) {
+    const input = publishTeacherAssignmentSchema.parse(
+      body && typeof body === 'object' ? body : {},
+    );
     const teacher = await this.requireTeacher(user);
     const row = await this.requireAssignment(teacher, id);
-    const updated = await this.prisma.assignment.update({
+    const title = stripAssignmentHtml(row.title);
+    const instructions = stripAssignmentHtml(row.instructions);
+    if (!title || title === UNTITLED_ASSIGNMENT_TITLE) {
+      throw new BadRequestException('Add an assignment title.');
+    }
+    if (!instructions) {
+      throw new BadRequestException('Add instructions.');
+    }
+    const now = new Date();
+    const publishedAt = input.publishedAt && input.publishedAt > now ? input.publishedAt : now;
+    await this.prisma.assignment.update({
       where: { id: row.id },
-      data: { publishedAt: row.publishedAt ?? new Date() },
-      include: { class: true, subject: true, files: true },
+      data: { publishedAt },
     });
-    return this.mapAssignmentDetail(updated);
+    return this.getAssignment(user, row.id);
   }
 
   async unpublishAssignment(user: AuthUser, id: string) {
     const teacher = await this.requireTeacher(user);
     const row = await this.requireAssignment(teacher, id);
-    const updated = await this.prisma.assignment.update({
+    await this.prisma.assignment.update({
       where: { id: row.id },
       data: { publishedAt: null },
-      include: { class: true, subject: true, files: true },
     });
-    return this.mapAssignmentDetail(updated);
+    return this.getAssignment(user, row.id);
   }
 
   async addAssignmentFile(user: AuthUser, assignmentId: string, body: unknown) {
     const input = assignmentFileSchema.parse(body);
     const teacher = await this.requireTeacher(user);
     const assignment = await this.requireAssignment(teacher, assignmentId);
+    if ('url' in input) {
+      await this.prisma.assignmentFile.create({
+        data: {
+          schoolId: teacher.schoolId,
+          assignmentId: assignment.id,
+          storageKey: null,
+          url: input.url,
+          fileName: input.fileName,
+          mimeType: LINK_MIME,
+          size: 0,
+        },
+      });
+      return this.getAssignment(user, assignmentId);
+    }
     const prefix = `${teacher.schoolId}/assignments/${assignment.id}/`;
     if (!input.storageKey.startsWith(prefix)) {
       throw new BadRequestException('Invalid file key.');
@@ -1146,16 +1211,53 @@ export class TeacherService {
     if (!ALLOWED_MIME.has(input.mimeType)) {
       throw new BadRequestException('This file type is not allowed.');
     }
+    if (input.size > maxBytesForMime(input.mimeType)) {
+      throw new BadRequestException('This file is too large.');
+    }
     await this.prisma.assignmentFile.create({
       data: {
         schoolId: teacher.schoolId,
         assignmentId: assignment.id,
         storageKey: input.storageKey,
+        url: null,
         fileName: input.fileName,
         mimeType: input.mimeType,
         size: input.size,
       },
     });
+    return this.getAssignment(user, assignmentId);
+  }
+
+  async updateAssignmentFile(user: AuthUser, assignmentId: string, fileId: string, body: unknown) {
+    const input = updateAssignmentFileSchema.parse(body);
+    const teacher = await this.requireTeacher(user);
+    await this.requireAssignment(teacher, assignmentId);
+    const file = await this.prisma.assignmentFile.findFirst({
+      where: { id: fileId, assignmentId, schoolId: teacher.schoolId },
+    });
+    if (!file) throw new NotFoundException('File not found.');
+    await this.prisma.assignmentFile.update({
+      where: { id: file.id },
+      data: { fileName: input.fileName },
+    });
+    return this.getAssignment(user, assignmentId);
+  }
+
+  async deleteAssignmentFile(user: AuthUser, assignmentId: string, fileId: string) {
+    const teacher = await this.requireTeacher(user);
+    await this.requireAssignment(teacher, assignmentId);
+    const file = await this.prisma.assignmentFile.findFirst({
+      where: { id: fileId, assignmentId, schoolId: teacher.schoolId },
+    });
+    if (!file) throw new NotFoundException('File not found.');
+    if (file.storageKey) {
+      try {
+        await this.storage.deleteObject(file.storageKey);
+      } catch {
+        // Keep deleting the row even if object storage is unreachable.
+      }
+    }
+    await this.prisma.assignmentFile.delete({ where: { id: file.id } });
     return this.getAssignment(user, assignmentId);
   }
 
@@ -1220,6 +1322,8 @@ export class TeacherService {
       score: scoreNumber(submission.score),
       feedback: submission.feedback,
       gradesPublishedAt: submission.gradesPublishedAt?.toISOString() ?? null,
+      textResponse: submission.textResponse ?? null,
+      linkUrl: submission.linkUrl ?? null,
       files,
     };
   }
@@ -1469,7 +1573,7 @@ export class TeacherService {
   private mapAssignmentList(row: {
     id: string;
     title: string;
-    dueAt: Date;
+    dueAt: Date | null;
     publishedAt: Date | null;
     classId: string;
     subjectId: string;
@@ -1481,7 +1585,7 @@ export class TeacherService {
     return {
       id: row.id,
       title: row.title,
-      dueAt: row.dueAt.toISOString(),
+      dueAt: row.dueAt?.toISOString() ?? null,
       publishedAt: row.publishedAt?.toISOString() ?? null,
       classId: row.classId,
       className: row.class.name,
@@ -1496,36 +1600,73 @@ export class TeacherService {
     };
   }
 
-  private mapAssignmentDetail(row: {
+  private async mapAssignmentDetail(row: {
     id: string;
+    schoolId: string;
     title: string;
     instructions: string;
-    dueAt: Date;
+    dueAt: Date | null;
+    closeAt: Date | null;
+    allowLate: boolean;
+    submissionType: 'FILE' | 'TEXT' | 'LINK' | 'MULTIPLE' | 'NONE';
+    maxFiles: number;
+    allowedMimeTypes: string[];
+    resubmitPolicy: 'NEVER' | 'ALWAYS' | 'UNTIL_DUE';
     maxScore: number;
     publishedAt: Date | null;
     classId: string;
     subjectId: string;
     class: { name: string };
     subject: { name: string };
-    files: { id: string; fileName: string; mimeType: string; size: number }[];
+    files: {
+      id: string;
+      fileName: string;
+      mimeType: string;
+      size: number;
+      storageKey: string | null;
+      url: string | null;
+    }[];
+    submissions: { status: SubmissionStatus; score: { toString(): string } | number | null }[];
   }) {
+    const studentCount = await this.prisma.enrollment.count({
+      where: { schoolId: row.schoolId, classId: row.classId },
+    });
+    const submitted = row.submissions.filter((item) => item.status !== 'DRAFT');
+    const files = await Promise.all(
+      row.files.map(async (file) => ({
+        id: file.id,
+        fileName: file.fileName,
+        mimeType: file.mimeType,
+        size: file.size,
+        url: file.url ?? null,
+        downloadUrl: file.storageKey
+          ? await this.storage.getObjectUrl(file.storageKey)
+          : (file.url ?? null),
+      })),
+    );
     return {
       id: row.id,
       title: row.title,
-      instructions: row.instructions,
-      dueAt: row.dueAt.toISOString(),
+      instructions: sanitizeAssignmentHtml(row.instructions),
+      dueAt: row.dueAt?.toISOString() ?? null,
+      closeAt: row.closeAt?.toISOString() ?? null,
+      allowLate: row.allowLate,
+      submissionType: row.submissionType,
+      maxFiles: row.maxFiles,
+      allowedMimeTypes: row.allowedMimeTypes,
+      resubmitPolicy: row.resubmitPolicy,
       maxScore: row.maxScore,
       publishedAt: row.publishedAt?.toISOString() ?? null,
       classId: row.classId,
       className: row.class.name,
       subjectId: row.subjectId,
       subjectName: row.subject.name,
-      files: row.files.map((file) => ({
-        id: file.id,
-        fileName: file.fileName,
-        mimeType: file.mimeType,
-        size: file.size,
-      })),
+      studentCount,
+      submittedCount: submitted.length,
+      toGradeCount: submitted.filter((item) => item.status === 'SUBMITTED' || item.status === 'LATE').length,
+      missingCount: Math.max(0, studentCount - submitted.length),
+      hasStudentWork: submitted.length > 0,
+      files,
     };
   }
 
@@ -1561,7 +1702,12 @@ export class TeacherService {
   private async requireAssignment(teacher: { id: string; schoolId: string }, id: string) {
     const row = await this.prisma.assignment.findFirst({
       where: { id, schoolId: teacher.schoolId },
-      include: { class: true, subject: true, files: true },
+      include: {
+        class: true,
+        subject: true,
+        files: true,
+        submissions: { select: { status: true, score: true } },
+      },
     });
     if (!row) throw new NotFoundException('Assignment not found.');
     await this.assertTeaching(teacher, row.classId, row.subjectId);

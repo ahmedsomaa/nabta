@@ -80,14 +80,23 @@ describe('StudentService isolation', () => {
       title: 'Worksheet',
       instructions: 'Do it',
       dueAt,
+      closeAt: null,
+      allowLate: true,
+      submissionType: 'FILE',
+      maxFiles: 1,
+      allowedMimeTypes: ['application/pdf'],
+      resubmitPolicy: 'NEVER',
       subjectId: 'sub',
       maxScore: 100,
       subject: { name: 'Math' },
+      class: { name: '10A' },
       files: [],
       submissions: [
         {
           id: 'sub-1',
           status: 'DRAFT',
+          textResponse: null,
+          linkUrl: null,
           files: [
             { id: 'f1', fileName: 'work.pdf', mimeType: 'application/pdf', size: 12, storageKey: 'k' },
           ],
@@ -106,14 +115,24 @@ describe('StudentService isolation', () => {
         findFirst: jest
           .fn()
           .mockResolvedValueOnce(assignmentRow)
-          .mockResolvedValueOnce({ id: 'asg-1', schoolId: 'school-a', dueAt })
+          .mockResolvedValueOnce({
+            id: 'asg-1',
+            schoolId: 'school-a',
+            dueAt,
+            submissionType: 'FILE',
+            allowLate: true,
+          })
           .mockResolvedValueOnce({
             ...assignmentRow,
             submissions: [{ ...assignmentRow.submissions[0], status: 'SUBMITTED' }],
           }),
       },
       assignmentSubmission: {
-        findUnique: jest.fn().mockResolvedValue({ id: 'sub-1' }),
+        upsert: jest.fn().mockResolvedValue({
+          id: 'sub-1',
+          textResponse: null,
+          linkUrl: null,
+        }),
         update: jest.fn().mockResolvedValue({}),
       },
       submissionFile: { count: jest.fn().mockResolvedValue(1) },
@@ -129,5 +148,27 @@ describe('StudentService isolation', () => {
       }),
     );
     expect(result.status).toBe('SUBMITTED');
+  });
+
+  it('hides assignments whose publish date is still in the future', async () => {
+    const prisma = {
+      student: {
+        findFirst: jest.fn().mockResolvedValue({
+          id: 'st-1',
+          schoolId: 'school-a',
+          enrollments: [{ classId: 'c1', class: { name: '10A' } }],
+        }),
+      },
+      assignment: { findFirst: jest.fn().mockResolvedValue(null) },
+    };
+    const service = new StudentService(prisma as never, { getUploadUrl: jest.fn() } as never);
+    await expect(service.getAssignment(studentUser, 'asg-1')).rejects.toBeInstanceOf(NotFoundException);
+    expect(prisma.assignment.findFirst).toHaveBeenCalledWith(
+      expect.objectContaining({
+        where: expect.objectContaining({
+          publishedAt: { lte: expect.any(Date) },
+        }),
+      }),
+    );
   });
 });

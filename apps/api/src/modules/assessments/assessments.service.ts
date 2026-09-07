@@ -6,6 +6,7 @@ import {
 } from '@nestjs/common';
 import type { AuthUser, AttemptStatus, StudentAssessmentStatus } from '@nabta/types';
 import {
+  UNTITLED_QUIZ_TITLE,
   createAssessmentSchema,
   createQuestionOptionSchema,
   createQuestionSchema,
@@ -19,8 +20,28 @@ import { PrismaService } from '../../prisma/prisma.service';
 import { requireSchoolId } from '../academic/school-scope';
 import { GradeRecordService } from './grade-record.service';
 import { scoreQuestion, shuffleIds } from './scoring';
+import { sanitizeAssignmentHtml, stripAssignmentHtml } from '../../common/assignment-html';
 
 const questionInclude = { options: { orderBy: { sortOrder: 'asc' as const } } };
+
+function quizTitle(value: string | undefined) {
+  const trimmed = value?.trim() ?? '';
+  return trimmed || UNTITLED_QUIZ_TITLE;
+}
+
+function durationSeconds(startedAt: Date, submittedAt: Date | null) {
+  if (!submittedAt) return null;
+  return Math.max(0, Math.round((submittedAt.getTime() - startedAt.getTime()) / 1000));
+}
+
+function quizIsOpen(
+  row: { opensAt: Date | null; dueAt: Date | null },
+  now = new Date(),
+) {
+  if (row.opensAt && row.opensAt > now) return false;
+  if (row.dueAt && row.dueAt < now) return false;
+  return true;
+}
 
 @Injectable()
 export class AssessmentsService {
@@ -92,30 +113,35 @@ export class AssessmentsService {
     return Array.isArray(value) ? value.filter((id): id is string => typeof id === 'string') : [];
   }
 
-  private mapTeacherDetail(row: {
-    id: string;
-    title: string;
-    instructions: string;
-    timeLimitMinutes: number | null;
-    maxAttempts: number;
-    passingScore: number;
-    randomizeQuestions: boolean;
-    publishedAt: Date | null;
-    classId: string;
-    subjectId: string;
-    unitId: string | null;
-    class: { name: string };
-    subject: { name: string };
-    questions: {
+  private mapTeacherDetail(
+    row: {
       id: string;
-      type: TeacherQuestionType;
-      prompt: string;
-      points: number;
-      sortOrder: number;
-      feedback: string | null;
-      options: { id: string; text: string; isCorrect: boolean; sortOrder: number }[];
-    }[];
-  }) {
+      title: string;
+      instructions: string;
+      timeLimitMinutes: number | null;
+      maxAttempts: number;
+      passingScore: number;
+      randomizeQuestions: boolean;
+      publishedAt: Date | null;
+      opensAt: Date | null;
+      dueAt: Date | null;
+      classId: string;
+      subjectId: string;
+      unitId: string | null;
+      class: { name: string };
+      subject: { name: string };
+      questions: {
+        id: string;
+        type: TeacherQuestionType;
+        prompt: string;
+        points: number;
+        sortOrder: number;
+        feedback: string | null;
+        options: { id: string; text: string; isCorrect: boolean; sortOrder: number }[];
+      }[];
+    },
+    stats: { studentCount: number; submittedCount: number },
+  ) {
     return {
       id: row.id,
       title: row.title,
@@ -125,11 +151,16 @@ export class AssessmentsService {
       passingScore: row.passingScore,
       randomizeQuestions: row.randomizeQuestions,
       publishedAt: row.publishedAt?.toISOString() ?? null,
+      opensAt: row.opensAt?.toISOString() ?? null,
+      dueAt: row.dueAt?.toISOString() ?? null,
       classId: row.classId,
       className: row.class.name,
       subjectId: row.subjectId,
       subjectName: row.subject.name,
       unitId: row.unitId,
+      studentCount: stats.studentCount,
+      submittedCount: stats.submittedCount,
+      maxScore: row.questions.reduce((sum, question) => sum + question.points, 0),
       questions: row.questions.map((question) => ({
         id: question.id,
         type: question.type,
@@ -147,6 +178,55 @@ export class AssessmentsService {
     };
   }
 
+  private async classQuizStats(schoolId: string, classId: string, assessmentId: string) {
+    const [studentCount, submitted] = await Promise.all([
+      this.prisma.enrollment.count({ where: { schoolId, classId } }),
+      this.prisma.assessmentAttempt.findMany({
+        where: { assessmentId, status: { in: ['SUBMITTED', 'EXPIRED'] } },
+        distinct: ['studentId'],
+        select: { studentId: true },
+      }),
+    ]);
+    return { studentCount, submittedCount: submitted.length };
+  }
+
+  private async toTeacherDetail(
+    row: Parameters<AssessmentsService['mapTeacherDetail']>[0] & { schoolId: string },
+  ) {
+    const stats = await this.classQuizStats(row.schoolId, row.classId, row.id);
+    return this.mapTeacherDetail(row, stats);
+  }
+
+  private assertPublishable(row: {
+    title: string;
+    questions: {
+      type: TeacherQuestionType;
+      prompt: string;
+      options: { text: string; isCorrect: boolean }[];
+    }[];
+  }) {
+    const title = row.title.trim();
+    if (!title || title === UNTITLED_QUIZ_TITLE) {
+      throw new BadRequestException('Add a quiz title before publishing.');
+    }
+    if (row.questions.length === 0) {
+      throw new BadRequestException('Add at least one question before publishing.');
+    }
+    for (const question of row.questions) {
+      if (!stripAssignmentHtml(question.prompt)) {
+        throw new BadRequestException('Every question needs a prompt.');
+      }
+      const hasCorrect = question.options.some((option) => option.isCorrect && option.text.trim());
+      if (!hasCorrect) {
+        throw new BadRequestException(
+          question.type === 'SHORT_ANSWER'
+            ? 'Short-answer questions need an accepted answer.'
+            : 'Every question needs a correct answer.',
+        );
+      }
+    }
+  }
+
   async listTeacherAssessments(user: AuthUser) {
     const teacher = await this.requireTeacher(user);
     const pairs = teacher.teachingAssignments;
@@ -157,21 +237,39 @@ export class AssessmentsService {
       include: {
         class: true,
         subject: true,
-        questions: { select: { id: true } },
-        attempts: { where: { status: { in: ['SUBMITTED', 'EXPIRED'] } }, select: { id: true } },
+        questions: { select: { id: true, points: true } },
+        attempts: {
+          where: { status: { in: ['SUBMITTED', 'EXPIRED'] } },
+          select: { id: true, studentId: true },
+        },
       },
       orderBy: { createdAt: 'desc' },
     });
+    const classIds = [...new Set(rows.map((row) => row.classId))];
+    const enrollmentCounts =
+      classIds.length === 0
+        ? []
+        : await this.prisma.enrollment.groupBy({
+            by: ['classId'],
+            where: { schoolId: teacher.schoolId, classId: { in: classIds } },
+            _count: { _all: true },
+          });
+    const studentsByClass = new Map(enrollmentCounts.map((row) => [row.classId, row._count._all]));
     return rows.map((row) => ({
       id: row.id,
       title: row.title,
       publishedAt: row.publishedAt?.toISOString() ?? null,
+      opensAt: row.opensAt?.toISOString() ?? null,
+      dueAt: row.dueAt?.toISOString() ?? null,
       classId: row.classId,
       className: row.class.name,
       subjectId: row.subjectId,
       subjectName: row.subject.name,
       questionCount: row.questions.length,
       attemptCount: row.attempts.length,
+      studentCount: studentsByClass.get(row.classId) ?? 0,
+      submittedCount: new Set(row.attempts.map((attempt) => attempt.studentId)).size,
+      maxScore: row.questions.reduce((sum, question) => sum + question.points, 0),
       timeLimitMinutes: row.timeLimitMinutes,
     }));
   }
@@ -186,12 +284,14 @@ export class AssessmentsService {
         classId: input.classId,
         subjectId: input.subjectId,
         unitId: input.unitId ?? null,
-        title: input.title,
-        instructions: input.instructions ?? '',
+        title: quizTitle(input.title),
+        instructions: sanitizeAssignmentHtml(input.instructions ?? ''),
         timeLimitMinutes: input.timeLimitMinutes ?? null,
         maxAttempts: input.maxAttempts ?? 1,
         passingScore: input.passingScore ?? 60,
         randomizeQuestions: input.randomizeQuestions ?? false,
+        opensAt: input.opensAt ?? null,
+        dueAt: input.dueAt ?? null,
       },
       include: {
         class: true,
@@ -199,12 +299,12 @@ export class AssessmentsService {
         questions: { orderBy: { sortOrder: 'asc' }, include: questionInclude },
       },
     });
-    return this.mapTeacherDetail(row);
+    return this.toTeacherDetail(row);
   }
 
   async getTeacherAssessment(user: AuthUser, id: string) {
     const { row } = await this.requireTeacherAssessment(user, id);
-    return this.mapTeacherDetail(row);
+    return this.toTeacherDetail(row);
   }
 
   async updateAssessment(user: AuthUser, id: string, body: unknown) {
@@ -213,13 +313,17 @@ export class AssessmentsService {
     const updated = await this.prisma.assessment.update({
       where: { id: row.id },
       data: {
-        ...(input.title != null ? { title: input.title } : {}),
-        ...(input.instructions != null ? { instructions: input.instructions } : {}),
+        ...(input.title != null ? { title: quizTitle(input.title) } : {}),
+        ...(input.instructions != null
+          ? { instructions: sanitizeAssignmentHtml(input.instructions) }
+          : {}),
         ...(input.unitId !== undefined ? { unitId: input.unitId } : {}),
         ...(input.timeLimitMinutes !== undefined ? { timeLimitMinutes: input.timeLimitMinutes } : {}),
         ...(input.maxAttempts != null ? { maxAttempts: input.maxAttempts } : {}),
         ...(input.passingScore != null ? { passingScore: input.passingScore } : {}),
         ...(input.randomizeQuestions != null ? { randomizeQuestions: input.randomizeQuestions } : {}),
+        ...(input.opensAt !== undefined ? { opensAt: input.opensAt } : {}),
+        ...(input.dueAt !== undefined ? { dueAt: input.dueAt } : {}),
       },
       include: {
         class: true,
@@ -227,7 +331,7 @@ export class AssessmentsService {
         questions: { orderBy: { sortOrder: 'asc' }, include: questionInclude },
       },
     });
-    return this.mapTeacherDetail(updated);
+    return this.toTeacherDetail(updated);
   }
 
   async deleteAssessment(user: AuthUser, id: string) {
@@ -238,6 +342,7 @@ export class AssessmentsService {
 
   async publishAssessment(user: AuthUser, id: string) {
     const { row } = await this.requireTeacherAssessment(user, id);
+    this.assertPublishable(row);
     const updated = await this.prisma.assessment.update({
       where: { id: row.id },
       data: { publishedAt: row.publishedAt ?? new Date() },
@@ -247,7 +352,7 @@ export class AssessmentsService {
         questions: { orderBy: { sortOrder: 'asc' }, include: questionInclude },
       },
     });
-    return this.mapTeacherDetail(updated);
+    return this.toTeacherDetail(updated);
   }
 
   async unpublishAssessment(user: AuthUser, id: string) {
@@ -261,21 +366,28 @@ export class AssessmentsService {
         questions: { orderBy: { sortOrder: 'asc' }, include: questionInclude },
       },
     });
-    return this.mapTeacherDetail(updated);
+    return this.toTeacherDetail(updated);
   }
 
   async createQuestion(user: AuthUser, assessmentId: string, body: unknown) {
     const input = createQuestionSchema.parse(body);
     const { teacher, row } = await this.requireTeacherAssessment(user, assessmentId);
     const last = row.questions[row.questions.length - 1];
+    const defaultChoiceOptions =
+      input.type === 'MULTIPLE_CHOICE' || input.type === 'MULTIPLE_ANSWER'
+        ? [
+            { text: 'A', isCorrect: true, sortOrder: 0 },
+            { text: 'B', isCorrect: false, sortOrder: 1 },
+          ]
+        : null;
     const created = await this.prisma.question.create({
       data: {
         schoolId: teacher.schoolId,
         assessmentId: row.id,
         type: input.type,
-        prompt: input.prompt,
+        prompt: sanitizeAssignmentHtml(input.prompt ?? ''),
         points: input.points ?? 1,
-        feedback: input.feedback ?? null,
+        feedback: input.feedback ? sanitizeAssignmentHtml(input.feedback) : null,
         sortOrder: (last?.sortOrder ?? -1) + 1,
         options: input.options?.length
           ? {
@@ -293,7 +405,14 @@ export class AssessmentsService {
                   { schoolId: teacher.schoolId, text: 'False', isCorrect: false, sortOrder: 1 },
                 ],
               }
-            : undefined,
+            : defaultChoiceOptions
+              ? {
+                  create: defaultChoiceOptions.map((option) => ({
+                    schoolId: teacher.schoolId,
+                    ...option,
+                  })),
+                }
+              : undefined,
       },
       include: questionInclude,
     });
@@ -312,9 +431,11 @@ export class AssessmentsService {
     return this.prisma.question.update({
       where: { id },
       data: {
-        ...(input.prompt != null ? { prompt: input.prompt } : {}),
+        ...(input.prompt != null ? { prompt: sanitizeAssignmentHtml(input.prompt) } : {}),
         ...(input.points != null ? { points: input.points } : {}),
-        ...(input.feedback !== undefined ? { feedback: input.feedback } : {}),
+        ...(input.feedback !== undefined
+          ? { feedback: input.feedback ? sanitizeAssignmentHtml(input.feedback) : null }
+          : {}),
         ...(input.type != null ? { type: input.type } : {}),
       },
       include: questionInclude,
@@ -406,6 +527,8 @@ export class AssessmentsService {
     });
     const attempts = await this.prisma.assessmentAttempt.findMany({
       where: { assessmentId: row.id, status: { in: ['SUBMITTED', 'EXPIRED'] } },
+      include: { student: true, answers: true },
+      orderBy: { submittedAt: 'desc' },
     });
     const byStudent = new Map<string, (typeof attempts)[number]>();
     for (const attempt of attempts) {
@@ -415,23 +538,96 @@ export class AssessmentsService {
       }
     }
     const scored = [...byStudent.values()];
+    const submittedCount = byStudent.size;
+    const studentCount = enrollments.length;
     const average =
       scored.length === 0
         ? null
         : Math.round(
-            (scored.reduce((sum, attempt) => sum + Number(attempt.score ?? 0), 0) / scored.length) * 100,
+            (scored.reduce((sum, attempt) => sum + Number(attempt.score ?? 0), 0) / scored.length) *
+              100,
           ) / 100;
+    const averagePercent =
+      scored.length === 0 || maxScore === 0
+        ? null
+        : Math.round(
+            (scored.reduce((sum, attempt) => sum + Number(attempt.score ?? 0) / maxScore, 0) /
+              scored.length) *
+              100,
+          );
     const passRate =
       scored.length === 0
         ? null
         : Math.round((scored.filter((attempt) => attempt.passed).length / scored.length) * 100);
+    const durations = attempts
+      .map((attempt) => durationSeconds(attempt.startedAt, attempt.submittedAt))
+      .filter((value): value is number => value != null);
+    const averageTimeSeconds =
+      durations.length === 0
+        ? null
+        : Math.round(durations.reduce((sum, value) => sum + value, 0) / durations.length);
+    const buckets = [
+      { bucket: '0-20', count: 0 },
+      { bucket: '20-40', count: 0 },
+      { bucket: '40-60', count: 0 },
+      { bucket: '60-80', count: 0 },
+      { bucket: '80-100', count: 0 },
+    ];
+    for (const attempt of scored) {
+      const percent = maxScore === 0 ? 0 : (Number(attempt.score ?? 0) / maxScore) * 100;
+      const index = percent >= 100 ? 4 : Math.min(4, Math.floor(percent / 20));
+      buckets[index]!.count += 1;
+    }
+    const questionStats = row.questions.map((question) => {
+      let correct = 0;
+      for (const attempt of attempts) {
+        const answer = attempt.answers.find((row) => row.questionId === question.id);
+        if (scoreQuestion(question, answer?.optionIds ?? [], answer?.textAnswer) === question.points) {
+          correct += 1;
+        }
+      }
+      return {
+        id: question.id,
+        prompt: question.prompt,
+        type: question.type,
+        points: question.points,
+        attemptCount: attempts.length,
+        correctRate:
+          attempts.length === 0 ? null : Math.round((correct / attempts.length) * 100),
+      };
+    });
     return {
       assessmentId: row.id,
       title: row.title,
       passingScore: row.passingScore,
       attemptCount: attempts.length,
+      studentCount,
+      submittedCount,
+      completionRate: studentCount === 0 ? null : Math.round((submittedCount / studentCount) * 100),
       average,
+      averagePercent,
       passRate,
+      averageTimeSeconds,
+      maxScore,
+      scoreDistribution: buckets,
+      questionStats,
+      recentSubmissions: attempts.slice(0, 8).map((attempt) => ({
+        attemptId: attempt.id,
+        studentId: attempt.studentId,
+        givenName: attempt.student.givenName,
+        familyName: attempt.student.familyName,
+        score: attempt.score != null ? Number(attempt.score) : null,
+        maxScore: attempt.maxScore,
+        submittedAt: attempt.submittedAt?.toISOString() ?? null,
+        durationSeconds: durationSeconds(attempt.startedAt, attempt.submittedAt),
+      })),
+      missingStudents: enrollments
+        .filter((enrollment) => !byStudent.has(enrollment.studentId))
+        .map((enrollment) => ({
+          studentId: enrollment.studentId,
+          givenName: enrollment.student.givenName,
+          familyName: enrollment.student.familyName,
+        })),
       students: enrollments.map((enrollment) => {
         const best = byStudent.get(enrollment.studentId);
         return {
@@ -442,6 +638,9 @@ export class AssessmentsService {
           maxScore,
           passed: best?.passed ?? null,
           attemptId: best?.id ?? null,
+          submittedAt: best?.submittedAt?.toISOString() ?? null,
+          durationSeconds: best ? durationSeconds(best.startedAt, best.submittedAt) : null,
+          status: best?.status ?? 'NOT_STARTED',
         };
       }),
     };
@@ -469,6 +668,7 @@ export class AssessmentsService {
       score: attempt.score != null ? Number(attempt.score) : null,
       maxScore: attempt.maxScore,
       passed: attempt.passed,
+      startedAt: attempt.startedAt.toISOString(),
       submittedAt: attempt.submittedAt?.toISOString() ?? null,
       questions: questions.map((question) => {
         const answer = answers.get(question.id);
@@ -551,6 +751,8 @@ export class AssessmentsService {
           ?.submittedAt?.toISOString() ?? null,
       passed: best?.passed ?? null,
       publishedAt: row.publishedAt?.toISOString() ?? null,
+      opensAt: row.opensAt?.toISOString() ?? null,
+      dueAt: row.dueAt?.toISOString() ?? null,
       answeredCount: inProgress
         ? inProgress.answers.filter(
             (answer) => answer.optionIds.length > 0 || Boolean(answer.textAnswer?.trim()),
@@ -594,8 +796,12 @@ export class AssessmentsService {
       instructions: row.instructions,
       randomizeQuestions: row.randomizeQuestions,
       questionCount: row.questions.length,
-      canStart: Boolean(summary.inProgressAttemptId) || summary.attemptsRemaining > 0,
+      canStart:
+        Boolean(summary.inProgressAttemptId) ||
+        (summary.attemptsRemaining > 0 && quizIsOpen(row)),
       latestAttemptId: latestFinished?.id ?? null,
+      opensAt: row.opensAt?.toISOString() ?? null,
+      dueAt: row.dueAt?.toISOString() ?? null,
     };
   }
 
@@ -677,6 +883,9 @@ export class AssessmentsService {
       if (live.status === 'IN_PROGRESS') {
         return this.getStudentAttempt(user, live.id);
       }
+    }
+    if (!quizIsOpen(assessment)) {
+      throw new BadRequestException('This quiz is not available right now.');
     }
     const finishedCount = await this.prisma.assessmentAttempt.count({
       where: {

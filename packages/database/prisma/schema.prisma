@@ -67,6 +67,20 @@ enum AttemptStatus {
   EXPIRED
 }
 
+enum AssignmentSubmissionType {
+  FILE
+  TEXT
+  LINK
+  MULTIPLE
+  NONE
+}
+
+enum AssignmentResubmitPolicy {
+  NEVER
+  ALWAYS
+  UNTIL_DUE
+}
+
 model School {
   id        String   @id @default(uuid()) @db.Uuid
   name      String
@@ -414,7 +428,13 @@ model Assignment {
   classId     String    @db.Uuid
   title        String
   instructions String
-  dueAt        DateTime
+  dueAt        DateTime?
+  closeAt      DateTime?
+  allowLate    Boolean   @default(true)
+  submissionType AssignmentSubmissionType @default(FILE)
+  maxFiles     Int       @default(1)
+  allowedMimeTypes String[] @default(["application/pdf", "image/jpeg", "image/png", "image/webp", "text/plain", "application/msword", "application/vnd.openxmlformats-officedocument.wordprocessingml.document"])
+  resubmitPolicy AssignmentResubmitPolicy @default(NEVER)
   maxScore     Int       @default(100)
   publishedAt  DateTime?
   createdAt    DateTime  @default(now())
@@ -442,6 +462,8 @@ model AssignmentSubmission {
   feedback          String?
   gradedAt          DateTime?
   gradesPublishedAt DateTime?
+  textResponse      String?
+  linkUrl           String?
   createdAt         DateTime         @default(now())
   updatedAt         DateTime         @updatedAt
 
@@ -496,7 +518,8 @@ model AssignmentFile {
   id           String   @id @default(uuid()) @db.Uuid
   schoolId     String   @db.Uuid
   assignmentId String   @db.Uuid
-  storageKey   String
+  storageKey   String?
+  url          String?
   fileName     String
   mimeType     String
   size         Int
@@ -561,6 +584,8 @@ model Assessment {
   maxAttempts        Int       @default(1)
   passingScore       Int       @default(60)
   randomizeQuestions Boolean   @default(false)
+  opensAt            DateTime?
+  dueAt              DateTime?
   publishedAt        DateTime?
   createdAt          DateTime  @default(now())
   updatedAt          DateTime  @updatedAt

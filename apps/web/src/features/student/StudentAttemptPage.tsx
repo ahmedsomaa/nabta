@@ -18,6 +18,7 @@ import type { StudentAssessmentOverview, StudentAttemptQuestion, StudentAttemptR
 import { apiFetch } from '@/lib/api';
 import { QueryError, QueryLoading } from './QueryState';
 import { StudentProgress } from './StudentChrome';
+import { QuizHtml } from '@/features/teacher/quizShared';
 import { cn } from '@/lib/cn';
 
 function formatRemaining(expiresAt: string | null) {
@@ -295,7 +296,7 @@ export function StudentAttemptPage() {
               ) : null}
 
               <div className="space-y-3 overflow-hidden rounded-xl border border-border bg-surface p-4">
-                <p className="font-medium">{question.prompt}</p>
+                <QuizHtml html={question.prompt} className="font-medium" />
                 {question.type === 'SHORT_ANSWER' ? (
                   <TextField
                     name={`q-${question.id}`}

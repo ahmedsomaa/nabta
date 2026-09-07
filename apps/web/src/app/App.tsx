@@ -35,12 +35,23 @@ import { TeacherStudentPage } from '@/features/teacher/TeacherStudentPage';
 import { TeacherBuilderPage } from '@/features/teacher/TeacherBuilderPage';
 import { TeacherAssignmentsPage } from '@/features/teacher/TeacherAssignmentsPage';
 import { TeacherAssignmentFormPage } from '@/features/teacher/TeacherAssignmentFormPage';
+import {
+  TeacherAssignmentOverviewPage,
+  TeacherAssignmentWorkspace,
+} from '@/features/teacher/TeacherAssignmentWorkspace';
 import { TeacherSubmissionsPage } from '@/features/teacher/TeacherSubmissionsPage';
 import { TeacherGradebookPage } from '@/features/teacher/TeacherGradebookPage';
 import { TeacherAttendancePage } from '@/features/teacher/TeacherAttendancePage';
 import { TeacherAssessmentsPage } from '@/features/teacher/TeacherAssessmentsPage';
 import { TeacherAssessmentFormPage } from '@/features/teacher/TeacherAssessmentFormPage';
-import { TeacherAssessmentResultsPage } from '@/features/teacher/TeacherAssessmentResultsPage';
+import {
+  TeacherQuizAnalyticsPage,
+  TeacherQuizOverviewPage,
+  TeacherQuizQuestionsPage,
+  TeacherQuizSubmissionsPage,
+  TeacherQuizWorkspace,
+  TeacherAssessmentResultsPage,
+} from '@/features/teacher/TeacherQuizWorkspace';
 import { StudentAssessmentOverviewPage } from '@/features/student/StudentAssessmentOverviewPage';
 import { StudentAttemptPage } from '@/features/student/StudentAttemptPage';
 import { StudentAttemptResultPage } from '@/features/student/StudentAttemptResultPage';
@@ -119,11 +130,21 @@ export function App() {
                   </Route>
                   <Route path="assignments" element={<TeacherAssignmentsPage />} />
                   <Route path="assignments/new" element={<TeacherAssignmentFormPage />} />
-                  <Route path="assignments/:id" element={<TeacherAssignmentFormPage />} />
-                  <Route path="assignments/:id/submissions" element={<TeacherSubmissionsPage />} />
+                  <Route path="assignments/:id/edit" element={<TeacherAssignmentFormPage />} />
+                  <Route path="assignments/:id" element={<TeacherAssignmentWorkspace />}>
+                    <Route index element={<TeacherAssignmentOverviewPage />} />
+                    <Route path="submissions" element={<TeacherSubmissionsPage />} />
+                    <Route path="grades" element={<TeacherSubmissionsPage variant="grades" />} />
+                  </Route>
                   <Route path="assessments" element={<TeacherAssessmentsPage />} />
                   <Route path="assessments/new" element={<TeacherAssessmentFormPage />} />
-                  <Route path="assessments/:id" element={<TeacherAssessmentFormPage />} />
+                  <Route path="assessments/:id/edit" element={<TeacherAssessmentFormPage />} />
+                  <Route path="assessments/:id" element={<TeacherQuizWorkspace />}>
+                    <Route index element={<TeacherQuizOverviewPage />} />
+                    <Route path="questions" element={<TeacherQuizQuestionsPage />} />
+                    <Route path="submissions" element={<TeacherQuizSubmissionsPage />} />
+                    <Route path="analytics" element={<TeacherQuizAnalyticsPage />} />
+                  </Route>
                   <Route path="assessments/:id/results" element={<TeacherAssessmentResultsPage />} />
                   <Route path="gradebook" element={<TeacherGradebookPage />} />
                   <Route path="gradebook/:classId/:subjectId" element={<TeacherGradebookPage />} />

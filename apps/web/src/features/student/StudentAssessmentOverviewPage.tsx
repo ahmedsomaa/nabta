@@ -9,6 +9,7 @@ import { QueryError, QueryLoading } from './QueryState';
 import { StudentPageHeader, StudentPanel } from './StudentChrome';
 import { QuizStatusChip } from './StatusChip';
 import { usePageTrail } from '@/layouts/PageTrail';
+import { QuizHtml } from '@/features/teacher/quizShared';
 
 function OverviewFact({
   icon: Icon,
@@ -107,7 +108,7 @@ export function StudentAssessmentOverviewPage() {
       {instructions ? (
         <StudentPanel>
           <p className="text-xs font-medium text-muted">{t('student.instructions')}</p>
-          <p className="mt-1 whitespace-pre-wrap text-sm">{instructions}</p>
+          <QuizHtml html={instructions} className="mt-1" />
         </StudentPanel>
       ) : null}
 
@@ -168,6 +169,15 @@ export function StudentAssessmentOverviewPage() {
           {t('student.continue')}
         </Button>
       ) : quiz.canStart ? (
+        <Button
+          variant="primary"
+          onPress={() =>
+            navigate(`/student/assessments/${id}/attempts/${quiz.inProgressAttemptId}`)
+          }
+        >
+          {t('student.continue')}
+        </Button>
+      ) : quiz.canStart ? (
         <Modal>
           <Button variant="primary">{t('assessment.start')}</Button>
           <Modal.Backdrop>
@@ -210,8 +220,10 @@ export function StudentAssessmentOverviewPage() {
             </Modal.Container>
           </Modal.Backdrop>
         </Modal>
-      ) : (
+      ) : quiz.attemptsRemaining <= 0 ? (
         <p className="text-sm text-muted">{t('assessment.noAttempts')}</p>
+      ) : (
+        <p className="text-sm text-muted">{t('assessment.notAvailable')}</p>
       )}
     </div>
   );

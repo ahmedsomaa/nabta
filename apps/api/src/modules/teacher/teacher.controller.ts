@@ -184,8 +184,12 @@ export class TeacherController {
   }
 
   @Post('assignments/:id/publish')
-  publishAssignment(@CurrentUser() user: AuthUser, @Param('id', ParseUUIDPipe) id: string) {
-    return this.teacher.publishAssignment(user, id);
+  publishAssignment(
+    @CurrentUser() user: AuthUser,
+    @Param('id', ParseUUIDPipe) id: string,
+    @Body() body: unknown,
+  ) {
+    return this.teacher.publishAssignment(user, id, body);
   }
 
   @Post('assignments/:id/unpublish')
@@ -205,6 +209,25 @@ export class TeacherController {
     @Body() body: unknown,
   ) {
     return this.teacher.addAssignmentFile(user, id, body);
+  }
+
+  @Patch('assignments/:id/files/:fileId')
+  updateAssignmentFile(
+    @CurrentUser() user: AuthUser,
+    @Param('id', ParseUUIDPipe) id: string,
+    @Param('fileId', ParseUUIDPipe) fileId: string,
+    @Body() body: unknown,
+  ) {
+    return this.teacher.updateAssignmentFile(user, id, fileId, body);
+  }
+
+  @Delete('assignments/:id/files/:fileId')
+  deleteAssignmentFile(
+    @CurrentUser() user: AuthUser,
+    @Param('id', ParseUUIDPipe) id: string,
+    @Param('fileId', ParseUUIDPipe) fileId: string,
+  ) {
+    return this.teacher.deleteAssignmentFile(user, id, fileId);
   }
 
   @Get('assignments/:id')

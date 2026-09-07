@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useTranslation } from 'react-i18next';
@@ -11,13 +11,11 @@ import { QueryError, QueryLoading } from './QueryState';
 import {
   PortalEmptyState,
   PortalList,
-  PortalPageHeader,
   PortalPanel,
   portalListRowClass,
 } from '@/components/portal/PortalChrome';
-import { usePageTrail } from '@/layouts/PageTrail';
 
-export function TeacherSubmissionsPage() {
+export function TeacherSubmissionsPage({ variant = 'submissions' }: { variant?: 'submissions' | 'grades' }) {
   const { t } = useTranslation();
   const queryClient = useQueryClient();
   const { id = '' } = useParams();
@@ -33,13 +31,22 @@ export function TeacherSubmissionsPage() {
     enabled: Boolean(openId),
   });
 
-  usePageTrail([{ label: t('teacher.submissions') }]);
+  const rows = useMemo(() => {
+    const items = list.data ?? [];
+    if (variant !== 'grades') return items;
+    return [...items].sort((a, b) => {
+      const aNeeds = a.id && a.score == null && (a.status === 'SUBMITTED' || a.status === 'LATE') ? 0 : 1;
+      const bNeeds = b.id && b.score == null && (b.status === 'SUBMITTED' || b.status === 'LATE') ? 0 : 1;
+      return aNeeds - bNeeds;
+    });
+  }, [list.data, variant]);
 
   const publish = useMutation({
     mutationFn: () => apiFetch(`/teacher/assignments/${id}/publish-grades`, { method: 'POST' }),
     onSuccess: () => {
       toast.success(t('teacher.gradesPublished'));
       void queryClient.invalidateQueries({ queryKey: ['teacher-submissions', id] });
+      void queryClient.invalidateQueries({ queryKey: ['teacher-assignment', id] });
     },
   });
 
@@ -48,19 +55,16 @@ export function TeacherSubmissionsPage() {
 
   return (
     <div className="space-y-4">
-      <PortalPageHeader
-        title={t('teacher.submissions')}
-        trailing={
-          <Button variant="primary" onPress={() => publish.mutate()} isPending={publish.isPending}>
-            {t('teacher.publishGrades')}
-          </Button>
-        }
-      />
-      {list.data.length === 0 ? (
+      <div className="flex justify-end">
+        <Button variant="primary" onPress={() => publish.mutate()} isPending={publish.isPending}>
+          {t('teacher.publishGrades')}
+        </Button>
+      </div>
+      {rows.length === 0 ? (
         <PortalEmptyState icon={ClipboardList}>{t('teacher.emptySubmissions')}</PortalEmptyState>
       ) : (
         <PortalList>
-          {list.data.map((row) => (
+          {rows.map((row) => (
             <li key={row.studentId} className="border-b border-border last:border-b-0">
               <button
                 type="button"
@@ -90,6 +94,7 @@ export function TeacherSubmissionsPage() {
           onSaved={() => {
             void queryClient.invalidateQueries({ queryKey: ['teacher-submissions', id] });
             void queryClient.invalidateQueries({ queryKey: ['teacher-submission', openId] });
+            void queryClient.invalidateQueries({ queryKey: ['teacher-assignment', id] });
           }}
         />
       ) : null}
@@ -131,6 +136,19 @@ function GradePanel({
           {t('teacher.maxScore')}: {submission.maxScore}
         </Chip>
       </div>
+      {submission.textResponse ? (
+        <p className="mt-3 whitespace-pre-wrap text-sm">{submission.textResponse}</p>
+      ) : null}
+      {submission.linkUrl ? (
+        <a
+          href={submission.linkUrl}
+          className="mt-3 block text-sm text-accent"
+          target="_blank"
+          rel="noreferrer"
+        >
+          {submission.linkUrl}
+        </a>
+      ) : null}
       {submission.files.map((file) => (
         <a
           key={file.id}

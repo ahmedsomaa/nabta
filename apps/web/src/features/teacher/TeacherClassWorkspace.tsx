@@ -82,7 +82,7 @@ export function TeacherClassOverviewPage() {
   const recorded = attendance.data?.records.filter((row) => row.status != null).length ?? 0;
   const now = Date.now();
   const upcoming = detail.assignments
-    .filter((item) => item.publishedAt && new Date(item.dueAt).getTime() >= now)
+    .filter((item) => item.publishedAt && (!item.dueAt || new Date(item.dueAt).getTime() >= now))
     .slice(0, 4);
   const toGrade = detail.assignments
     .filter((item) => item.pendingCount > 0)
@@ -176,7 +176,9 @@ export function TeacherClassOverviewPage() {
                     <div className="min-w-0 flex-1">
                       <p className="truncate font-medium">{item.title}</p>
                       <p className="mt-0.5 text-xs text-muted">
-                        {t('teacher.due', { date: formatDue(item.dueAt, i18n.language) })}
+                        {item.dueAt
+                          ? t('teacher.due', { date: formatDue(item.dueAt, i18n.language) })
+                          : t('teacher.noDueDate')}
                       </p>
                     </div>
                     <span className="shrink-0 text-xs tabular-nums text-muted">
@@ -533,7 +535,12 @@ export function TeacherClassAssignmentsPage() {
   return (
     <div className="space-y-4">
       <div className="flex justify-end">
-        <Button variant="primary" onPress={() => navigate('/teacher/assignments/new')}>
+        <Button
+          variant="primary"
+          onPress={() =>
+            navigate(`/teacher/assignments/new?classId=${detail.classId}&subjectId=${detail.subjectId}`)
+          }
+        >
           {t('teacher.newAssignment')}
         </Button>
       </div>
@@ -542,7 +549,8 @@ export function TeacherClassAssignmentsPage() {
           icon={ClipboardList}
           action={{
             label: t('teacher.newAssignment'),
-            onPress: () => navigate('/teacher/assignments/new'),
+            onPress: () =>
+              navigate(`/teacher/assignments/new?classId=${detail.classId}&subjectId=${detail.subjectId}`),
           }}
         >
           {t('teacher.emptyAssignments')}
@@ -567,13 +575,19 @@ export function TeacherClassAssignmentsPage() {
                   <tr key={item.id} className="border-t border-border hover:bg-overlay">
                     <td className="px-4 py-3">
                       <Link
-                        to={`/teacher/assignments/${item.id}`}
+                        to={
+                          item.publishedAt
+                            ? `/teacher/assignments/${item.id}`
+                            : `/teacher/assignments/${item.id}/edit`
+                        }
                         className="font-medium text-inherit no-underline hover:text-accent [overflow-wrap:anywhere]"
                       >
                         {item.title}
                       </Link>
                     </td>
-                    <td className="px-4 py-3 text-muted">{formatDue(item.dueAt, i18n.language)}</td>
+                    <td className="px-4 py-3 text-muted">
+                      {item.dueAt ? formatDue(item.dueAt, i18n.language) : t('teacher.noDueDate')}
+                    </td>
                     <td className="px-4 py-3 tabular-nums">
                       {item.submissionCount}/{detail.studentCount}
                     </td>
@@ -630,7 +644,7 @@ export function TeacherClassQuizzesPage() {
           {detail.assessments.map((item) => {
             const completion =
               detail.studentCount > 0
-                ? Math.min(100, Math.round((item.attemptCount / detail.studentCount) * 100))
+                ? Math.min(100, Math.round((item.submittedCount / detail.studentCount) * 100))
                 : 0;
             return (
               <div
@@ -639,7 +653,7 @@ export function TeacherClassQuizzesPage() {
               >
                 <div className="flex items-start justify-between gap-3">
                   <Link
-                    to={`/teacher/assessments/${item.id}`}
+                    to={item.publishedAt ? `/teacher/assessments/${item.id}` : `/teacher/assessments/${item.id}/edit`}
                     className="min-w-0 font-medium text-inherit no-underline hover:text-accent [overflow-wrap:anywhere]"
                   >
                     {item.title}
@@ -674,20 +688,20 @@ export function TeacherClassQuizzesPage() {
                   <div className="flex items-center justify-between text-xs text-muted">
                     <span>{t('teacher.completion')}</span>
                     <span className="tabular-nums">
-                      {item.attemptCount}/{detail.studentCount}
+                      {item.submittedCount}/{detail.studentCount}
                     </span>
                   </div>
                   <PortalProgress value={completion} label={t('teacher.completion')} />
                 </div>
                 <div className="flex gap-3 pt-1 text-xs font-medium">
                   <Link
-                    to={`/teacher/assessments/${item.id}`}
+                    to={item.publishedAt ? `/teacher/assessments/${item.id}` : `/teacher/assessments/${item.id}/edit`}
                     className="text-accent no-underline hover:opacity-80"
                   >
                     {t('teacher.open')}
                   </Link>
                   <Link
-                    to={`/teacher/assessments/${item.id}/results`}
+                    to={`/teacher/assessments/${item.id}/submissions`}
                     className="text-muted no-underline hover:text-accent"
                   >
                     {t('teacher.results')}

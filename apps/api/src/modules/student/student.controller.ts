@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Param, ParseUUIDPipe, Post, UseGuards } from '@nestjs/common';
+import { Body, Controller, Delete, Get, Param, ParseUUIDPipe, Post, UseGuards } from '@nestjs/common';
 import { JwtAuthGuard } from '../../common/guards/jwt-auth.guard';
 import { RolesGuard } from '../../common/guards/roles.guard';
 import { Roles } from '../../common/decorators/roles.decorator';
@@ -74,5 +74,14 @@ export class StudentPortalController {
   @Post('assignments/:id/submit')
   submit(@CurrentUser() user: AuthUser, @Param('id', ParseUUIDPipe) id: string) {
     return this.student.submit(user, id);
+  }
+
+  @Delete('assignments/:id/files/:fileId')
+  deleteSubmissionFile(
+    @CurrentUser() user: AuthUser,
+    @Param('id', ParseUUIDPipe) id: string,
+    @Param('fileId', ParseUUIDPipe) fileId: string,
+  ) {
+    return this.student.deleteSubmissionFile(user, id, fileId);
   }
 }

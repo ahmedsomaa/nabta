@@ -77,13 +77,15 @@ export function TeacherAssignmentsPage() {
                 <li key={item.id} className="border-b border-border last:border-b-0">
                   <div className="flex items-start gap-3 px-3 py-2.5">
                     <Link
-                      to={`/teacher/assignments/${item.id}`}
+                      to={item.publishedAt ? `/teacher/assignments/${item.id}` : `/teacher/assignments/${item.id}/edit`}
                       className="min-w-0 flex-1 text-start text-inherit no-underline"
                     >
                       <p className="truncate font-medium">{item.title}</p>
                       <p className="mt-0.5 truncate text-xs text-muted">
                         {item.className} · {item.subjectName} ·{' '}
-                        {t('teacher.due', { date: formatDue(item.dueAt, i18n.language) })}
+                        {item.dueAt
+                          ? t('teacher.due', { date: formatDue(item.dueAt, i18n.language) })
+                          : t('teacher.noDueDate')}
                       </p>
                     </Link>
                     <div className="flex shrink-0 flex-col items-end gap-1 sm:flex-row sm:items-center sm:gap-2">

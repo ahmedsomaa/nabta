@@ -85,4 +85,28 @@ describe('AssessmentsService isolation', () => {
       NotFoundException,
     );
   });
+
+  it('refuses to publish a quiz without questions', async () => {
+    const prisma = {
+      teacher: { findFirst: jest.fn().mockResolvedValue(teacherRow) },
+      teachingAssignment: { findFirst: jest.fn().mockResolvedValue({ classId: 'c1', subjectId: 'math' }) },
+      assessment: {
+        findFirst: jest.fn().mockResolvedValue({
+          id: 'q1',
+          classId: 'c1',
+          subjectId: 'math',
+          schoolId: 'school-a',
+          title: 'Algebra quiz',
+          class: { name: '10B' },
+          subject: { name: 'Math' },
+          questions: [],
+        }),
+      },
+    };
+    const service = new AssessmentsService(prisma as never, { recompute: jest.fn() } as never);
+    await expect(service.publishAssessment(teacherUser, 'q1')).rejects.toMatchObject({
+      message: 'Add at least one question before publishing.',
+    });
+  });
 });
+

@@ -55,6 +55,7 @@ describe('TeacherService isolation', () => {
           class: { name: '10B' },
           subject: { name: 'Math' },
           files: [],
+          submissions: [],
         }),
       },
       teachingAssignment: { findFirst: jest.fn().mockResolvedValue(null) },
@@ -454,5 +455,30 @@ describe('TeacherService isolation', () => {
     await service.deleteMaterial(teacherUser, 'mat-1');
     expect(storage.deleteObject).toHaveBeenCalledWith('school-a/materials/math/lesson-1/notes.pdf');
     expect(prisma.learningMaterial.delete).toHaveBeenCalledWith({ where: { id: 'mat-1' } });
+  });
+
+  it('refuses to publish an untitled assignment', async () => {
+    const prisma = {
+      teacher: { findFirst: jest.fn().mockResolvedValue(teacherRow) },
+      teachingAssignment: { findFirst: jest.fn().mockResolvedValue({ id: 'ta' }) },
+      assignment: {
+        findFirst: jest.fn().mockResolvedValue({
+          id: 'asg-1',
+          classId: 'c1',
+          subjectId: 'math',
+          schoolId: 'school-a',
+          title: 'Untitled assignment',
+          instructions: '<p>Complete the worksheet.</p>',
+          class: { name: '10A' },
+          subject: { name: 'Math' },
+          files: [],
+          submissions: [],
+        }),
+      },
+    };
+    const service = new TeacherService(prisma as never, { getUploadUrl: jest.fn() } as never);
+    await expect(service.publishAssignment(teacherUser, 'asg-1', {})).rejects.toThrow(
+      'Add an assignment title.',
+    );
   });
 });

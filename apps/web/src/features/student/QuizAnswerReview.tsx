@@ -3,6 +3,7 @@ import { Chip } from '@heroui/react';
 import { useTranslation } from 'react-i18next';
 import type { StudentAttemptResult } from '@nabta/types';
 import { StudentPanel } from './StudentChrome';
+import { QuizHtml } from '@/features/teacher/quizShared';
 import { cn } from '@/lib/cn';
 
 export function QuizFact({ label, children }: { label: string; children: ReactNode }) {
@@ -38,7 +39,7 @@ export function QuizAnswerReview({ result }: { result: StudentAttemptResult }) {
                 </span>
               </Chip>
             </div>
-            <p className="mt-1 font-medium">{question.prompt}</p>
+            <QuizHtml html={question.prompt} className="mt-1 font-medium" />
             {question.textAnswer ? (
               <p className="mt-3 text-sm">
                 <span className="text-xs font-medium text-muted">{t('assessment.yourAnswer')}</span>

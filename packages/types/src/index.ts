@@ -138,6 +138,8 @@ export interface TeachingAssignment {
 export type LessonType = 'RICH_TEXT' | 'VIDEO' | 'PDF' | 'IMAGE' | 'EXTERNAL';
 export type SubmissionStatus = 'DRAFT' | 'SUBMITTED' | 'LATE' | 'GRADED' | 'RETURNED';
 export type StudentAssignmentStatus = 'NOT_STARTED' | SubmissionStatus;
+export type AssignmentSubmissionType = 'FILE' | 'TEXT' | 'LINK' | 'MULTIPLE' | 'NONE';
+export type AssignmentResubmitPolicy = 'NEVER' | 'ALWAYS' | 'UNTIL_DUE';
 
 export interface StudentMe {
   id: string;
@@ -250,20 +252,38 @@ export interface StudentLessonDetail {
   units: StudentUnit[];
 }
 
+export interface StudentAssignmentFile {
+  id: string;
+  fileName: string;
+  mimeType: string;
+  size: number;
+  downloadUrl: string | null;
+  url: string | null;
+}
+
 export interface StudentAssignmentDetail {
   id: string;
   title: string;
   instructions: string;
-  dueAt: string;
+  dueAt: string | null;
+  closeAt: string | null;
   subjectId: string;
   subjectName: string;
+  className: string;
   status: StudentAssignmentStatus;
   canSubmit: boolean;
   maxScore: number;
   score: number | null;
   feedback: string | null;
-  attachments: { id: string; fileName: string; mimeType: string; size: number; downloadUrl: string }[];
-  files: { id: string; fileName: string; mimeType: string; size: number; downloadUrl: string }[];
+  submissionType: AssignmentSubmissionType;
+  maxFiles: number;
+  allowedMimeTypes: string[];
+  resubmitPolicy: AssignmentResubmitPolicy;
+  allowLate: boolean;
+  textResponse: string | null;
+  linkUrl: string | null;
+  attachments: StudentAssignmentFile[];
+  files: StudentAssignmentFile[];
 }
 
 export interface FilePresignResult {
@@ -385,7 +405,7 @@ export interface TeacherUnit {
 export interface TeacherAssignmentListItem {
   id: string;
   title: string;
-  dueAt: string;
+  dueAt: string | null;
   publishedAt: string | null;
   classId: string;
   className: string;
@@ -452,18 +472,38 @@ export interface TeacherLessonDetail {
   }[];
 }
 
+export interface TeacherAssignmentFile {
+  id: string;
+  fileName: string;
+  mimeType: string;
+  size: number;
+  url: string | null;
+  downloadUrl: string | null;
+}
+
 export interface TeacherAssignmentDetail {
   id: string;
   title: string;
   instructions: string;
-  dueAt: string;
+  dueAt: string | null;
+  closeAt: string | null;
+  allowLate: boolean;
+  submissionType: AssignmentSubmissionType;
+  maxFiles: number;
+  allowedMimeTypes: string[];
+  resubmitPolicy: AssignmentResubmitPolicy;
   maxScore: number;
   publishedAt: string | null;
   classId: string;
   className: string;
   subjectId: string;
   subjectName: string;
-  files: { id: string; fileName: string; mimeType: string; size: number }[];
+  studentCount: number;
+  submittedCount: number;
+  toGradeCount: number;
+  missingCount: number;
+  hasStudentWork: boolean;
+  files: TeacherAssignmentFile[];
 }
 
 export interface TeacherSubmissionListItem {
@@ -490,6 +530,8 @@ export interface TeacherSubmissionDetail {
   score: number | null;
   feedback: string | null;
   gradesPublishedAt: string | null;
+  textResponse: string | null;
+  linkUrl: string | null;
   files: { id: string; fileName: string; mimeType: string; size: number; downloadUrl: string }[];
 }
 
@@ -553,16 +595,23 @@ export interface TeacherQuestion {
   options: TeacherQuestionOption[];
 }
 
+export type TeacherQuizStatus = 'draft' | 'scheduled' | 'active' | 'closed';
+
 export interface TeacherAssessmentListItem {
   id: string;
   title: string;
   publishedAt: string | null;
+  opensAt: string | null;
+  dueAt: string | null;
   classId: string;
   className: string;
   subjectId: string;
   subjectName: string;
   questionCount: number;
   attemptCount: number;
+  studentCount: number;
+  submittedCount: number;
+  maxScore: number;
   timeLimitMinutes: number | null;
 }
 
@@ -575,12 +624,26 @@ export interface TeacherAssessmentDetail {
   passingScore: number;
   randomizeQuestions: boolean;
   publishedAt: string | null;
+  opensAt: string | null;
+  dueAt: string | null;
   classId: string;
   className: string;
   subjectId: string;
   subjectName: string;
   unitId: string | null;
+  studentCount: number;
+  submittedCount: number;
+  maxScore: number;
   questions: TeacherQuestion[];
+}
+
+export interface TeacherQuestionStat {
+  id: string;
+  prompt: string;
+  type: QuestionType;
+  points: number;
+  attemptCount: number;
+  correctRate: number | null;
 }
 
 export interface TeacherAssessmentResults {
@@ -588,8 +651,27 @@ export interface TeacherAssessmentResults {
   title: string;
   passingScore: number;
   attemptCount: number;
+  studentCount: number;
+  submittedCount: number;
+  completionRate: number | null;
   average: number | null;
+  averagePercent: number | null;
   passRate: number | null;
+  averageTimeSeconds: number | null;
+  maxScore: number;
+  scoreDistribution: { bucket: string; count: number }[];
+  questionStats: TeacherQuestionStat[];
+  recentSubmissions: {
+    attemptId: string;
+    studentId: string;
+    givenName: string;
+    familyName: string;
+    score: number | null;
+    maxScore: number;
+    submittedAt: string | null;
+    durationSeconds: number | null;
+  }[];
+  missingStudents: { studentId: string; givenName: string; familyName: string }[];
   students: {
     studentId: string;
     givenName: string;
@@ -598,6 +680,9 @@ export interface TeacherAssessmentResults {
     maxScore: number;
     passed: boolean | null;
     attemptId: string | null;
+    submittedAt: string | null;
+    durationSeconds: number | null;
+    status: AttemptStatus | 'NOT_STARTED';
   }[];
 }
 
@@ -610,6 +695,7 @@ export interface TeacherAttemptReview {
   score: number | null;
   maxScore: number;
   passed: boolean | null;
+  startedAt: string;
   submittedAt: string | null;
   questions: {
     id: string;
@@ -640,6 +726,8 @@ export interface StudentAssessmentListItem {
   questionCount: number;
   submittedAt: string | null;
   publishedAt?: string | null;
+  opensAt?: string | null;
+  dueAt?: string | null;
   answeredCount?: number;
   status: StudentAssessmentStatus;
 }
@@ -662,6 +750,8 @@ export interface StudentAssessmentOverview {
   maxScore: number;
   passed: boolean | null;
   latestAttemptId: string | null;
+  opensAt: string | null;
+  dueAt: string | null;
   status: StudentAssessmentStatus;
 }
 

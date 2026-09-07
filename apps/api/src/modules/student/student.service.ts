@@ -6,25 +6,16 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import { randomUUID } from 'node:crypto';
-import type { AuthUser } from '@nabta/types';
+import type { AssignmentResubmitPolicy, AssignmentSubmissionType, AuthUser } from '@nabta/types';
 import {
   assignmentDraftSchema,
   filePresignSchema,
   lessonProgressSchema,
 } from '@nabta/validation';
+import { sanitizeAssignmentHtml } from '../../common/assignment-html';
 import { PrismaService } from '../../prisma/prisma.service';
 import { requireSchoolId } from '../academic/school-scope';
 import { STORAGE_SERVICE, type StorageService } from '../storage/storage.service';
-
-const ALLOWED_MIME = new Set([
-  'application/pdf',
-  'image/jpeg',
-  'image/png',
-  'image/webp',
-  'text/plain',
-  'application/msword',
-  'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
-]);
 
 const MIME_EXT: Record<string, string> = {
   'application/pdf': 'pdf',
@@ -82,7 +73,7 @@ export class StudentService {
   }
 
   displayStatus(
-    dueAt: Date,
+    dueAt: Date | null,
     submission: { status: string; submittedAt?: Date | null; gradesPublishedAt?: Date | null } | null,
   ): 'NOT_STARTED' | 'DRAFT' | 'SUBMITTED' | 'LATE' | 'GRADED' | 'RETURNED' {
     if (!submission) return 'NOT_STARTED';
@@ -91,10 +82,38 @@ export class StudentService {
     if (submission.gradesPublishedAt) return 'GRADED';
     if (submission.status === 'LATE') return 'LATE';
     if (submission.status === 'SUBMITTED' || submission.status === 'GRADED' || submission.status === 'RETURNED') {
-      if (submission.submittedAt && submission.submittedAt > dueAt) return 'LATE';
+      if (dueAt && submission.submittedAt && submission.submittedAt > dueAt) return 'LATE';
       return 'SUBMITTED';
     }
     return 'SUBMITTED';
+  }
+
+  private visibleNow(now = new Date()) {
+    return { publishedAt: { lte: now } };
+  }
+
+  canSubmitWork(
+    assignment: {
+      submissionType?: AssignmentSubmissionType | null;
+      closeAt?: Date | null;
+      dueAt?: Date | null;
+      allowLate?: boolean | null;
+      resubmitPolicy?: AssignmentResubmitPolicy | null;
+    },
+    status: string,
+    now = new Date(),
+  ) {
+    const submissionType = assignment.submissionType ?? 'FILE';
+    if (submissionType === 'NONE') return false;
+    if (assignment.closeAt && now > assignment.closeAt) return false;
+    if (assignment.dueAt && assignment.allowLate === false && now > assignment.dueAt) return false;
+    const submitted = ['SUBMITTED', 'LATE', 'GRADED', 'RETURNED'].includes(status);
+    if (!submitted) return true;
+    if (assignment.resubmitPolicy === 'ALWAYS') return true;
+    if (assignment.resubmitPolicy === 'UNTIL_DUE') {
+      return !assignment.dueAt || now <= assignment.dueAt;
+    }
+    return false;
   }
 
   private publishedLessons() {
@@ -129,7 +148,7 @@ export class StudentService {
         where: {
           schoolId,
           classId: { in: classIds },
-          publishedAt: { not: null },
+          ...this.visibleNow(),
         },
         include: {
           subject: true,
@@ -162,7 +181,7 @@ export class StudentService {
     ]);
 
     const total = await this.prisma.assignment.count({
-      where: { schoolId, classId: { in: classIds }, publishedAt: { not: null } },
+      where: { schoolId, classId: { in: classIds }, ...this.visibleNow() },
     });
 
     return {
@@ -181,7 +200,7 @@ export class StudentService {
             id: row.id,
             kind: 'assignment' as const,
             title: row.title,
-            dueAt: row.dueAt.toISOString(),
+            dueAt: row.dueAt?.toISOString() ?? null,
             subjectName: row.subject.name,
             status: this.displayStatus(row.dueAt, row.submissions[0] ?? null),
           }))
@@ -238,7 +257,7 @@ export class StudentService {
         where: {
           schoolId: student.schoolId,
           classId: { in: classIds },
-          publishedAt: { not: null },
+          ...this.visibleNow(),
         },
         include: { submissions: { where: { studentId: student.id } } },
       }),
@@ -294,7 +313,7 @@ export class StudentService {
           include: { lessons: this.publishedLessons() },
         },
         assignments: {
-          where: { classId: teaching.classId, publishedAt: { not: null } },
+          where: { classId: teaching.classId, ...this.visibleNow() },
           orderBy: { dueAt: 'asc' },
           include: { submissions: { where: { studentId: student.id } } },
         },
@@ -423,7 +442,7 @@ export class StudentService {
         return {
           id: row.id,
           title: row.title,
-          dueAt: row.dueAt.toISOString(),
+          dueAt: row.dueAt?.toISOString() ?? null,
           subjectName: subject.name,
           status: this.displayStatus(row.dueAt, submission),
           maxScore: row.maxScore,
@@ -569,7 +588,7 @@ export class StudentService {
     const student = await this.requireStudent(user);
     const classIds = this.classIds(student);
     const rows = await this.prisma.assignment.findMany({
-      where: { schoolId: student.schoolId, classId: { in: classIds }, publishedAt: { not: null } },
+      where: { schoolId: student.schoolId, classId: { in: classIds }, ...this.visibleNow() },
       include: {
         subject: true,
         submissions: { where: { studentId: student.id } },
@@ -582,7 +601,7 @@ export class StudentService {
       return {
         id: row.id,
         title: row.title,
-        dueAt: row.dueAt.toISOString(),
+        dueAt: row.dueAt?.toISOString() ?? null,
         subjectName: row.subject.name,
         status: this.displayStatus(row.dueAt, submission),
         maxScore: row.maxScore,
@@ -601,9 +620,10 @@ export class StudentService {
     const student = await this.requireStudent(user);
     const classIds = this.classIds(student);
     const row = await this.prisma.assignment.findFirst({
-      where: { id: assignmentId, schoolId: student.schoolId, publishedAt: { not: null } },
+      where: { id: assignmentId, schoolId: student.schoolId, ...this.visibleNow() },
       include: {
         subject: true,
+        class: true,
         files: true,
         submissions: { where: { studentId: student.id }, include: { files: true } },
       },
@@ -613,27 +633,42 @@ export class StudentService {
     }
     const submission = row.submissions[0] ?? null;
     const status = this.displayStatus(row.dueAt, submission);
-    const locked = status === 'SUBMITTED' || status === 'LATE' || status === 'GRADED';
     const published = Boolean(submission?.gradesPublishedAt);
     return {
       id: row.id,
       title: row.title,
-      instructions: row.instructions,
-      dueAt: row.dueAt.toISOString(),
+      instructions: sanitizeAssignmentHtml(row.instructions),
+      dueAt: row.dueAt?.toISOString() ?? null,
+      closeAt: row.closeAt?.toISOString() ?? null,
       subjectId: row.subjectId,
       subjectName: row.subject.name,
+      className: row.class.name,
       status,
-      canSubmit: !locked,
+      canSubmit: this.canSubmitWork(row, status),
       maxScore: row.maxScore,
       score: published && submission?.score != null ? Number(submission.score) : null,
       feedback: published ? (submission?.feedback ?? null) : null,
+      submissionType: row.submissionType,
+      maxFiles: row.maxFiles,
+      allowedMimeTypes: row.allowedMimeTypes,
+      resubmitPolicy: row.resubmitPolicy,
+      allowLate: row.allowLate,
+      textResponse: submission?.textResponse ?? null,
+      linkUrl: submission?.linkUrl ?? null,
       attachments: await this.mapFiles(row.files),
       files: await this.mapFiles(submission?.files ?? []),
     };
   }
 
   private async mapFiles(
-    files: { id: string; fileName: string; mimeType: string; size: number; storageKey: string }[],
+    files: {
+      id: string;
+      fileName: string;
+      mimeType: string;
+      size: number;
+      storageKey?: string | null;
+      url?: string | null;
+    }[],
   ) {
     return Promise.all(
       files.map(async (file) => ({
@@ -641,19 +676,23 @@ export class StudentService {
         fileName: file.fileName,
         mimeType: file.mimeType,
         size: file.size,
-        downloadUrl: await this.storage.getObjectUrl(file.storageKey),
+        url: file.url ?? null,
+        downloadUrl: file.storageKey
+          ? await this.storage.getObjectUrl(file.storageKey)
+          : (file.url ?? null),
       })),
     );
   }
 
   async presign(user: AuthUser, body: unknown) {
     const input = filePresignSchema.parse(body);
-    if (!ALLOWED_MIME.has(input.mimeType)) {
-      throw new BadRequestException('This file type is not allowed.');
-    }
     const assignment = await this.getAssignment(user, input.assignmentId);
     if (!assignment.canSubmit) {
       throw new BadRequestException('This assignment can no longer be updated.');
+    }
+    const allowed = new Set(assignment.allowedMimeTypes);
+    if (!allowed.has(input.mimeType)) {
+      throw new BadRequestException('This file type is not allowed.');
     }
     const student = await this.requireStudent(user);
     const ext = MIME_EXT[input.mimeType] ?? 'bin';
@@ -669,37 +708,74 @@ export class StudentService {
       throw new BadRequestException('This assignment can no longer be updated.');
     }
     const student = await this.requireStudent(user);
-    const prefix = `${student.schoolId}/submissions/${assignmentId}/${student.id}/`;
-    if (!input.storageKey.startsWith(prefix)) {
-      throw new BadRequestException('Invalid file key.');
-    }
-    if (!ALLOWED_MIME.has(input.mimeType)) {
-      throw new BadRequestException('This file type is not allowed.');
-    }
-
     const submission = await this.prisma.assignmentSubmission.upsert({
       where: { assignmentId_studentId: { assignmentId, studentId: student.id } },
-      update: { status: 'DRAFT' },
+      update: {
+        ...(input.textResponse !== undefined ? { textResponse: input.textResponse } : {}),
+        ...(input.linkUrl !== undefined ? { linkUrl: input.linkUrl || null } : {}),
+      },
       create: {
         schoolId: student.schoolId,
         assignmentId,
         studentId: student.id,
         status: 'DRAFT',
+        textResponse: input.textResponse ?? null,
+        linkUrl: input.linkUrl || null,
       },
     });
 
-    await this.prisma.submissionFile.deleteMany({ where: { submissionId: submission.id } });
-    await this.prisma.submissionFile.create({
-      data: {
-        schoolId: student.schoolId,
-        submissionId: submission.id,
-        storageKey: input.storageKey,
-        fileName: input.fileName,
-        mimeType: input.mimeType,
-        size: input.size,
-      },
-    });
+    if (input.storageKey && input.mimeType && input.fileName && input.size != null) {
+      const prefix = `${student.schoolId}/submissions/${assignmentId}/${student.id}/`;
+      if (!input.storageKey.startsWith(prefix)) {
+        throw new BadRequestException('Invalid file key.');
+      }
+      const allowed = new Set(assignment.allowedMimeTypes);
+      if (!allowed.has(input.mimeType)) {
+        throw new BadRequestException('This file type is not allowed.');
+      }
+      const count = await this.prisma.submissionFile.count({ where: { submissionId: submission.id } });
+      if (count >= assignment.maxFiles) {
+        if (assignment.maxFiles === 1) {
+          await this.prisma.submissionFile.deleteMany({ where: { submissionId: submission.id } });
+        } else {
+          throw new BadRequestException('Maximum files reached.');
+        }
+      }
+      await this.prisma.submissionFile.create({
+        data: {
+          schoolId: student.schoolId,
+          submissionId: submission.id,
+          storageKey: input.storageKey,
+          fileName: input.fileName,
+          mimeType: input.mimeType,
+          size: input.size,
+        },
+      });
+    }
 
+    return this.getAssignment(user, assignmentId);
+  }
+
+  async deleteSubmissionFile(user: AuthUser, assignmentId: string, fileId: string) {
+    const view = await this.getAssignment(user, assignmentId);
+    if (!view.canSubmit) {
+      throw new BadRequestException('This assignment can no longer be updated.');
+    }
+    const student = await this.requireStudent(user);
+    const submission = await this.prisma.assignmentSubmission.findUnique({
+      where: { assignmentId_studentId: { assignmentId, studentId: student.id } },
+    });
+    if (!submission) throw new NotFoundException('File not found.');
+    const file = await this.prisma.submissionFile.findFirst({
+      where: { id: fileId, submissionId: submission.id, schoolId: student.schoolId },
+    });
+    if (!file) throw new NotFoundException('File not found.');
+    try {
+      await this.storage.deleteObject(file.storageKey);
+    } catch {
+      // Keep deleting the row even if object storage is unreachable.
+    }
+    await this.prisma.submissionFile.delete({ where: { id: file.id } });
     return this.getAssignment(user, assignmentId);
   }
 
@@ -708,28 +784,54 @@ export class StudentService {
     if (!view.canSubmit) {
       throw new BadRequestException('This assignment can no longer be updated.');
     }
-    if (view.files.length === 0 && view.status === 'NOT_STARTED') {
-      throw new BadRequestException('Upload a file before submitting.');
-    }
     const student = await this.requireStudent(user);
     const assignment = await this.prisma.assignment.findFirst({
       where: { id: assignmentId, schoolId: student.schoolId },
     });
     if (!assignment) throw new NotFoundException('Assignment not found.');
 
-    const late = new Date() > assignment.dueAt;
-    const submission = await this.prisma.assignmentSubmission.findUnique({
+    const submission = await this.prisma.assignmentSubmission.upsert({
       where: { assignmentId_studentId: { assignmentId, studentId: student.id } },
+      update: {},
+      create: {
+        schoolId: student.schoolId,
+        assignmentId,
+        studentId: student.id,
+        status: 'DRAFT',
+      },
     });
-    if (!submission || (await this.prisma.submissionFile.count({ where: { submissionId: submission.id } })) === 0) {
+    const fileCount = await this.prisma.submissionFile.count({ where: { submissionId: submission.id } });
+    const text = (submission.textResponse ?? view.textResponse ?? '').trim();
+    const link = (submission.linkUrl ?? view.linkUrl ?? '').trim();
+    const type = assignment.submissionType;
+    if (type === 'NONE') {
+      throw new BadRequestException('This assignment does not accept submissions.');
+    }
+    if (type === 'FILE' && fileCount === 0) {
       throw new BadRequestException('Upload a file before submitting.');
     }
+    if (type === 'TEXT' && !text) {
+      throw new BadRequestException('Add a text response before submitting.');
+    }
+    if (type === 'LINK' && !link) {
+      throw new BadRequestException('Add a link before submitting.');
+    }
+    if (type === 'MULTIPLE' && fileCount === 0 && !text && !link) {
+      throw new BadRequestException('Add a file, text, or link before submitting.');
+    }
+
+    const now = new Date();
+    const late = Boolean(assignment.dueAt && now > assignment.dueAt);
 
     await this.prisma.assignmentSubmission.update({
       where: { id: submission.id },
       data: {
         status: late ? 'LATE' : 'SUBMITTED',
-        submittedAt: new Date(),
+        submittedAt: now,
+        score: null,
+        feedback: null,
+        gradedAt: null,
+        gradesPublishedAt: null,
       },
     });
 
