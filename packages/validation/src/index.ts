@@ -235,8 +235,14 @@ const fileMeta = {
   fileName: z.string().min(1).max(180),
 };
 
+const materialFileMeta = {
+  mimeType: z.string().min(1).max(120),
+  size: z.number().int().min(1).max(50 * 1024 * 1024),
+  fileName: z.string().min(1).max(180),
+};
+
 export const teacherFilePresignSchema = z.discriminatedUnion('purpose', [
-  z.object({ purpose: z.literal('material'), lessonId: z.string().uuid(), ...fileMeta }),
+  z.object({ purpose: z.literal('material'), lessonId: z.string().uuid(), ...materialFileMeta }),
   z.object({ purpose: z.literal('assignment'), assignmentId: z.string().uuid(), ...fileMeta }),
 ]);
 
@@ -276,11 +282,36 @@ export const reorderLessonsSchema = z.object({
   ids: z.array(z.string().uuid()).min(1),
 });
 
-export const lessonMaterialSchema = z.object({
-  storageKey: z.string().min(1).max(500),
-  fileName: z.string().min(1).max(180),
-  mimeType: z.string().min(1).max(120),
-  size: z.number().int().min(1).max(10 * 1024 * 1024),
+export const lessonMaterialSchema = z.union([
+  z.object({
+    storageKey: z.string().min(1).max(500),
+    fileName: z.string().min(1).max(180),
+    mimeType: z.string().min(1).max(120),
+    size: z.number().int().min(1).max(50 * 1024 * 1024),
+  }),
+  z.object({
+    fileName: z.string().min(1).max(180),
+    url: z
+      .string()
+      .url()
+      .max(2000)
+      .refine((value) => value.startsWith('http://') || value.startsWith('https://'), {
+        message: 'URL must start with http:// or https://',
+      }),
+  }),
+]);
+
+export const updateMaterialSchema = z.object({
+  fileName: z.string().min(1).max(180).optional(),
+  url: z
+    .string()
+    .url()
+    .max(2000)
+    .refine((value) => value.startsWith('http://') || value.startsWith('https://'), {
+      message: 'URL must start with http:// or https://',
+    })
+    .optional(),
+  lessonId: z.string().uuid().optional(),
 });
 
 export const createTeacherAssignmentSchema = z.object({
@@ -299,7 +330,7 @@ export const updateTeacherAssignmentSchema = z.object({
   maxScore: z.number().int().min(1).max(1000).optional(),
 });
 
-export const assignmentFileSchema = lessonMaterialSchema;
+export const assignmentFileSchema = assignmentDraftSchema;
 
 export const gradeSubmissionSchema = z.object({
   score: z.number().min(0).max(1000),

@@ -28,6 +28,7 @@ import {
   reorderUnitsSchema,
   teacherFilePresignSchema,
   updateLessonSchema,
+  updateMaterialSchema,
   updateTeacherAssignmentSchema,
   updateUnitSchema,
 } from '@nabta/validation';
@@ -35,6 +36,10 @@ import { PrismaService } from '../../prisma/prisma.service';
 import { requireSchoolId } from '../academic/school-scope';
 import { STORAGE_SERVICE, type StorageService } from '../storage/storage.service';
 import { GradeRecordService } from '../assessments/grade-record.service';
+
+const DOC_MAX_BYTES = 10 * 1024 * 1024;
+const VIDEO_MAX_BYTES = 50 * 1024 * 1024;
+const LINK_MIME = 'text/uri-list';
 
 const ALLOWED_MIME = new Set([
   'application/pdf',
@@ -44,6 +49,10 @@ const ALLOWED_MIME = new Set([
   'text/plain',
   'application/msword',
   'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+  'video/mp4',
+  'video/webm',
+  'application/vnd.ms-powerpoint',
+  'application/vnd.openxmlformats-officedocument.presentationml.presentation',
 ]);
 
 const MIME_EXT: Record<string, string> = {
@@ -54,7 +63,15 @@ const MIME_EXT: Record<string, string> = {
   'text/plain': 'txt',
   'application/msword': 'doc',
   'application/vnd.openxmlformats-officedocument.wordprocessingml.document': 'docx',
+  'video/mp4': 'mp4',
+  'video/webm': 'webm',
+  'application/vnd.ms-powerpoint': 'ppt',
+  'application/vnd.openxmlformats-officedocument.presentationml.presentation': 'pptx',
 };
+
+function maxBytesForMime(mimeType: string) {
+  return mimeType.startsWith('video/') ? VIDEO_MAX_BYTES : DOC_MAX_BYTES;
+}
 
 function parseDateOnly(value: string) {
   const [year, month, day] = value.split('-').map(Number);
@@ -587,9 +604,12 @@ export class TeacherService {
         mimeType: row.mimeType,
         size: row.size,
         createdAt: row.createdAt.toISOString(),
-        downloadUrl: await this.storage.getObjectUrl(row.storageKey),
+        updatedAt: row.updatedAt.toISOString(),
+        downloadUrl: row.storageKey ? await this.storage.getObjectUrl(row.storageKey) : null,
+        url: row.url ?? null,
         lessonId: row.lessonId,
         lessonTitle: row.lesson.title,
+        unitId: row.lesson.unit.id,
         unitTitle: row.lesson.unit.title,
       })),
     );
@@ -788,6 +808,9 @@ export class TeacherService {
     if (!ALLOWED_MIME.has(input.mimeType)) {
       throw new BadRequestException('This file type is not allowed.');
     }
+    if (input.size > maxBytesForMime(input.mimeType)) {
+      throw new BadRequestException('This file is too large.');
+    }
     const teacher = await this.requireTeacher(user);
     const ext = MIME_EXT[input.mimeType] ?? 'bin';
     let storageKey: string;
@@ -891,7 +914,8 @@ export class TeacherService {
           fileName: row.fileName,
           mimeType: row.mimeType,
           size: row.size,
-          downloadUrl: await this.storage.getObjectUrl(row.storageKey),
+          downloadUrl: row.storageKey ? await this.storage.getObjectUrl(row.storageKey) : null,
+          url: row.url ?? null,
         })),
       ),
     };
@@ -958,6 +982,19 @@ export class TeacherService {
     const input = lessonMaterialSchema.parse(body);
     const teacher = await this.requireTeacher(user);
     const lesson = await this.requireLesson(teacher, lessonId);
+    if ('url' in input) {
+      return this.prisma.learningMaterial.create({
+        data: {
+          schoolId: teacher.schoolId,
+          lessonId: lesson.id,
+          storageKey: null,
+          url: input.url,
+          fileName: input.fileName,
+          mimeType: LINK_MIME,
+          size: 0,
+        },
+      });
+    }
     const prefix = `${teacher.schoolId}/materials/${lesson.unit.subjectId}/${lesson.id}/`;
     if (!input.storageKey.startsWith(prefix)) {
       throw new BadRequestException('Invalid file key.');
@@ -965,16 +1002,54 @@ export class TeacherService {
     if (!ALLOWED_MIME.has(input.mimeType)) {
       throw new BadRequestException('This file type is not allowed.');
     }
+    if (input.size > maxBytesForMime(input.mimeType)) {
+      throw new BadRequestException('This file is too large.');
+    }
     return this.prisma.learningMaterial.create({
       data: {
         schoolId: teacher.schoolId,
         lessonId: lesson.id,
         storageKey: input.storageKey,
+        url: null,
         fileName: input.fileName,
         mimeType: input.mimeType,
         size: input.size,
       },
     });
+  }
+
+  async updateMaterial(user: AuthUser, id: string, body: unknown) {
+    const input = updateMaterialSchema.parse(body);
+    const teacher = await this.requireTeacher(user);
+    const row = await this.requireMaterial(teacher, id);
+    const data: { fileName?: string; url?: string; lessonId?: string } = {};
+    if (input.fileName != null) data.fileName = input.fileName;
+    if (input.url != null) {
+      if (!row.url) throw new BadRequestException('Only links can change URL.');
+      data.url = input.url;
+    }
+    if (input.lessonId != null && input.lessonId !== row.lessonId) {
+      const lesson = await this.requireLesson(teacher, input.lessonId);
+      if (lesson.unit.classId !== row.lesson.unit.classId || lesson.unit.subjectId !== row.lesson.unit.subjectId) {
+        throw new BadRequestException('Move stays in this class.');
+      }
+      data.lessonId = lesson.id;
+    }
+    return this.prisma.learningMaterial.update({ where: { id: row.id }, data });
+  }
+
+  async deleteMaterial(user: AuthUser, id: string) {
+    const teacher = await this.requireTeacher(user);
+    const row = await this.requireMaterial(teacher, id);
+    if (row.storageKey) {
+      try {
+        await this.storage.deleteObject(row.storageKey);
+      } catch {
+        // Keep deleting the row even if object storage is unreachable.
+      }
+    }
+    await this.prisma.learningMaterial.delete({ where: { id: row.id } });
+    return { ok: true };
   }
 
   async listAssignments(user: AuthUser) {
@@ -1471,6 +1546,16 @@ export class TeacherService {
     if (!lesson || !lesson.unit.classId) throw new NotFoundException('Lesson not found.');
     await this.assertTeaching(teacher, lesson.unit.classId, lesson.unit.subjectId);
     return lesson;
+  }
+
+  private async requireMaterial(teacher: { id: string; schoolId: string }, id: string) {
+    const row = await this.prisma.learningMaterial.findFirst({
+      where: { id, schoolId: teacher.schoolId },
+      include: { lesson: { include: { unit: true } } },
+    });
+    if (!row || !row.lesson.unit.classId) throw new NotFoundException('Material not found.');
+    await this.assertTeaching(teacher, row.lesson.unit.classId, row.lesson.unit.subjectId);
+    return row;
   }
 
   private async requireAssignment(teacher: { id: string; schoolId: string }, id: string) {

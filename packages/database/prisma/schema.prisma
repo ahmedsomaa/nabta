@@ -370,7 +370,8 @@ model LearningMaterial {
   id          String   @id @default(uuid()) @db.Uuid
   schoolId    String   @db.Uuid
   lessonId    String   @db.Uuid
-  storageKey  String
+  storageKey  String?
+  url         String?
   fileName    String
   mimeType    String
   size        Int

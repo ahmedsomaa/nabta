@@ -358,9 +358,12 @@ export interface TeacherMaterialItem {
   mimeType: string;
   size: number;
   createdAt: string;
-  downloadUrl: string;
+  updatedAt: string;
+  downloadUrl: string | null;
+  url: string | null;
   lessonId: string;
   lessonTitle: string;
+  unitId: string;
   unitTitle: string;
 }
 
@@ -439,7 +442,14 @@ export interface TeacherLessonDetail {
   url: string | null;
   publishedAt: string | null;
   sortOrder: number;
-  materials: { id: string; fileName: string; mimeType: string; size: number; downloadUrl: string }[];
+  materials: {
+    id: string;
+    fileName: string;
+    mimeType: string;
+    size: number;
+    downloadUrl: string | null;
+    url: string | null;
+  }[];
 }
 
 export interface TeacherAssignmentDetail {

@@ -1,6 +1,6 @@
 import { useMemo, useState } from 'react';
 import { Link, useNavigate, useOutletContext, useParams } from 'react-router-dom';
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { useQuery } from '@tanstack/react-query';
 import { useTranslation } from 'react-i18next';
 import { Button, Chip } from '@heroui/react';
 import type { LucideIcon } from 'lucide-react';
@@ -8,17 +8,11 @@ import {
   BookOpen,
   ClipboardList,
   FileQuestion,
-  FileText,
-  Film,
-  Image as ImageIcon,
-  Link2,
   Paperclip,
   Timer,
-  Upload,
   Users,
 } from 'lucide-react';
 import type {
-  FilePresignResult,
   TeacherAssignmentListItem,
   TeacherAttendance,
   TeacherClassDetail,
@@ -28,7 +22,6 @@ import type {
 } from '@nabta/types';
 import { apiFetch } from '@/lib/api';
 import { formatDue } from '@/features/student/StatusChip';
-import { QueryError, QueryLoading } from './QueryState';
 import {
   PortalEmptyState,
   PortalList,
@@ -718,158 +711,4 @@ function QuizFact({ icon: Icon, text }: { icon: LucideIcon; text: string }) {
   );
 }
 
-function materialIcon(mimeType: string): LucideIcon {
-  if (mimeType.startsWith('image/')) return ImageIcon;
-  if (mimeType.startsWith('video/')) return Film;
-  if (mimeType === 'application/pdf') return FileText;
-  if (mimeType.startsWith('text/')) return FileText;
-  return Link2;
-}
-
-function formatBytes(size: number) {
-  if (size < 1024) return `${size} B`;
-  if (size < 1024 * 1024) return `${Math.round(size / 1024)} KB`;
-  return `${(size / (1024 * 1024)).toFixed(1)} MB`;
-}
-
-export function TeacherClassMaterialsPage() {
-  const { t, i18n } = useTranslation();
-  const queryClient = useQueryClient();
-  const { classId = '', subjectId = '' } = useParams();
-  const { detail } = useClassOutlet();
-  const lessons = detail.units.flatMap((unit) =>
-    unit.lessons.map((lesson) => ({ ...lesson, unitTitle: unit.title })),
-  );
-  const [lessonId, setLessonId] = useState(lessons[0]?.id ?? '');
-  const query = useQuery({
-    queryKey: ['teacher-materials', classId, subjectId],
-    queryFn: () =>
-      apiFetch<TeacherMaterialItem[]>(
-        `/teacher/classes/${classId}/subjects/${subjectId}/materials`,
-      ),
-    enabled: Boolean(classId && subjectId),
-  });
-  const upload = useMutation({
-    mutationFn: async (file: File) => {
-      const presign = await apiFetch<FilePresignResult>('/teacher/files/presign', {
-        method: 'POST',
-        body: JSON.stringify({
-          purpose: 'material',
-          lessonId,
-          mimeType: file.type || 'application/octet-stream',
-          size: file.size,
-          fileName: file.name,
-        }),
-      });
-      const put = await fetch(presign.uploadUrl, { method: 'PUT', body: file });
-      if (!put.ok) throw new Error('Upload failed');
-      return apiFetch(`/teacher/lessons/${lessonId}/materials`, {
-        method: 'POST',
-        body: JSON.stringify({
-          storageKey: presign.storageKey,
-          mimeType: file.type || 'application/octet-stream',
-          size: file.size,
-          fileName: file.name,
-        }),
-      });
-    },
-    onSuccess: () => {
-      void queryClient.invalidateQueries({ queryKey: ['teacher-materials', classId, subjectId] });
-    },
-  });
-
-  const grouped = useMemo(() => {
-    const groups = new Map<string, { title: string; items: TeacherMaterialItem[] }>();
-    for (const item of query.data ?? []) {
-      const group = groups.get(item.lessonId) ?? {
-        title: `${item.unitTitle} · ${item.lessonTitle}`,
-        items: [],
-      };
-      group.items.push(item);
-      groups.set(item.lessonId, group);
-    }
-    return [...groups.values()];
-  }, [query.data]);
-
-  if (query.isLoading) return <QueryLoading />;
-  if (query.isError || !query.data) return <QueryError onRetry={() => void query.refetch()} />;
-
-  return (
-    <div className="space-y-5">
-      {lessons.length > 0 ? (
-        <PortalPanel className="p-4">
-          <div className="flex flex-wrap items-end gap-3">
-            <label className="grid min-w-[12rem] flex-1 gap-1 text-sm">
-              <span className="text-xs text-muted">{t('teacher.chooseLesson')}</span>
-              <select
-                className="rounded-lg border border-border bg-surface px-3 py-2"
-                value={lessonId}
-                onChange={(event) => setLessonId(event.target.value)}
-              >
-                {lessons.map((lesson) => (
-                  <option key={lesson.id} value={lesson.id}>
-                    {lesson.unitTitle} · {lesson.title}
-                  </option>
-                ))}
-              </select>
-            </label>
-            <label className="grid gap-1 text-sm">
-              <span className="flex items-center gap-1.5 text-xs text-muted">
-                <Upload className="size-3.5" aria-hidden />
-                {t('teacher.uploadToLesson')}
-              </span>
-              <input
-                type="file"
-                className="text-sm"
-                disabled={!lessonId || upload.isPending}
-                onChange={(event) => {
-                  const file = event.target.files?.[0];
-                  if (file) upload.mutate(file);
-                  event.target.value = '';
-                }}
-              />
-            </label>
-          </div>
-        </PortalPanel>
-      ) : null}
-
-      {grouped.length === 0 ? (
-        <PortalEmptyState icon={Paperclip}>{t('teacher.emptyMaterials')}</PortalEmptyState>
-      ) : (
-        grouped.map((group) => (
-          <section key={group.title} className="space-y-2">
-            <h2 className="text-sm font-medium text-muted">{group.title}</h2>
-            <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
-              {group.items.map((item) => {
-                const Icon = materialIcon(item.mimeType);
-                return (
-                  <a
-                    key={item.id}
-                    href={item.downloadUrl}
-                    target="_blank"
-                    rel="noreferrer"
-                    className="flex items-start gap-3 rounded-xl border border-border bg-surface p-3 text-inherit no-underline transition-colors hover:border-accent/40"
-                  >
-                    <span className="inline-flex size-10 shrink-0 items-center justify-center rounded-lg bg-accent/10 text-accent">
-                      <Icon className="size-5" aria-hidden />
-                    </span>
-                    <div className="min-w-0">
-                      <p className="truncate font-medium">{item.fileName}</p>
-                      <p className="mt-0.5 text-xs text-muted">
-                        {formatBytes(item.size)} ·{' '}
-                        {new Date(item.createdAt).toLocaleDateString(i18n.language, {
-                          day: 'numeric',
-                          month: 'short',
-                        })}
-                      </p>
-                    </div>
-                  </a>
-                );
-              })}
-            </div>
-          </section>
-        ))
-      )}
-    </div>
-  );
-}
+export { TeacherClassMaterialsPage } from './TeacherClassMaterialsPage';

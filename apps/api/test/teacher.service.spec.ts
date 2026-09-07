@@ -343,9 +343,11 @@ describe('TeacherService isolation', () => {
             mimeType: 'application/pdf',
             size: 1024,
             createdAt: new Date('2026-09-05T08:00:00.000Z'),
+            updatedAt: new Date('2026-09-06T08:00:00.000Z'),
             storageKey: 'school-a/materials/math/lesson-1/notes.pdf',
+            url: null,
             lessonId: 'lesson-1',
-            lesson: { title: 'Algebra', unit: { title: 'Unit 1' } },
+            lesson: { title: 'Algebra', unit: { id: 'unit-1', title: 'Unit 1' } },
           },
         ]),
       },
@@ -360,8 +362,97 @@ describe('TeacherService isolation', () => {
     expect(materials[0]).toMatchObject({
       fileName: 'notes.pdf',
       downloadUrl: 'https://files/notes.pdf',
+      url: null,
       lessonTitle: 'Algebra',
+      unitId: 'unit-1',
       unitTitle: 'Unit 1',
+      updatedAt: '2026-09-06T08:00:00.000Z',
     });
+  });
+
+  it('adds a link material without object storage', async () => {
+    const create = jest.fn().mockResolvedValue({ id: 'mat-link' });
+    const prisma = {
+      teacher: { findFirst: jest.fn().mockResolvedValue(teacherRow) },
+      lesson: {
+        findFirst: jest.fn().mockResolvedValue({
+          id: 'lesson-1',
+          unitId: 'unit-1',
+          unit: { classId: 'c1', subjectId: 'math' },
+          materials: [],
+        }),
+      },
+      teachingAssignment: { findFirst: jest.fn().mockResolvedValue({ id: 'ta' }) },
+      learningMaterial: { create },
+    };
+    const service = new TeacherService(prisma as never, { getUploadUrl: jest.fn() } as never);
+    await service.addMaterial(teacherUser, 'lesson-1', {
+      fileName: 'Khan Academy',
+      url: 'https://www.khanacademy.org/forces',
+    });
+    expect(create).toHaveBeenCalledWith({
+      data: expect.objectContaining({
+        fileName: 'Khan Academy',
+        url: 'https://www.khanacademy.org/forces',
+        storageKey: null,
+        size: 0,
+        mimeType: 'text/uri-list',
+      }),
+    });
+  });
+
+  it('moves a material to another lesson in the same class', async () => {
+    const update = jest.fn().mockResolvedValue({ id: 'mat-1' });
+    const prisma = {
+      teacher: { findFirst: jest.fn().mockResolvedValue(teacherRow) },
+      teachingAssignment: { findFirst: jest.fn().mockResolvedValue({ id: 'ta' }) },
+      learningMaterial: {
+        findFirst: jest.fn().mockResolvedValue({
+          id: 'mat-1',
+          lessonId: 'lesson-1',
+          url: null,
+          lesson: { unit: { classId: 'c1', subjectId: 'math' } },
+        }),
+        update,
+      },
+      lesson: {
+        findFirst: jest.fn().mockResolvedValue({
+          id: 'lesson-2',
+          unit: { classId: 'c1', subjectId: 'math' },
+          materials: [],
+        }),
+      },
+    };
+    const service = new TeacherService(prisma as never, { getUploadUrl: jest.fn() } as never);
+    await service.updateMaterial(teacherUser, 'mat-1', {
+      lessonId: '22222222-2222-4222-8222-222222222222',
+    });
+    expect(update).toHaveBeenCalledWith({
+      where: { id: 'mat-1' },
+      data: { lessonId: 'lesson-2' },
+    });
+  });
+
+  it('deletes a file material and removes the stored object', async () => {
+    const prisma = {
+      teacher: { findFirst: jest.fn().mockResolvedValue(teacherRow) },
+      teachingAssignment: { findFirst: jest.fn().mockResolvedValue({ id: 'ta' }) },
+      learningMaterial: {
+        findFirst: jest.fn().mockResolvedValue({
+          id: 'mat-1',
+          storageKey: 'school-a/materials/math/lesson-1/notes.pdf',
+          lesson: { unit: { classId: 'c1', subjectId: 'math' } },
+        }),
+        delete: jest.fn().mockResolvedValue({}),
+      },
+    };
+    const storage = {
+      getUploadUrl: jest.fn(),
+      deleteObject: jest.fn().mockResolvedValue(undefined),
+    };
+    const service = new TeacherService(prisma as never, storage as never);
+    await service.deleteMaterial(teacherUser, 'mat-1');
+    expect(storage.deleteObject).toHaveBeenCalledWith('school-a/materials/math/lesson-1/notes.pdf');
+    expect(prisma.learningMaterial.delete).toHaveBeenCalledWith({ where: { id: 'mat-1' } });
   });
 });

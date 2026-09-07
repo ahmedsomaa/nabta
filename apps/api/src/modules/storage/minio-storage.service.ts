@@ -52,4 +52,8 @@ export class MinioStorageService implements StorageService, OnModuleInit {
   async getUploadUrl(key: string, expirySeconds = 600): Promise<string> {
     return this.client.presignedPutObject(this.bucket, key, expirySeconds);
   }
+
+  async deleteObject(key: string): Promise<void> {
+    await this.client.removeObject(this.bucket, key);
+  }
 }

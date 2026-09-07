@@ -154,6 +154,20 @@ export class TeacherController {
     return this.teacher.addMaterial(user, id, body);
   }
 
+  @Patch('materials/:id')
+  updateMaterial(
+    @CurrentUser() user: AuthUser,
+    @Param('id', ParseUUIDPipe) id: string,
+    @Body() body: unknown,
+  ) {
+    return this.teacher.updateMaterial(user, id, body);
+  }
+
+  @Delete('materials/:id')
+  deleteMaterial(@CurrentUser() user: AuthUser, @Param('id', ParseUUIDPipe) id: string) {
+    return this.teacher.deleteMaterial(user, id);
+  }
+
   @Get('assignments')
   assignments(@CurrentUser() user: AuthUser) {
     return this.teacher.listAssignments(user);
